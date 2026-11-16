@@ -1,0 +1,66 @@
+{
+  "version": 1,
+  "name": "PYCRAFT Awakening Locked 48-Color Palette",
+  "calibratedTo": "docs/art/reference.png",
+  "colors": [
+    { "index": 1, "id": "sky_zenith", "group": "sky", "hex": "#8EC5E8", "role": "Sky zenith gradient", "exemptSaturation": true },
+    { "index": 2, "id": "sky_mid", "group": "sky", "hex": "#B4DAF0", "role": "Sky mid gradient", "exemptSaturation": true },
+    { "index": 3, "id": "sky_horizon", "group": "sky", "hex": "#D9EEF6", "role": "Sky horizon and distance fog" },
+    { "index": 4, "id": "cloud_white", "group": "sky", "hex": "#F5FAFD", "role": "Voxel cloud lit top", "exemptSaturation": true },
+    { "index": 5, "id": "cloud_shadow", "group": "sky", "hex": "#DCEAF3", "role": "Voxel cloud underside" },
+
+    { "index": 6, "id": "grass_light", "group": "grass", "hex": "#8ED438", "role": "Sunlit grass terrace top (RC-07)", "exemptSaturation": true },
+    { "index": 7, "id": "grass_top", "group": "grass", "hex": "#76BF31", "role": "Primary grass top (RC-07)" },
+    { "index": 8, "id": "grass_lip", "group": "grass", "hex": "#5FA32A", "role": "Grass overhang side lip" },
+    { "index": 9, "id": "grass_dormant", "group": "grass", "hex": "#9AA071", "role": "Dormant pre-restoration grass" },
+
+    { "index": 10, "id": "foliage_deep", "group": "foliage", "hex": "#2D6636", "role": "Deep pine tree foliage" },
+    { "index": 11, "id": "foliage_mid", "group": "foliage", "hex": "#3E8242", "role": "Mid pine and oak foliage" },
+    { "index": 12, "id": "foliage_light", "group": "foliage", "hex": "#5CA64A", "role": "Sunlit shrub and foliage crown" },
+    { "index": 13, "id": "foliage_blossom", "group": "foliage", "hex": "#E9B7C4", "role": "Sparing flower/blossom accent" },
+
+    { "index": 14, "id": "soil_warm", "group": "soil", "hex": "#8F5D3C", "role": "Warm island soil stratum" },
+    { "index": 15, "id": "soil_dark", "group": "soil", "hex": "#6D4630", "role": "Deep soil transition" },
+    { "index": 16, "id": "soil_tilled", "group": "soil", "hex": "#5B3A27", "role": "Terrace farm tilled soil" },
+
+    { "index": 17, "id": "stone_light", "group": "stone", "hex": "#B2B8BC", "role": "Lit stone stairs and masonry" },
+    { "index": 18, "id": "stone_mid", "group": "stone", "hex": "#8C9398", "role": "Island cliff and stalactite stone" },
+    { "index": 19, "id": "stone_dark", "group": "stone", "hex": "#6E757A", "role": "Shadowed stone underside" },
+    { "index": 20, "id": "stone_base", "group": "stone", "hex": "#555B60", "role": "Deep rock core" },
+
+    { "index": 21, "id": "water_shallow", "group": "water", "hex": "#4CD7E0", "role": "Shallow pond and river water (RC-07)", "exemptSaturation": true },
+    { "index": 22, "id": "water_turquoise", "group": "water", "hex": "#38B2CE", "role": "Stepped waterfall cascade (RC-07)", "exemptSaturation": true },
+    { "index": 23, "id": "water_deep", "group": "water", "hex": "#2A86A8", "role": "Deep water pool" },
+    { "index": 24, "id": "water_foam", "group": "water", "hex": "#E8F7F4", "role": "Waterfall splash foam" },
+    { "index": 25, "id": "water_dormant", "group": "water", "hex": "#79A6A6", "role": "Dormant stalled pond" },
+
+    { "index": 26, "id": "sand_light", "group": "sand", "hex": "#E2CE9C", "role": "Sandy path and wheat crop" },
+    { "index": 27, "id": "sand_mid", "group": "sand", "hex": "#CDB683", "role": "Path edge and weathered stone trim" },
+
+    { "index": 28, "id": "wood_plank", "group": "wood", "hex": "#B07D4F", "role": "M2 plank bridge, dock, cottage trim" },
+    { "index": 29, "id": "wood_dark", "group": "wood", "hex": "#7A5233", "role": "Dark structural timber" },
+    { "index": 30, "id": "wood_trunk", "group": "wood", "hex": "#6A4A2F", "role": "Tree trunks" },
+
+    { "index": 31, "id": "cottage_wall", "group": "architecture", "hex": "#EDE4D0", "role": "Cottage plaster wall" },
+    { "index": 32, "id": "cottage_roof", "group": "architecture", "hex": "#355C8C", "role": "Cottage blue-slate roof" },
+    { "index": 33, "id": "lighthouse_red", "group": "architecture", "hex": "#D9433B", "role": "Beacon/lighthouse red stripe (RC-07)", "exemptSaturation": true },
+    { "index": 34, "id": "lighthouse_white", "group": "architecture", "hex": "#F0EDE6", "role": "Beacon/lighthouse white stripe" },
+
+    { "index": 35, "id": "accent_amber", "group": "accent", "hex": "#F2B544", "role": "Beacon lamp, campfire core, lantern", "exemptSaturation": true, "maxEmissive": 1.2 },
+    { "index": 36, "id": "accent_fire", "group": "accent", "hex": "#E5793A", "role": "Campfire flame and carrot crop", "exemptSaturation": true },
+    { "index": 37, "id": "accent_clay", "group": "accent", "hex": "#B4533C", "role": "Terracotta clay roof and BIT Clay paint" },
+    { "index": 38, "id": "accent_teal", "group": "accent", "hex": "#2F7F86", "role": "Architect scarf teal" },
+    { "index": 39, "id": "accent_bronze", "group": "accent", "hex": "#A8773D", "role": "Brass/bronze trim and NEO accents" },
+    { "index": 40, "id": "core_vein", "group": "accent", "hex": "#5ED8CB", "role": "Core Shard veins and NEO visor", "exemptSaturation": true, "maxEmissive": 1.2 },
+    { "index": 41, "id": "energy_bridge", "group": "accent", "hex": "#5CE1E6", "role": "Core Spire stairs & Skybridge cyan (RC-07)", "exemptSaturation": true, "maxEmissive": 1.2 },
+
+    { "index": 42, "id": "crystal_blue", "group": "crystal", "hex": "#4BACE8", "role": "Blue energy crystal and gate sensor", "exemptSaturation": true },
+    { "index": 43, "id": "crystal_green", "group": "crystal", "hex": "#6DBE4B", "role": "Green rune pillar and sensor" },
+    { "index": 44, "id": "crystal_red", "group": "crystal", "hex": "#E0603F", "role": "Red sealed gate and alert rune", "exemptSaturation": true },
+
+    { "index": 45, "id": "neo_ceramic", "group": "character", "hex": "#F2F4F5", "role": "NEO off-white ceramic shell" },
+    { "index": 46, "id": "bit_moss", "group": "character", "hex": "#5F8E4E", "role": "BIT moss-green chassis" },
+    { "index": 47, "id": "char_slate", "group": "character", "hex": "#3A464C", "role": "BIT treads, boots, slate trim" },
+    { "index": 48, "id": "char_canvas", "group": "character", "hex": "#D6CCB8", "role": "Architect canvas tunic and props" }
+  ]
+}

@@ -1,17 +1,33 @@
 import { defineConfig } from 'vitest/config';
+import path from 'node:path';
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, 'src'),
+    },
+  },
   test: {
+    environment: 'jsdom',
     globals: true,
-    environment: 'node',
-    include: ['tests/**/*.test.ts', 'src/**/*.test.ts'],
-    exclude: ['tests/**/*.spec.ts', 'node_modules/**'],
-    testTimeout: 60000,
     fileParallelism: false,
-    server: {
-      deps: {
-        external: ['pyodide'],
-      },
+    testTimeout: 60_000,
+    hookTimeout: 60_000,
+    include: [
+      'tests/unit/**/*.test.ts',
+      'tests/unit/**/*.test.tsx',
+      'tests/integration/**/*.test.ts',
+    ],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json-summary'],
+      include: [
+        'src/sim/**',
+        'src/learning/**',
+        'src/mentor/**',
+        'src/persistence/**',
+        'src/stores/**',
+      ],
     },
   },
 });

@@ -1,0 +1,243 @@
+{
+  "F1": {
+    "kcId": "F1",
+    "title": "Program Python",
+    "summary": "Program adalah daftar instruksi yang dijalankan Python dari baris atas ke baris bawah.",
+    "exampleCode": "print(\"NEO online\")",
+    "exampleCaption": "Menjalankan satu perintah ke Terminal Suar.",
+    "inWorldNote": "Terminal Suar hanya merespons perintah Python para Arsitek."
+  },
+  "F2": {
+    "kcId": "F2",
+    "title": "Perintah print()",
+    "summary": "print() menampilkan teks atau angka ke layar konsol. Kamu bisa mencetak beberapa nilai dipisahkan koma.",
+    "exampleCode": "print(\"Halo, Aetheria!\")",
+    "exampleCaption": "Setiap print() memulihkan bagian suara NEO.",
+    "inWorldNote": "Pesanmu muncul di layar Terminal Suar."
+  },
+  "F3": {
+    "kcId": "F3",
+    "title": "String (Teks Bertanda Kutip)",
+    "summary": "Tanda kutip \"...\" menandai teks agar Python tahu itu kata, bukan perintah. \"5\" adalah teks, sedangkan 5 adalah angka.",
+    "exampleCode": "print(\"5\" + \"5\")  # menghasilkan 55\nprint(5 + 5)      # menghasilkan 10",
+    "exampleCaption": "Teks digabung; angka dijumlahkan.",
+    "inWorldNote": "Digunakan untuk menulis teks pada papan tanda kayu."
+  },
+  "F4": {
+    "kcId": "F4",
+    "title": "Komentar (#)",
+    "summary": "Python melewati semua yang ditulis setelah tanda # pada baris tersebut. Berguna untuk catatan atau mematikan baris bermasalah.",
+    "exampleCode": "# Baris ini hanya catatan Arsitek\nprint(\"Suar stabil\")",
+    "exampleCaption": "Baris berawalan # tidak dijalankan.",
+    "inWorldNote": "Menonaktifkan perintah lampu merah di Beacon Point."
+  },
+  "F5": {
+    "kcId": "F5",
+    "title": "Karakter Escape (\\n, \\t, \\\")",
+    "summary": "Garis miring terbalik \\ memberi arti khusus: \\n membuat baris baru, \\t memberi jarak tab, dan \\\" menulis kutip di dalam teks.",
+    "exampleCode": "print(\"Jembatan\\nRusak\\n\\\"Hati-hati!\\\"\")",
+    "exampleCaption": "Satu print() menghasilkan tiga baris.",
+    "inWorldNote": "Memformat papan tanda kayu multi-baris."
+  },
+  "F6": {
+    "kcId": "F6",
+    "title": "Membaca Masukan dengan input()",
+    "summary": "input() menunggu jawaban pengguna dan selalu mengembalikannya sebagai teks (str).",
+    "exampleCode": "nama = input(\"Siapa namamu? \")\nprint(\"Selamat datang,\", nama)",
+    "exampleCaption": "Jawaban disimpan ke variabel nama.",
+    "inWorldNote": "Suar menanyakan namamu lalu mengukirkannya di batu."
+  },
+  "F7": {
+    "kcId": "F7",
+    "title": "Urutan & Indentasi",
+    "summary": "Kode dijalankan berurutan dari atas ke bawah. Spasi di awal baris (4 spasi) mengelompokkan baris ke dalam blok.",
+    "exampleCode": "if True:\n    print(\"Di dalam blok\")",
+    "exampleCaption": "4 spasi menandakan isi blok.",
+    "inWorldNote": "Urutan boot NEO dan blok perintah robot bergantung pada indentasi."
+  },
+  "F8": {
+    "kcId": "F8",
+    "title": "Membaca Pesan Error",
+    "summary": "Error menunjukkan baris dan alasan Python bingung. NEO selalu membantumu menerjemahkan keluhan mesin.",
+    "exampleCode": "# pritn(\"hi\") -> NameError: maksudmu print?",
+    "exampleCaption": "Perhatikan nomor baris yang ditandai merah.",
+    "inWorldNote": "Setiap mesin memberi tahu bagian mana yang perlu diperbaiki."
+  },
+  "V1": {
+    "kcId": "V1",
+    "title": "Variabel (Kotak Bernama)",
+    "summary": "Variabel menyimpan nilai dengan nama label tertentu menggunakan tanda =. Nilainya bisa dibaca ulang dan diubah nanti.",
+    "exampleCode": "kayu = 4\nrobot.say(kayu)\nkayu = 6",
+    "exampleCaption": "Nilai di kotak 'kayu' berubah dari 4 menjadi 6.",
+    "inWorldNote": "Panel Variabel menampilkan isi kotak saat program berjalan."
+  },
+  "D2": {
+    "kcId": "D2",
+    "title": "Bilangan Bulat (int)",
+    "summary": "int adalah bilangan bulat tanpa titik desimal, dipakai untuk menghitung langkah atau jumlah balok.",
+    "exampleCode": "langkah = 3\nrobot.move(langkah)",
+    "exampleCaption": "Variabel angka bulat diteruskan ke robot.move().",
+    "inWorldNote": "BIT melangkah tepat sebanyak nilai int."
+  },
+  "D3": {
+    "kcId": "D3",
+    "title": "Bilangan Desimal (float)",
+    "summary": "float adalah bilangan berkoma (memakai titik, misalnya 1.5) untuk berat atau ukuran pecahan.",
+    "exampleCode": "total_berat = jarak * 1.5\nprint(total_berat)",
+    "exampleCaption": "Mengalikan dengan 1.5 menghasilkan float.",
+    "inWorldNote": "Menghitung total beban papan jembatan."
+  },
+  "D5": {
+    "kcId": "D5",
+    "title": "Boolean (True / False)",
+    "summary": "bool hanya memiliki dua nilai: True (ya/benar) atau False (tidak/salah). Perhatikan huruf kapitalnya.",
+    "exampleCode": "print(robot.can_move())",
+    "exampleCaption": "True jika jalur depan aman dilalui.",
+    "inWorldNote": "Sebelum jembatan dibangun can_move() bernilai False, sesudahnya True."
+  },
+  "D6": {
+    "kcId": "D6",
+    "title": "Konversi Tipe dengan int()",
+    "summary": "Hasil scan() atau input() berbentuk teks (str). Gunakan int(teks) untuk mengubah teks angka menjadi bilangan bulat sebelum dihitung.",
+    "exampleCode": "label = robot.scan()  # \"12\"\nprint(int(label) + 3) # 15",
+    "exampleCaption": "int(\"12\") mengubah teks menjadi angka 12.",
+    "inWorldNote": "Menghindari TypeError saat menjumlahkan label peti."
+  },
+  "T1_ARITH": {
+    "kcId": "T1_ARITH",
+    "title": "Kartu Mikro: Operator + dan *",
+    "summary": "Untuk angka, + menjumlahkan dan * mengalikan. Kamu akan mendalami seluruh operator matematika di Tambang Aritmetika!",
+    "exampleCode": "hasil = int(label) + 3\nberat = jarak * 1.5",
+    "exampleCaption": "+ menambah angka; * mengalikan panjang dengan berat per papan.",
+    "inWorldNote": "Digunakan sekilas di Supply Grove untuk menghitung label dan berat jembatan.",
+    "isMicroCard": true
+  },
+  "O5": {
+    "kcId": "O5",
+    "title": "Operator Perbandingan",
+    "summary": "Gunakan == (sama), != (berbeda), >, <, >=, <= untuk membandingkan dua nilai dan mendapat True/False.",
+    "exampleCode": "print(beban >= 2)\nprint(warna == \"blue\")",
+    "exampleCaption": "Hati-hati: == membandingkan, = mengisi variabel.",
+    "inWorldNote": "Pilar rune Gerbang Terkunci menyala hijau untuk True."
+  },
+  "B1": {
+    "kcId": "B1",
+    "title": "Perbandingan ke Boolean",
+    "summary": "Setiap ekspresi perbandingan adalah pertanyaan yang dijawab Python dengan True atau False.",
+    "exampleCode": "print(5 > 3)   # True\nprint(2 == 4)  # False",
+    "exampleCaption": "Hasil perbandingan dapat langsung dicetak atau dipakai di if.",
+    "inWorldNote": "Menjawab teka-teki rune Kakek Tamo."
+  },
+  "B2": {
+    "kcId": "B2",
+    "title": "Percabangan if",
+    "summary": "if menjalankan blok kode berindentasi (4 spasi) hanya jika kondisinya bernilai True. Akhiri kepala if dengan titik dua :.",
+    "exampleCode": "if warna == \"blue\":\n    gate.open()",
+    "exampleCaption": "gate.open() hanya berjalan saat warna adalah \"blue\".",
+    "inWorldNote": "Gerbang terbuka hanya untuk kristal biru."
+  },
+  "B3": {
+    "kcId": "B3",
+    "title": "Cabang Alternatif else",
+    "summary": "else berjalan otomatis ketika kondisi if di atasnya bernilai False.",
+    "exampleCode": "if warna == \"blue\":\n    gate.open()\nelse:\n    gate.light(\"red\")",
+    "exampleCaption": "Selalu ada respons jelas walau syarat gagal.",
+    "inWorldNote": "Lampu merah menyala saat kristal ditolak."
+  },
+  "B4": {
+    "kcId": "B4",
+    "title": "Cabang Majemuk elif",
+    "summary": "elif memeriksa syarat tambahan secara berurutan dari atas ke bawah. Begitu satu cabang cocok, sisanya dilewati.",
+    "exampleCode": "if warna == \"blue\":\n    gate.open()\nelif warna == \"green\":\n    gate.light(\"yellow\")\nelse:\n    gate.light(\"red\")",
+    "exampleCaption": "Tiga kemungkinan warna, tiga reaksi gerbang.",
+    "inWorldNote": "Mengatur lampu sinyal untuk setiap jenis kristal."
+  },
+  "B5": {
+    "kcId": "B5",
+    "title": "Logika and (Keduanya Wajib)",
+    "summary": "A and B bernilai True hanya jika kondisi A dan kondisi B sama-sama True.",
+    "exampleCode": "if warna == \"blue\" and beban >= 2:\n    gate.open()",
+    "exampleCaption": "Kristal harus biru DAN timbangan minimal 2.",
+    "inWorldNote": "Membuka kunci ganda gerbang utama."
+  },
+  "B6": {
+    "kcId": "B6",
+    "title": "Logika or (Salah Satu Cukup)",
+    "summary": "A or B bernilai True jika minimal salah satu kondisi bernilai True.",
+    "exampleCode": "if warna == \"blue\" or warna == \"gold\":\n    gate.open()",
+    "exampleCaption": "Cukup satu kunci alternatif yang cocok.",
+    "inWorldNote": "Digunakan pada gerbang dengan kunci alternatif."
+  },
+  "B7": {
+    "kcId": "B7",
+    "title": "Logika not (Pembalik)",
+    "summary": "not membalik nilai kebenaran: not True menjadi False, dan not False menjadi True.",
+    "exampleCode": "if not (warna == \"red\"):\n    gate.light(\"yellow\")",
+    "exampleCaption": "Menangani semua kasus selain merah.",
+    "inWorldNote": "Tantangan bonus penyaringan gerbang."
+  },
+  "L1": {
+    "kcId": "L1",
+    "title": "Perulangan for & range()",
+    "summary": "for mengulang blok kode sebanyak angka di dalam range(). range(6) berhitung 0..5 (6 kali); range(1, 6) berhitung 1..5.",
+    "exampleCode": "for i in range(6):\n    robot.plant(\"wheat\")\n    robot.move(1)",
+    "exampleCaption": "Mengulang penanaman 6 kali hanya dengan 3 baris.",
+    "inWorldNote": "Mengotomatiskan baris Ladang Terasering."
+  },
+  "L3": {
+    "kcId": "L3",
+    "title": "Perulangan while",
+    "summary": "while terus mengulang selama kondisinya bernilai True. Pastikan robot bergerak atau kondisi berubah agar loop bisa berhenti.",
+    "exampleCode": "while robot.can_move():\n    robot.plant(\"wheat\")\n    robot.move(1)",
+    "exampleCaption": "Cocok saat panjang baris ladang tidak diketahui di awal.",
+    "inWorldNote": "Menanam baris ladang dengan panjang bervariasi."
+  },
+  "L5": {
+    "kcId": "L5",
+    "title": "Melewati Langkah dengan continue",
+    "summary": "continue melompati sisa isi loop untuk putaran ini saja, lalu langsung lanjut ke putaran berikutnya.",
+    "exampleCode": "if robot.front() == \"rock\":\n    robot.move(1)\n    continue",
+    "exampleCaption": "Melewati batu tanpa menghentikan seluruh loop.",
+    "inWorldNote": "Tantangan bonus ladang berbatu."
+  },
+  "L6": {
+    "kcId": "L6",
+    "title": "Perulangan Bersarang (Nested Loop)",
+    "summary": "Loop di dalam loop memproses grid 2D: loop luar berjalan per baris (farm.rows), loop dalam per petak (farm.cols).",
+    "exampleCode": "for r in range(farm.rows):\n    for c in range(farm.cols):\n        robot.plant(\"wheat\")\n        robot.move(1)\n    robot.next_row()",
+    "exampleCaption": "Menangani ukuran ladang 3x5, 2x6, maupun 4x4.",
+    "inWorldNote": "Memulihkan seluruh air terjun dan kincir ladang."
+  },
+  "N1": {
+    "kcId": "N1",
+    "title": "Membuat Fungsi (def)",
+    "summary": "def menyimpan resep kode bernama. Mendefinisikan fungsi tidak menjalankannya; kamu harus memanggilnya dengan nama().",
+    "exampleCode": "def pasang_tiang():\n    robot.place_block(\"stone\")\n\npasang_tiang()",
+    "exampleCaption": "Tulis resep sekali, panggil berkali-kali.",
+    "inWorldNote": "Membangun tiang menara pengawas di Bengkel BOLT."
+  },
+  "N2": {
+    "kcId": "N2",
+    "title": "Parameter Fungsi",
+    "summary": "Parameter di dalam tanda kurung def menerima nilai masukan agar fungsi bisa membangun ukuran berbeda.",
+    "exampleCode": "def pasang_tiang(tinggi):\n    for i in range(tinggi):\n        robot.place_block(\"stone\")",
+    "exampleCaption": "pasang_tiang(2) dan pasang_tiang(4) memakai resep yang sama.",
+    "inWorldNote": "Membangun tiang dengan tinggi sesuai cetak biru."
+  },
+  "N3": {
+    "kcId": "N3",
+    "title": "Parameter Default",
+    "summary": "Parameter dengan nilai default (=3) otomatis dipakai jika pemanggil tidak mengirim nilai.",
+    "exampleCode": "def pasang_tiang(tinggi=3, blok=\"stone\"):\n    ...",
+    "exampleCaption": "Bisa dipanggil pasang_tiang() maupun pasang_tiang(5, \"wood\").",
+    "inWorldNote": "Tantangan bonus resep serbaguna BOLT."
+  },
+  "N4": {
+    "kcId": "N4",
+    "title": "Nilai Kembali (return)",
+    "summary": "return mengirim hasil perhitungan kembali ke pemanggil fungsi. Berbeda dengan print() yang hanya menulis ke layar.",
+    "exampleCode": "def hitung_balok(lebar, tinggi):\n    return lebar * tinggi\n\ndepot.request(\"stone\", hitung_balok(3, 4))",
+    "exampleCaption": "Depot menerima angka pasti dari return.",
+    "inWorldNote": "Jika fungsi memakai print() bukan return, depot menerima None!"
+  }
+}

@@ -1,0 +1,243 @@
+{
+  "F1": {
+    "kcId": "F1",
+    "title": "Python Programs",
+    "summary": "A program is an ordered list of instructions executed from top to bottom.",
+    "exampleCode": "print(\"NEO online\")",
+    "exampleCaption": "Sending one command to the Beacon Terminal.",
+    "inWorldNote": "The Beacon Terminal only responds to Architects' Python instructions."
+  },
+  "F2": {
+    "kcId": "F2",
+    "title": "The print() Command",
+    "summary": "print() shows text or numbers in the console. You can separate multiple values with commas.",
+    "exampleCode": "print(\"Hello, Aetheria!\")",
+    "exampleCaption": "Each print() restores part of NEO's voice.",
+    "inWorldNote": "Your message appears on the Beacon screen."
+  },
+  "F3": {
+    "kcId": "F3",
+    "title": "Quoted Text (Strings)",
+    "summary": "Quotes \"...\" tell Python a value is text, not a command. \"5\" is text while 5 is a number.",
+    "exampleCode": "print(\"5\" + \"5\")  # outputs 55\nprint(5 + 5)      # outputs 10",
+    "exampleCaption": "Strings join together; integers add numerically.",
+    "inWorldNote": "Used to write messages onto wooden signboards."
+  },
+  "F4": {
+    "kcId": "F4",
+    "title": "Comments (#)",
+    "summary": "Python ignores everything after # on a line. Use comments for notes or to disable faulty lines.",
+    "exampleCode": "# Architect's note\nprint(\"Beacon steady\")",
+    "exampleCaption": "Lines starting with # do not execute.",
+    "inWorldNote": "Silences faulty red-alarm prints at Beacon Point."
+  },
+  "F5": {
+    "kcId": "F5",
+    "title": "Escape Characters (\\n, \\t, \\\")",
+    "summary": "A backslash \\ gives the next character a special role: \\n for newline, \\t for tab, \\\" for an inner quote.",
+    "exampleCode": "print(\"Bridge\\nBroken\\n\\\"Watch out!\\\"\")",
+    "exampleCaption": "One print() creates three lines.",
+    "inWorldNote": "Formats a multi-line wooden signpost."
+  },
+  "F6": {
+    "kcId": "F6",
+    "title": "Reading Input with input()",
+    "summary": "input() waits for a user answer and always returns it as a string (str).",
+    "exampleCode": "name = input(\"Your name? \")\nprint(\"Welcome,\", name)",
+    "exampleCaption": "Stores the answer inside a variable.",
+    "inWorldNote": "The Beacon asks your name and carves it into stone."
+  },
+  "F7": {
+    "kcId": "F7",
+    "title": "Order & Indentation",
+    "summary": "Python executes top to bottom. Leading spaces (4 spaces) group statements inside a block.",
+    "exampleCode": "if True:\n    print(\"Inside block\")",
+    "exampleCaption": "4 spaces mark lines inside the block.",
+    "inWorldNote": "NEO's boot sequence and robot blocks depend on exact order and indentation."
+  },
+  "F8": {
+    "kcId": "F8",
+    "title": "Reading Error Messages",
+    "summary": "Errors tell you the exact line and reason Python got stuck. NEO translates machine errors into clear hints.",
+    "exampleCode": "# pritn(\"hi\") -> NameError: did you mean print?",
+    "exampleCaption": "Check the highlighted line number first.",
+    "inWorldNote": "Every machine points to what needs fixing."
+  },
+  "V1": {
+    "kcId": "V1",
+    "title": "Variables (Labeled Boxes)",
+    "summary": "Variables store values under a name using =. You can read and reassign them later.",
+    "exampleCode": "wood = 4\nrobot.say(wood)\nwood = 6",
+    "exampleCaption": "The value in 'wood' updates from 4 to 6.",
+    "inWorldNote": "The Variables Panel tracks updates live during replay."
+  },
+  "D2": {
+    "kcId": "D2",
+    "title": "Integers (int)",
+    "summary": "int values are whole numbers without decimals, used for counting steps or blocks.",
+    "exampleCode": "steps = 3\nrobot.move(steps)",
+    "exampleCaption": "Passes an integer variable to robot.move().",
+    "inWorldNote": "BIT drives forward by that exact whole count."
+  },
+  "D3": {
+    "kcId": "D3",
+    "title": "Decimals (float)",
+    "summary": "float values include a decimal point (like 1.5) for weights and continuous measurements.",
+    "exampleCode": "total_weight = gap * 1.5\nprint(total_weight)",
+    "exampleCaption": "Multiplying by 1.5 produces a float.",
+    "inWorldNote": "Computes total plank weight for the Supply Grove bridge."
+  },
+  "D5": {
+    "kcId": "D5",
+    "title": "Booleans (True / False)",
+    "summary": "bool has only two values: True or False, always capitalized.",
+    "exampleCode": "print(robot.can_move())",
+    "exampleCaption": "True when the tile ahead is clear to cross.",
+    "inWorldNote": "False before building the bridge, True afterward."
+  },
+  "D6": {
+    "kcId": "D6",
+    "title": "Type Conversion with int()",
+    "summary": "Results from scan() or input() are text (str). Convert numeric text with int(text) before doing math.",
+    "exampleCode": "label = robot.scan()  # \"12\"\nprint(int(label) + 3) # 15",
+    "exampleCaption": "int(\"12\") turns text into integer 12.",
+    "inWorldNote": "Fixes TypeError when adding to scanned crate labels."
+  },
+  "T1_ARITH": {
+    "kcId": "T1_ARITH",
+    "title": "Micro-Card: + and * Operators",
+    "summary": "With numbers, + adds and * multiplies. You will explore the full operator toolkit in Arithmetic Mines!",
+    "exampleCode": "total = int(label) + 3\nweight = gap * 1.5",
+    "exampleCaption": "+ adds numbers; * multiplies bridge length by plank weight.",
+    "inWorldNote": "Introduced briefly in Supply Grove for label totals and bridge weight.",
+    "isMicroCard": true
+  },
+  "O5": {
+    "kcId": "O5",
+    "title": "Comparison Operators",
+    "summary": "Use ==, !=, >, <, >=, <= to compare two values and obtain True or False.",
+    "exampleCode": "print(weight >= 2)\nprint(color == \"blue\")",
+    "exampleCaption": "== compares; = assigns a variable.",
+    "inWorldNote": "Gatehouse rune pillars glow green for True."
+  },
+  "B1": {
+    "kcId": "B1",
+    "title": "Comparison to Boolean",
+    "summary": "Each comparison asks a yes/no question that Python answers with True or False.",
+    "exampleCode": "print(5 > 3)   # True\nprint(2 == 4)  # False",
+    "exampleCaption": "Comparisons can be printed or placed in if headers.",
+    "inWorldNote": "Solves Old Tamo's four rune riddles."
+  },
+  "B2": {
+    "kcId": "B2",
+    "title": "if Statement",
+    "summary": "if runs an indented block (4 spaces) only when its condition is True. End the header with :.",
+    "exampleCode": "if color == \"blue\":\n    gate.open()",
+    "exampleCaption": "gate.open() executes only when color is \"blue\".",
+    "inWorldNote": "The gate opens solely for blue crystals."
+  },
+  "B3": {
+    "kcId": "B3",
+    "title": "else Branch",
+    "summary": "else runs automatically whenever the if condition above it is False.",
+    "exampleCode": "if color == \"blue\":\n    gate.open()\nelse:\n    gate.light(\"red\")",
+    "exampleCaption": "Handles the denied case cleanly.",
+    "inWorldNote": "Turns on the red warning lamp."
+  },
+  "B4": {
+    "kcId": "B4",
+    "title": "elif Multi-Branch",
+    "summary": "elif checks extra conditions in order from top to bottom. Only the first matching branch runs.",
+    "exampleCode": "if color == \"blue\":\n    gate.open()\nelif color == \"green\":\n    gate.light(\"yellow\")\nelse:\n    gate.light(\"red\")",
+    "exampleCaption": "Three crystal colors, three distinct responses.",
+    "inWorldNote": "Controls gate lamps for blue, green, and other crystals."
+  },
+  "B5": {
+    "kcId": "B5",
+    "title": "Logical and",
+    "summary": "A and B is True only when both A and B are True.",
+    "exampleCode": "if color == \"blue\" and weight >= 2:\n    gate.open()",
+    "exampleCaption": "Requires both blue crystal AND weight >= 2.",
+    "inWorldNote": "Unlocks the double-sealed Gatehouse."
+  },
+  "B6": {
+    "kcId": "B6",
+    "title": "Logical or",
+    "summary": "A or B is True when at least one side is True.",
+    "exampleCode": "if color == \"blue\" or color == \"gold\":\n    gate.open()",
+    "exampleCaption": "Passes when either key matches.",
+    "inWorldNote": "Supports alternative gate keys."
+  },
+  "B7": {
+    "kcId": "B7",
+    "title": "Logical not",
+    "summary": "not flips True to False and False to True.",
+    "exampleCode": "if not (color == \"red\"):\n    gate.light(\"yellow\")",
+    "exampleCaption": "Matches everything except red.",
+    "inWorldNote": "Bonus gate logic challenge."
+  },
+  "L1": {
+    "kcId": "L1",
+    "title": "for Loops & range()",
+    "summary": "for repeats an indented block for each number in range(). range(6) gives 0..5; range(1, 6) gives 1..5.",
+    "exampleCode": "for i in range(6):\n    robot.plant(\"wheat\")\n    robot.move(1)",
+    "exampleCaption": "Plants 6 tiles in just 3 lines.",
+    "inWorldNote": "Automates Terrace Farm rows."
+  },
+  "L3": {
+    "kcId": "L3",
+    "title": "while Loops",
+    "summary": "while repeats as long as the condition stays True. Move or update state so the loop terminates.",
+    "exampleCode": "while robot.can_move():\n    robot.plant(\"wheat\")\n    robot.move(1)",
+    "exampleCaption": "Ideal when row length varies across scenarios.",
+    "inWorldNote": "Handles unknown-length farm rows."
+  },
+  "L5": {
+    "kcId": "L5",
+    "title": "Skipping Steps with continue",
+    "summary": "continue jumps straight to the next iteration without executing remaining lines in this pass.",
+    "exampleCode": "if robot.front() == \"rock\":\n    robot.move(1)\n    continue",
+    "exampleCaption": "Skips rocky tiles safely.",
+    "inWorldNote": "Bonus challenge on rocky farm rows."
+  },
+  "L6": {
+    "kcId": "L6",
+    "title": "Nested Loops (2D Grids)",
+    "summary": "Outer loop steps over farm.rows; inner loop steps over farm.cols.",
+    "exampleCode": "for r in range(farm.rows):\n    for c in range(farm.cols):\n        robot.plant(\"wheat\")\n        robot.move(1)\n    robot.next_row()",
+    "exampleCaption": "Works identically on 3x5, 2x6, and 4x4 farms.",
+    "inWorldNote": "Restores the Terrace Farm waterfall and lift."
+  },
+  "N1": {
+    "kcId": "N1",
+    "title": "Defining Functions (def)",
+    "summary": "def stores a reusable recipe. Defining a function does not run it until you call it with ().",
+    "exampleCode": "def build_pillar():\n    robot.place_block(\"stone\")\n\nbuild_pillar()",
+    "exampleCaption": "Write once, call as often as needed.",
+    "inWorldNote": "Builds watchtower pillars in BOLT's Workshop."
+  },
+  "N2": {
+    "kcId": "N2",
+    "title": "Function Parameters",
+    "summary": "Parameters inside def (...) receive arguments so one function handles multiple sizes.",
+    "exampleCode": "def build_pillar(height):\n    for i in range(height):\n        robot.place_block(\"stone\")",
+    "exampleCaption": "build_pillar(2) and build_pillar(4) reuse the same recipe.",
+    "inWorldNote": "Matches blueprint heights."
+  },
+  "N3": {
+    "kcId": "N3",
+    "title": "Default Parameters",
+    "summary": "A default parameter (=3) is used whenever the caller omits that argument.",
+    "exampleCode": "def build_pillar(height=3, block=\"stone\"):\n    ...",
+    "exampleCaption": "Supports both build_pillar() and build_pillar(5, \"wood\").",
+    "inWorldNote": "BOLT Workshop bonus challenge."
+  },
+  "N4": {
+    "kcId": "N4",
+    "title": "Return Values (return)",
+    "summary": "return sends a computed value back to the caller. Unlike print(), it does not just display text.",
+    "exampleCode": "def hitung_balok(lebar, tinggi):\n    return lebar * tinggi\n\ndepot.request(\"stone\", hitung_balok(3, 4))",
+    "exampleCaption": "Depot receives the returned integer.",
+    "inWorldNote": "Printing instead of returning sends None to the depot!"
+  }
+}

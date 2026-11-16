@@ -1,0 +1,290 @@
+[
+  {
+    "id": "tab_mixed",
+    "priority": 1,
+    "errorType": "TabError",
+    "headline": "Mixed Tabs and Spaces",
+    "template": "On line {line}, tabs and spaces are mixed in indentation. Use 4 spaces consistently for every block.",
+    "socratic": "Do all lines inside this block start at the exact same space column?"
+  },
+  {
+    "id": "indent_expected",
+    "priority": 2,
+    "errorType": "IndentationError",
+    "headline": "Expected an Indented Block",
+    "template": "Line {line} needs to be indented. After a colon `:`, shift the next line 4 spaces to the right.",
+    "socratic": "Which line belongs inside the block after `:`?"
+  },
+  {
+    "id": "indent_alignment",
+    "priority": 3,
+    "errorType": "IndentationError",
+    "headline": "Indentation Not Aligned",
+    "template": "The spacing at the start of line {line} does not match the surrounding block. Align sibling lines with the same number of spaces.",
+    "socratic": "Compare the leading spaces on line {line} with the lines above it."
+  },
+  {
+    "id": "syntax_unclosed_string",
+    "priority": 4,
+    "errorType": "SyntaxError",
+    "headline": "Unclosed Quote Mark",
+    "template": "The string quote on line {line} was never closed. Every text literal needs matching opening and closing quotes, like `\"Hello\"`.",
+    "socratic": "Where should the text on line {line} end?"
+  },
+  {
+    "id": "syntax_assign_in_condition",
+    "priority": 5,
+    "errorType": "SyntaxError",
+    "headline": "Use `==` to Compare Values",
+    "template": "Inside the condition on line {line}, use `==` (double equals) to compare values instead of `=`.",
+    "socratic": "Is line {line} assigning a variable or checking if two values match?"
+  },
+  {
+    "id": "syntax_missing_colon",
+    "priority": 6,
+    "errorType": "SyntaxError",
+    "headline": "Missing Colon `:`",
+    "template": "Line {line} needs a colon `:` at the end of the `{keyword}` statement to start its block.",
+    "socratic": "Which symbol always ends an `if`, `for`, `while`, or `def` header line?"
+  },
+  {
+    "id": "syntax_unclosed_bracket",
+    "priority": 7,
+    "errorType": "SyntaxError",
+    "headline": "Unclosed Parenthesis or Bracket",
+    "template": "An opening parenthesis or bracket near line {line} was never closed with `)` or `]`.",
+    "socratic": "Count the opening and closing brackets on line {line} — do they match?"
+  },
+  {
+    "id": "syntax_unmatched_bracket",
+    "priority": 8,
+    "errorType": "SyntaxError",
+    "headline": "Extra Closing Bracket",
+    "template": "Line {line} has a closing `{char}` without a matching opening bracket.",
+    "socratic": "Which closing bracket on line {line} is extra?"
+  },
+  {
+    "id": "syntax_missing_comma",
+    "priority": 9,
+    "errorType": "SyntaxError",
+    "headline": "Missing Comma",
+    "template": "On line {line}, separate each argument or item with a comma `,`.",
+    "socratic": "Are two values sitting next to each other on line {line} without a comma?"
+  },
+  {
+    "id": "syntax_print_no_parens",
+    "priority": 10,
+    "errorType": "SyntaxError",
+    "headline": "`print` Requires Parentheses `()`",
+    "template": "In Python 3, `print` needs parentheses on line {line}, for example `print(\"Hello\")`.",
+    "socratic": "How should you wrap the text inside `print(...)`?"
+  },
+  {
+    "id": "syntax_invalid_identifier",
+    "priority": 11,
+    "errorType": "SyntaxError",
+    "headline": "Invalid Name or Statement Placement",
+    "template": "Line {line} violates Python naming or block placement rules. Variable names must start with a letter or underscore and cannot be keywords.",
+    "socratic": "Check the variable name or keyword placement on line {line}."
+  },
+  {
+    "id": "syntax_invalid_char",
+    "priority": 12,
+    "errorType": "SyntaxError",
+    "headline": "Unrecognized Character",
+    "template": "Line {line} contains a special character (such as smart quotes `“ ”`). Replace it with straight quotes `\"` or `'`.",
+    "socratic": "Are all punctuation marks on line {line} standard ASCII characters?"
+  },
+  {
+    "id": "syntax_generic",
+    "priority": 13,
+    "errorType": "SyntaxError",
+    "headline": "Syntax Needs Adjustment",
+    "template": "Python could not parse line {line}. Double-check quotes, parentheses, commas, and colons.",
+    "socratic": "Which part of line {line} differs from the expected syntax?"
+  },
+  {
+    "id": "import_blocked",
+    "priority": 14,
+    "errorType": "ImportError",
+    "headline": "Module Not Available",
+    "template": "Module `{name}` on line {line} is not available in Pycraft. Use the active robot commands and core Python tools.",
+    "socratic": "Which built-in Pycraft commands can solve this task directly?"
+  },
+  {
+    "id": "name_locked_capability",
+    "priority": 15,
+    "errorType": "NameError",
+    "headline": "`{name}` Is Not Unlocked Yet",
+    "template": "BIT does not have the `{name}` capability in this area (line {line}). You will unlock `{name}` in {unlockMission}.",
+    "socratic": "Which commands are listed as active in this mission header?"
+  },
+  {
+    "id": "name_bool_lowercase",
+    "priority": 16,
+    "errorType": "NameError",
+    "headline": "Capitalize `{suggestion}`",
+    "template": "Python is case-sensitive! On line {line}, write `{suggestion}` with a capital first letter instead of `{name}`.",
+    "socratic": "How are `True`, `False`, and `None` capitalized in Python?"
+  },
+  {
+    "id": "name_typo",
+    "priority": 17,
+    "errorType": "NameError",
+    "headline": "Possible Typo in `{name}`",
+    "template": "Python does not recognize `{name}` on line {line}. Did you mean `{suggestion}`?",
+    "socratic": "Check the spelling of `{name}` letter by letter on line {line}."
+  },
+  {
+    "id": "name_generic",
+    "priority": 18,
+    "errorType": "NameError",
+    "headline": "Undefined Name `{name}`",
+    "template": "The variable or command `{name}` on line {line} has not been defined yet or is out of scope.",
+    "socratic": "Was `{name}` assigned a value before line {line}?"
+  },
+  {
+    "id": "attr_locked_method",
+    "priority": 19,
+    "errorType": "AttributeError",
+    "headline": "`.{attr}()` Is Locked Here",
+    "template": "The `{object}.{attr}` capability on line {line} is not unlocked in this region/mission yet. It unlocks in {unlockMission}.",
+    "socratic": "Check the unlocked command chips in the editor header."
+  },
+  {
+    "id": "attr_typo",
+    "priority": 20,
+    "errorType": "AttributeError",
+    "headline": "Unknown Method `.{attr}`",
+    "template": "`{object}` on line {line} has no method `{attr}`. Did you mean `{object}.{suggestion}`?",
+    "socratic": "Check the spelling after the dot on line {line}."
+  },
+  {
+    "id": "attr_nonetype",
+    "priority": 21,
+    "errorType": "AttributeError",
+    "headline": "Cannot Access Attribute on `None`",
+    "template": "On line {line}, the value you accessed is `None` (empty), for example `scan()` on an empty tile.",
+    "socratic": "What did the previous call return before line {line}?"
+  },
+  {
+    "id": "attr_generic",
+    "priority": 22,
+    "errorType": "AttributeError",
+    "headline": "Attribute or Method Not Found",
+    "template": "The object on line {line} has no attribute `{attr}`. Check the object's available commands.",
+    "socratic": "Which methods belong to the object on line {line}?"
+  },
+  {
+    "id": "type_str_int",
+    "priority": 23,
+    "errorType": "TypeError",
+    "headline": "Cannot Add Text and Number Directly",
+    "template": "On line {line}, you tried to combine text (`str`) with a number (`int`). Use `int(text)` to convert numeric text into an integer, or `str(num)` for text.",
+    "socratic": "Is the value from `scan()` or `input()` still a string (`str`)?"
+  },
+  {
+    "id": "type_missing_parens",
+    "priority": 24,
+    "errorType": "TypeError",
+    "headline": "Missing Parentheses `()` on Call",
+    "template": "On line {line}, you wrote `{expr}` without `()`. Add parentheses `()` so Python and BIT execute the command.",
+    "socratic": "What symbols go at the end of a command to actually run it?"
+  },
+  {
+    "id": "type_arg_count",
+    "priority": 25,
+    "errorType": "TypeError",
+    "headline": "Wrong Number of Arguments",
+    "template": "The call on line {line} received the wrong number of arguments. Check how many parameters belong inside `()`.",
+    "socratic": "How many inputs does this function or command expect?"
+  },
+  {
+    "id": "type_not_iterable_or_callable",
+    "priority": 26,
+    "errorType": "TypeError",
+    "headline": "Value Type Cannot Be Used This Way",
+    "template": "The value on line {line} cannot be called like a function or looped over directly. To loop N times, use `range(N)`.",
+    "socratic": "When repeating N times in `for`, which helper wraps N?"
+  },
+  {
+    "id": "type_generic",
+    "priority": 27,
+    "errorType": "TypeError",
+    "headline": "Incompatible Value Type",
+    "template": "On line {line}, the value type does not match what this command expects (such as `int` vs `str` or `bool`).",
+    "socratic": "Which type (`int`, `str`, or `bool`) is expected on line {line}?"
+  },
+  {
+    "id": "value_int_parse",
+    "priority": 28,
+    "errorType": "ValueError",
+    "headline": "Text Is Not a Valid Number",
+    "template": "The text `\"{val}\"` on line {line} is not numeric, so `int()` cannot convert it into an integer.",
+    "socratic": "Make sure the text passed to `int(...)` contains only digits."
+  },
+  {
+    "id": "value_api_arg",
+    "priority": 29,
+    "errorType": "ValueError",
+    "headline": "Invalid Argument Value",
+    "template": "The argument passed on line {line} is out of range or invalid (e.g. turn must be `\"left\"`, `\"right\"`, or `\"around\"`, and steps must be a positive integer).",
+    "socratic": "Which valid values does the command on line {line} accept?"
+  },
+  {
+    "id": "zero_division",
+    "priority": 30,
+    "errorType": "ZeroDivisionError",
+    "headline": "Cannot Divide by Zero",
+    "template": "On line {line}, your program tried to divide by `0`. Ensure the divisor is never zero.",
+    "socratic": "Why did the divisor on line {line} evaluate to `0`?"
+  },
+  {
+    "id": "index_error",
+    "priority": 31,
+    "errorType": "IndexError",
+    "headline": "Index Out of Range",
+    "template": "On line {line}, the index goes past the length of the list. Remember Python indexing starts at `0`.",
+    "socratic": "How many items are in the list, and what is the largest valid index?"
+  },
+  {
+    "id": "key_error",
+    "priority": 32,
+    "errorType": "KeyError",
+    "headline": "Key Not Found",
+    "template": "The key `\"{val}\"` on line {line} is missing from the dictionary. Check spelling or use `.get()`.",
+    "socratic": "Which keys actually exist in that dictionary?"
+  },
+  {
+    "id": "recursion_error",
+    "priority": 33,
+    "errorType": "RecursionError",
+    "headline": "Function Recursed Too Deeply",
+    "template": "On line {line}, the function called itself repeatedly until reaching the depth limit (200).",
+    "socratic": "Is there a stopping base case before the function calls itself again?"
+  },
+  {
+    "id": "eof_error",
+    "priority": 34,
+    "errorType": "EOFError",
+    "headline": "Not Enough `input()` Answers",
+    "template": "Your program on line {line} requested `input()` more times than the pre-filled answers provided.",
+    "socratic": "How many times does your program call `input()`?"
+  },
+  {
+    "id": "too_many_steps",
+    "priority": 35,
+    "errorType": "TooManySteps",
+    "headline": "Program Ran Too Long",
+    "template": "Your program ran more than {limit} steps without stopping — the loop on line {line} may always stay `True`.",
+    "socratic": "What makes the loop condition on line {line} eventually become `False`?"
+  },
+  {
+    "id": "action_limit",
+    "priority": 36,
+    "errorType": "ActionLimit",
+    "headline": "Robot Action Limit Reached",
+    "template": "BIT executed more than {limit} world actions by line {line}. Check your loop bounds so BIT does not keep moving endlessly.",
+    "socratic": "Does your loop count match the puzzle grid size?"
+  }
+]

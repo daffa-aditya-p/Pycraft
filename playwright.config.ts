@@ -1,43 +1,53 @@
-import { defineConfig } from '@playwright/test';
+import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
-  testDir: './tests',
-  testMatch: /.*\.spec\.ts/,
-  fullyParallel: true,
+  testDir: './tests/e2e',
+  fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
-  reporter: [['html', { open: 'never' }], ['list']],
+  workers: 1,
+  reporter: [['list'], ['html', { open: 'never' }]],
+  timeout: 60_000,
   use: {
-    baseURL: 'http://localhost:4321',
+    baseURL: 'http://127.0.0.1:4173',
     trace: 'on-first-retry',
+    screenshot: 'only-on-failure',
   },
   projects: [
     {
-      name: 'mobile-375x667',
+      name: 'desktop-chromium',
       use: {
-        viewport: { width: 375, height: 667 },
-        userAgent:
-          'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1',
-      },
-    },
-    {
-      name: 'tablet-768x1024',
-      use: {
-        viewport: { width: 768, height: 1024 },
-      },
-    },
-    {
-      name: 'desktop-1440x900',
-      use: {
+        ...devices['Desktop Chrome'],
         viewport: { width: 1440, height: 900 },
+      },
+    },
+    {
+      name: 'tablet-landscape',
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1024, height: 768 },
+        hasTouch: true,
+      },
+    },
+    {
+      name: 'mobile-portrait',
+      use: {
+        ...devices['Pixel 7'],
+        viewport: { width: 390, height: 844 },
+      },
+    },
+    {
+      name: 'mobile-landscape',
+      use: {
+        ...devices['Pixel 7'],
+        viewport: { width: 844, height: 390 },
       },
     },
   ],
   webServer: {
-    command: 'pnpm preview --port 4321',
-    url: 'http://localhost:4321',
+    command: 'npm run preview -- --port 4173 --host 127.0.0.1',
+    url: 'http://127.0.0.1:4173',
     reuseExistingServer: !process.env.CI,
-    timeout: 120000,
+    timeout: 120_000,
   },
 });

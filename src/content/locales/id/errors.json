@@ -1,0 +1,290 @@
+[
+  {
+    "id": "tab_mixed",
+    "priority": 1,
+    "errorType": "TabError",
+    "headline": "Spasi dan Tab Tercampur",
+    "template": "Di baris {line}, kamu mencampur tombol Tab dan spasi biasa. Gunakan 4 spasi secara konsisten untuk setiap blok kode.",
+    "socratic": "Apakah semua baris di dalam blok ini mulai pada kolom spasi yang sama?"
+  },
+  {
+    "id": "indent_expected",
+    "priority": 2,
+    "errorType": "IndentationError",
+    "headline": "Blok Kode Belum Menjorok",
+    "template": "Jarak spasi (indentasi) di baris {line} belum menjorok ke dalam. Setelah tanda titik dua `:`, geser baris berikutnya 4 spasi ke kanan.",
+    "socratic": "Baris mana yang seharusnya berada di dalam blok setelah `:`?"
+  },
+  {
+    "id": "indent_alignment",
+    "priority": 3,
+    "errorType": "IndentationError",
+    "headline": "Indentasi Tidak Sejajar",
+    "template": "Jarak spasi di awal baris {line} tidak sejajar dengan baris di atasnya. Pastikan setiap baris selevel memiliki jumlah spasi yang sama.",
+    "socratic": "Coba hitung spasi di awal baris {line} dan bandingkan dengan baris di atasnya."
+  },
+  {
+    "id": "syntax_unclosed_string",
+    "priority": 4,
+    "errorType": "SyntaxError",
+    "headline": "Tanda Kutip Belum Ditutup",
+    "template": "Tanda kutip pada baris {line} belum ditutup. Setiap teks perlu tanda kutip pembuka dan penutup yang sama, misalnya `\"Halo\"`.",
+    "socratic": "Di bagian mana teks pada baris {line} seharusnya berakhir?"
+  },
+  {
+    "id": "syntax_assign_in_condition",
+    "priority": 5,
+    "errorType": "SyntaxError",
+    "headline": "Gunakan `==` untuk Membandingkan",
+    "template": "Di dalam kondisi pada baris {line}, gunakan `==` (dua sama dengan) untuk membandingkan nilai, bukan `=`.",
+    "socratic": "Apakah baris {line} sedang mengisi variabel atau memeriksa kesamaan dua nilai?"
+  },
+  {
+    "id": "syntax_missing_colon",
+    "priority": 6,
+    "errorType": "SyntaxError",
+    "headline": "Kurang Tanda Titik Dua `:`",
+    "template": "Baris {line} membutuhkan tanda titik dua `:` di akhir pernyataan `{keyword}` untuk memulai blok kode.",
+    "socratic": "Karakter apa yang selalu menutup baris kepala `if`, `for`, `while`, atau `def`?"
+  },
+  {
+    "id": "syntax_unclosed_bracket",
+    "priority": 7,
+    "errorType": "SyntaxError",
+    "headline": "Tanda Kurung Belum Ditutup",
+    "template": "Ada tanda kurung pembuka di sekitar baris {line} yang belum ditutup dengan `)` atau `]`.",
+    "socratic": "Hitung jumlah tanda kurung buka dan tutup pada baris {line} — apakah sudah berpasangan?"
+  },
+  {
+    "id": "syntax_unmatched_bracket",
+    "priority": 8,
+    "errorType": "SyntaxError",
+    "headline": "Tanda Kurung Penutup Berlebih",
+    "template": "Di baris {line} terdapat tanda kurung penutup `{char}` yang tidak memiliki pasangan pembuka.",
+    "socratic": "Kurung penutup mana di baris {line} yang mungkin berlebih?"
+  },
+  {
+    "id": "syntax_missing_comma",
+    "priority": 9,
+    "errorType": "SyntaxError",
+    "headline": "Sepertinya Lupa Tanda Koma",
+    "template": "Pada baris {line}, pisahkan setiap nilai atau argumen dengan tanda koma `,`.",
+    "socratic": "Apakah ada dua nilai yang bersebelahan di baris {line} tanpa pemisah koma?"
+  },
+  {
+    "id": "syntax_print_no_parens",
+    "priority": 10,
+    "errorType": "SyntaxError",
+    "headline": "`print` Membutuhkan Kurung `()`",
+    "template": "Di Python 3, `print` harus memakai tanda kurung pada baris {line}, misalnya `print(\"Halo\")`.",
+    "socratic": "Bagaimana bentuk perintah `print` yang benar dengan tanda kurung?"
+  },
+  {
+    "id": "syntax_invalid_identifier",
+    "priority": 11,
+    "errorType": "SyntaxError",
+    "headline": "Penulisan Nama atau Pernyataan Tidak Valid",
+    "template": "Baris {line} melanggar aturan penamaan atau penempatan perintah Python. Nama variabel harus dimulai huruf/garis bawah dan tidak memakai kata kunci Python.",
+    "socratic": "Periksa nama variabel atau posisi kata kunci di baris {line}."
+  },
+  {
+    "id": "syntax_invalid_char",
+    "priority": 12,
+    "errorType": "SyntaxError",
+    "headline": "Karakter Tidak Dikenali Python",
+    "template": "Baris {line} mengandung karakter khusus (seperti tanda kutip melengkung `“ ”`). Ganti dengan tanda kutip lurus `\"` atau `'`.",
+    "socratic": "Apakah semua tanda baca di baris {line} memakai simbol ketik standar?"
+  },
+  {
+    "id": "syntax_generic",
+    "priority": 13,
+    "errorType": "SyntaxError",
+    "headline": "Struktur Kode Perlu Diperbaiki",
+    "template": "Python belum bisa membaca penulisan di baris {line}. Periksa kembali tanda kutip, tanda kurung, koma, dan titik dua.",
+    "socratic": "Bagian mana di baris {line} yang berbeda dari contoh kode?"
+  },
+  {
+    "id": "import_blocked",
+    "priority": 14,
+    "errorType": "ImportError",
+    "headline": "Modul Sistem Tidak Tersedia",
+    "template": "Modul `{name}` di baris {line} tidak dibuka di dunia Pycraft. Gunakan perintah robot dan fungsi Python dasar yang tersedia di misi ini.",
+    "socratic": "Perintah bawaan Pycraft apa yang sudah cukup untuk menyelesaikan tugas ini?"
+  },
+  {
+    "id": "name_locked_capability",
+    "priority": 15,
+    "errorType": "NameError",
+    "headline": "Kemampuan `{name}` Belum Terbuka",
+    "template": "BIT belum memiliki kemampuan `{name}` di area ini (baris {line}). Kamu akan membuka `{name}` di {unlockMission}.",
+    "socratic": "Perintah apa saja yang sudah aktif di bilah tujuan misi saat ini?"
+  },
+  {
+    "id": "name_bool_lowercase",
+    "priority": 16,
+    "errorType": "NameError",
+    "headline": "Huruf Kapital pada `{suggestion}`",
+    "template": "Python membedakan huruf besar dan kecil! Di baris {line}, tulis `{suggestion}` dengan huruf kapital di awal, bukan `{name}`.",
+    "socratic": "Bagaimana penulisan `True`, `False`, atau `None` yang benar di Python?"
+  },
+  {
+    "id": "name_typo",
+    "priority": 17,
+    "errorType": "NameError",
+    "headline": "Salah Ketik Nama `{name}`",
+    "template": "Python tidak mengenal nama `{name}` di baris {line}. Apakah maksudmu `{suggestion}`?",
+    "socratic": "Coba periksa ejaan `{name}` huruf demi huruf pada baris {line}."
+  },
+  {
+    "id": "name_generic",
+    "priority": 18,
+    "errorType": "NameError",
+    "headline": "Nama `{name}` Belum Dikenali",
+    "template": "Variabel atau perintah `{name}` di baris {line} belum dibuat atau berada di luar jangkauan. Pastikan kamu sudah mendefinisikannya lebih dulu.",
+    "socratic": "Apakah `{name}` sudah diberi nilai sebelum baris {line}?"
+  },
+  {
+    "id": "attr_locked_method",
+    "priority": 19,
+    "errorType": "AttributeError",
+    "headline": "Perintah `.{attr}()` Belum Terbuka",
+    "template": "Kemampuan `{object}.{attr}` di baris {line} belum tersedia di wilayah ini. Kamu akan membukanya di {unlockMission}.",
+    "socratic": "Lihat daftar perintah yang tersedia di header editor untuk misi ini."
+  },
+  {
+    "id": "attr_typo",
+    "priority": 20,
+    "errorType": "AttributeError",
+    "headline": "Perintah `.{attr}` Tidak Dikenal",
+    "template": "`{object}` di baris {line} tidak memiliki perintah `{attr}`. Apakah maksudmu `{object}.{suggestion}`?",
+    "socratic": "Periksa kembali ejaan perintah setelah tanda titik pada baris {line}."
+  },
+  {
+    "id": "attr_nonetype",
+    "priority": 21,
+    "errorType": "AttributeError",
+    "headline": "Nilai Kosong (`None`) Tidak Punya Perintah",
+    "template": "Di baris {line}, nilai yang diakses ternyata kosong (`None`), misalnya hasil `scan()` di petak kosong.",
+    "socratic": "Apa yang dikembalikan pemanggilan sebelumnya sebelum baris {line}?"
+  },
+  {
+    "id": "attr_generic",
+    "priority": 22,
+    "errorType": "AttributeError",
+    "headline": "Atribut atau Method Tidak Ditemukan",
+    "template": "Objek pada baris {line} tidak memiliki atribut `{attr}`. Periksa daftar kemampuan objek tersebut.",
+    "socratic": "Method apa yang benar-benar dimiliki objek di baris {line}?"
+  },
+  {
+    "id": "type_str_int",
+    "priority": 23,
+    "errorType": "TypeError",
+    "headline": "Teks dan Angka Tidak Bisa Dijumlahkan",
+    "template": "Di baris {line}, kamu mencoba menggabungkan teks (`str`) dengan angka (`int`). Gunakan `int(teks)` untuk mengubah teks angka menjadi bilangan bulat, atau `str(angka)` untuk menjadi teks.",
+    "socratic": "Apakah nilai hasil `scan()` atau `input()` masih berupa teks (`str`)?"
+  },
+  {
+    "id": "type_missing_parens",
+    "priority": 24,
+    "errorType": "TypeError",
+    "headline": "Lupa Tanda Kurung `()` pada Perintah",
+    "template": "Pada baris {line}, kamu menulis `{expr}` tanpa tanda kurung `()`. Tambahkan `()` agar Python dan BIT menjalankan perintah tersebut.",
+    "socratic": "Perintah robot atau fungsi selalu diakhiri dengan simbol apa agar berjalan?"
+  },
+  {
+    "id": "type_arg_count",
+    "priority": 25,
+    "errorType": "TypeError",
+    "headline": "Jumlah Argumen Tidak Sesuai",
+    "template": "Pemanggilan fungsi pada baris {line} menerima jumlah argumen yang salah. Periksa berapa parameter yang dibutuhkan di dalam `()`.",
+    "socratic": "Berapa nilai masukan yang diminta oleh definisi fungsi atau perintah ini?"
+  },
+  {
+    "id": "type_not_iterable_or_callable",
+    "priority": 26,
+    "errorType": "TypeError",
+    "headline": "Tipe Data Tidak Mendukung Operasi Ini",
+    "template": "Nilai di baris {line} tidak bisa dipanggil seperti fungsi atau diulang dengan `for`. Untuk mengulang angka, gunakan `range(angka)`.",
+    "socratic": "Jika ingin mengulang sebanyak N kali, fungsi apa yang membungkus N di `for`?"
+  },
+  {
+    "id": "type_generic",
+    "priority": 27,
+    "errorType": "TypeError",
+    "headline": "Tipe Nilai Tidak Cocok",
+    "template": "Di baris {line}, tipe data yang diberikan tidak sesuai dengan yang diharapkan perintah tersebut (misalnya angka bulat vs teks/boolean).",
+    "socratic": "Tipe data apa (`int`, `str`, atau `bool`) yang diminta oleh perintah di baris {line}?"
+  },
+  {
+    "id": "value_int_parse",
+    "priority": 28,
+    "errorType": "ValueError",
+    "headline": "Teks Bukan Angka Valid",
+    "template": "Teks `\"{val}\"` di baris {line} bukan angka, sehingga `int()` tidak bisa mengubahnya menjadi bilangan bulat.",
+    "socratic": "Pastikan nilai di dalam `int(...)` hanya berisi digit angka."
+  },
+  {
+    "id": "value_api_arg",
+    "priority": 29,
+    "errorType": "ValueError",
+    "headline": "Nilai Argumen di Luar Batas",
+    "template": "Nilai yang dikirim ke perintah di baris {line} tidak valid (misalnya arah belok harus `\"left\"`, `\"right\"`, atau `\"around\"`, atau langkah harus bilangan bulat positif).",
+    "socratic": "Nilai valid apa saja yang diterima perintah pada baris {line}?"
+  },
+  {
+    "id": "zero_division",
+    "priority": 30,
+    "errorType": "ZeroDivisionError",
+    "headline": "Tidak Bisa Membagi dengan Nol",
+    "template": "Di baris {line}, program mencoba membagi suatu angka dengan `0`. Pastikan pembaginya tidak bernilai nol.",
+    "socratic": "Mengapa variabel pembagi di baris {line} bisa bernilai `0`?"
+  },
+  {
+    "id": "index_error",
+    "priority": 31,
+    "errorType": "IndexError",
+    "headline": "Indeks Melewati Batas Daftar",
+    "template": "Di baris {line}, indeks yang diakses melebihi panjang daftar. Ingat bahwa indeks Python dimulai dari `0`.",
+    "socratic": "Berapa jumlah elemen daftar tersebut, dan berapa indeks terbesarnya?"
+  },
+  {
+    "id": "key_error",
+    "priority": 32,
+    "errorType": "KeyError",
+    "headline": "Kunci Tidak Ditemukan",
+    "template": "Kunci `\"{val}\"` pada baris {line} tidak ada di dalam dictionary. Periksa ejaan kunci atau gunakan `.get()`.",
+    "socratic": "Kunci apa saja yang benar-benar ada di dalam dictionary tersebut?"
+  },
+  {
+    "id": "recursion_error",
+    "priority": 33,
+    "errorType": "RecursionError",
+    "headline": "Fungsi Memanggil Dirinya Terlalu Dalam",
+    "template": "Di baris {line}, fungsi memanggil dirinya sendiri berulang kali hingga batas kedalaman (200) tercapai.",
+    "socratic": "Apakah ada kondisi berhenti sebelum fungsi memanggil dirinya lagi?"
+  },
+  {
+    "id": "eof_error",
+    "priority": 34,
+    "errorType": "EOFError",
+    "headline": "Jawaban `input()` Kurang",
+    "template": "Programmu di baris {line} meminta `input()` lebih banyak daripada jumlah jawaban yang kamu siapkan.",
+    "socratic": "Berapa kali `input()` dipanggil saat program berjalan?"
+  },
+  {
+    "id": "too_many_steps",
+    "priority": 35,
+    "errorType": "TooManySteps",
+    "headline": "Program Berjalan Terlalu Lama",
+    "template": "Programmu berjalan lebih dari {limit} langkah tanpa berhenti — kemungkinan perulangan di baris {line} selalu bernilai `True`.",
+    "socratic": "Apa yang membuat kondisi `while` di baris {line} bisa berubah menjadi `False`?"
+  },
+  {
+    "id": "action_limit",
+    "priority": 36,
+    "errorType": "ActionLimit",
+    "headline": "Batas Aksi Robot Tercapai",
+    "template": "BIT sudah menjalankan lebih dari {limit} aksi dunia pada baris {line}. Periksa perulanganmu agar BIT tidak berjalan terus-menerus.",
+    "socratic": "Apakah jumlah pengulangan di baris {line} sudah sesuai ukuran area puzzle?"
+  }
+]

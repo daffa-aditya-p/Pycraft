@@ -1,0 +1,323 @@
+/* PYCRAFT Design System Tokens
+ * Surfaces: Slate (functional) & Parchment (narrative)
+ * Anti-AI-slop rules: zero glassmorphism/backdrop-filter, zero purple-blue gradients,
+ * max border-radius 4px, primary buttons use 6px chamfered clip-path, WCAG AA >= 4.5:1.
+ */
+
+:root {
+  /* Text Scaling (100% | 125% | 150%) */
+  --text-scale: 1;
+  font-size: calc(16px * var(--text-scale));
+
+  /* Safe-area & dynamic viewport */
+  --app-h: 100dvh;
+  --sat: env(safe-area-inset-top, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+
+  /* Surface: Slate (Functional HUD, Editor, Settings) */
+  --slate-base: #1C2427;
+  --slate-base-96: rgba(28, 36, 39, 0.96);
+  --slate-raised: #243034;
+  --slate-border: #33434A;
+  --slate-highlight: #3D5058;
+  --slate-pressed: #161D1F;
+
+  /* Surface: Parchment (Narrative Dialogue, Journal, Mission Complete) */
+  --parchment-bg: #F3EAD8;
+  --parchment-raised: #EFE2CA;
+  --parchment-border: #D9C9A8;
+  --parchment-ink: #2A2420;
+  --parchment-ink-muted: #5C4F47;
+
+  /* Text on Slate (WCAG 2.1 AA >= 4.5:1) */
+  --text-primary: #E8EEF0;
+  --text-secondary: #A9B8BD;
+  --text-muted: #8FA3A9; /* 5.2:1 contrast on #1C2427 */
+
+  /* Accents */
+  --accent-amber: #F2B544;
+  --accent-amber-hover: #F5C467;
+  --accent-amber-pressed: #D99B29;
+  --accent-amber-ink: #1C2427;
+  --accent-turquoise: #3CC4C0;
+  --accent-turquoise-bg: rgba(60, 196, 192, 0.18);
+
+  /* Semantic */
+  --semantic-success: #6DBE4B;
+  --semantic-warning: #E9A23B;
+  --semantic-error: #E0603F;
+  --semantic-info: #5BA7D6;
+
+  /* CodeMirror Slate Editor Theme */
+  --editor-bg: #1A2225;
+  --editor-gutter: #1F292C;
+  --editor-active-line: #24303A;
+  --editor-exec-fill: rgba(60, 196, 192, 0.18);
+  --editor-exec-bar: #3CC4C0;
+  --editor-kw: #F2B544;
+  --editor-str: #9CCB6B;
+  --editor-num: #E59A6B;
+  --editor-comment: #8FA3A9;
+  --editor-builtin: #7FC8E8;
+  --editor-api: #3CC4C0;
+  --editor-error: #E0603F;
+  --editor-blank-bg: #27383E;
+  --editor-blank-border: #F2B544;
+
+  /* Radii (voxel-honest: 0, 2, 4px max) */
+  --radius-0: 0px;
+  --radius-2: 2px;
+  --radius-4: 4px;
+  --chamfer-6: polygon(
+    6px 0,
+    100% 0,
+    100% calc(100% - 6px),
+    calc(100% - 6px) 100%,
+    0 100%,
+    0 6px
+  );
+
+  /* Elevation (no blur > 8px) */
+  --shadow-panel: 2px 2px 0 rgba(0, 0, 0, 0.35);
+  --shadow-soft: 0 4px 8px rgba(0, 0, 0, 0.3);
+
+  /* Spacing (4px base) */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-12: 48px;
+  --sp-16: 64px;
+
+  /* Typography */
+  --font-display: 'Barlow Semi Condensed', 'Segoe UI', system-ui, sans-serif;
+  --font-body: 'Atkinson Hyperlegible Next', 'Segoe UI', system-ui, sans-serif;
+  --font-code: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Motion */
+  --dur-fast: 120ms;
+  --dur-panel: 200ms;
+  --dur-cam: 600ms;
+  --ease-out-cubic: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Focus ring */
+  --focus-ring: 2px solid var(--accent-amber);
+  --focus-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 0ms;
+    --dur-panel: 0ms;
+    --dur-cam: 0ms;
+  }
+}
+
+[data-reduced-motion='true'] {
+  --dur-fast: 0ms;
+  --dur-panel: 0ms;
+  --dur-cam: 0ms;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100dvh;
+  height: var(--app-h, 100dvh);
+  overflow: hidden;
+  overscroll-behavior: none;
+  background-color: var(--slate-base);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Global keyboard focus-visible indicator */
+:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+/* Visually hidden live region for screen readers (#game-announcements) */
+.sr-only-live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Surface helpers */
+.surface-slate {
+  background-color: var(--slate-base-96);
+  color: var(--text-primary);
+  border: 1px solid var(--slate-border);
+  box-shadow: inset 0 1px 0 var(--slate-highlight), var(--shadow-panel);
+  border-radius: var(--radius-4);
+}
+
+.surface-slate-raised {
+  background-color: var(--slate-raised);
+  color: var(--text-primary);
+  border: 1px solid var(--slate-border);
+  box-shadow: inset 0 1px 0 var(--slate-highlight), var(--shadow-panel);
+  border-radius: var(--radius-4);
+}
+
+.surface-parchment {
+  background-color: var(--parchment-bg);
+  color: var(--parchment-ink);
+  border: 1px solid var(--parchment-border);
+  box-shadow: var(--shadow-panel);
+  border-radius: var(--radius-4);
+}
+
+/* Chamfered Primary Action Button */
+.btn-primary-chamfer {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  min-height: 44px;
+  padding: var(--sp-2) var(--sp-4);
+  background-color: var(--accent-amber);
+  color: var(--accent-amber-ink);
+  border: none;
+  border-radius: 0;
+  clip-path: var(--chamfer-6);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease-out-cubic),
+              transform var(--dur-fast) var(--ease-out-cubic);
+}
+
+@media (hover: hover) {
+  .btn-primary-chamfer:hover:not(:disabled) {
+    background-color: var(--accent-amber-hover);
+  }
+}
+
+.btn-primary-chamfer:active:not(:disabled) {
+  background-color: var(--accent-amber-pressed);
+  transform: translateY(1px);
+}
+
+.btn-primary-chamfer:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-slate {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  min-height: 44px;
+  padding: var(--sp-2) var(--sp-3);
+  background-color: var(--slate-raised);
+  color: var(--text-primary);
+  border: 1px solid var(--slate-border);
+  border-radius: var(--radius-2);
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease-out-cubic),
+              border-color var(--dur-fast) var(--ease-out-cubic),
+              transform var(--dur-fast) var(--ease-out-cubic);
+}
+
+@media (hover: hover) {
+  .btn-slate:hover:not(:disabled) {
+    background-color: #2C3A3F;
+    border-color: var(--slate-highlight);
+  }
+}
+
+.btn-slate:active:not(:disabled) {
+  background-color: var(--slate-pressed);
+  transform: translateY(1px);
+}
+
+.btn-slate:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-parchment {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  min-height: 44px;
+  padding: var(--sp-2) var(--sp-4);
+  background-color: var(--parchment-raised);
+  color: var(--parchment-ink);
+  border: 1px solid var(--parchment-border);
+  border-radius: var(--radius-2);
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease-out-cubic),
+              transform var(--dur-fast) var(--ease-out-cubic);
+}
+
+@media (hover: hover) {
+  .btn-parchment:hover:not(:disabled) {
+    background-color: #E5D4B6;
+  }
+}
+
+.btn-parchment:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+/* Touch hit targets >= 48x48 CSS px */
+.touch-target-48 {
+  min-width: 48px;
+  min-height: 48px;
+}
+
+/* Responsive Layout & Keyboard Overlay Helpers */
+.pycraft-ui-root {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+}
+
+.pycraft-ui-root > * {
+  pointer-events: auto;
+}
+
+/* Input sizing: minimum 16px on touch to prevent iOS Safari zoom on focus */
+@media (pointer: coarse) {
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}

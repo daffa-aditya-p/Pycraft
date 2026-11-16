@@ -1,0 +1,19 @@
+{
+  "name": "PYCRAFT — Code Your World",
+  "short_name": "PYCRAFT",
+  "description": "3D voxel adventure game where real Python code brings Aetheria's machines and islands back to life.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#1C2427",
+  "background_color": "#D9EEF6",
+  "lang": "id",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,22 +1,26 @@
-# Build and cache outputs
-dist/
-.astro/
+# Dependencies
 node_modules/
-.pnpm-store/
+.pnp
+.pnp.js
 
-# Logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
+# Build outputs
+dist/
+dist-ssr/
+*.local
 
-# Environment
+# Baked runtime artifacts (can be re-baked or committed as needed; keep logs/test artifacts ignored)
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+coverage/
+.vitest-cache/
+
+# Environment & IDE
 .env
-.env.production
-.env.local
-
-# OS files
+.env.*
+!.env.example
 .DS_Store
 Thumbs.db
-# Test artifacts
-screenshots/
+*.log
+npm-debug.log*
