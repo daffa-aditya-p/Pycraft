@@ -224,9 +224,11 @@ export function App(): React.JSX.Element {
   const syncQuestStore = useCallback(() => {
     const qr = questRunnerRef.current;
     if (!qr) return;
+    const loc = useSettingsStore.getState().locale;
     const activeQuest = qr.getActiveQuest();
     const nextObj = activeQuest ? qr.getNextObjectiveForQuest(activeQuest.id) : undefined;
-    const objLabel = nextObj ? nextObj.label[useSettingsStore.getState().locale] : null;
+    const objLabel = nextObj ? nextObj.label[loc] : null;
+    const objHint = nextObj?.hint ? nextObj.hint[loc] : activeQuest?.hint ? activeQuest.hint[loc] : null;
     const missionId = nextObj?.missionId ?? activeQuest?.id ?? null;
     const stepId = nextObj?.type === 'code_step' ? nextObj.targetId : null;
     useGameStore.getState().syncQuestRunnerSnapshot({
@@ -236,11 +238,76 @@ export function App(): React.JSX.Element {
       activeMissionId: missionId,
       activeStepId: stepId,
       objectiveLabel: objLabel,
+      objectiveHint: objHint,
     });
   }, []);
 
+  const isQuestLocked = useCallback(
+    (questId: string): { locked: boolean; prereqTitle?: { id: string; en: string } } => {
+      const qr = questRunnerRef.current;
+      const states = qr ? qr.getStates() : useGameStore.getState().quests.states;
+      const quest = AWAKENING_QUESTS.find((q) => q.id === questId);
+      if (!quest) return { locked: false };
+      for (const pid of quest.prerequisites) {
+        if (states[pid] !== 'completed') {
+          const prereq = AWAKENING_QUESTS.find((q) => q.id === pid);
+          return { locked: true, prereqTitle: prereq?.title };
+        }
+      }
+      return { locked: false };
+    },
+    []
+  );
+
   const openStepInEditor = useCallback(
     (step: MissionStepManifest, showIntroIfFirst = true) => {
+      const loc = useSettingsStore.getState().locale;
+
+      // 1. Strict sequential quest check: Ensure prerequisite quest is fully completed
+      const quest = AWAKENING_QUESTS.find((q) => q.id === step.missionId);
+      if (quest) {
+        const qr = questRunnerRef.current;
+        const states = qr ? qr.getStates() : useGameStore.getState().quests.states;
+        const unmetPrereq = quest.prerequisites.find((pid) => states[pid] !== 'completed');
+        if (unmetPrereq) {
+          const prereqDef = AWAKENING_QUESTS.find((q) => q.id === unmetPrereq);
+          EventBus.emit('audio.cue', { cue: 'bit_bump' });
+          useUIStore.getState().pushToast({
+            kind: 'warning',
+            message:
+              loc === 'id'
+                ? `🔒 Terkunci: Harus menyelesaikan quest "${prereqDef?.title.id ?? unmetPrereq}" terlebih dahulu!`
+                : `🔒 Locked: Must complete quest "${prereqDef?.title.en ?? unmetPrereq}" first!`,
+          });
+          return;
+        }
+      }
+
+      // 2. Strict sequential step check within mission: Must complete preceding main steps in order
+      const mission = getMissionById(step.missionId);
+      if (mission) {
+        const completedSteps = useGameStore.getState().quests.completedStepIds;
+        const stepIndex = mission.steps.findIndex((s) => s.stepId === step.stepId);
+        if (stepIndex > 0) {
+          const uncompletedPreceding = mission.steps
+            .slice(0, stepIndex)
+            .filter((s) => !s.isBonus && !completedSteps.includes(s.stepId));
+          if (uncompletedPreceding.length > 0) {
+            const firstUncompleted = uncompletedPreceding[0]!;
+            EventBus.emit('audio.cue', { cue: 'bit_bump' });
+            useUIStore.getState().pushToast({
+              kind: 'warning',
+              message:
+                loc === 'id'
+                  ? `🔒 Selesaikan langkah "${firstUncompleted.title.id}" terlebih dahulu!`
+                  : `🔒 Complete step "${firstUncompleted.title.en}" first!`,
+            });
+            openStepInEditor(firstUncompleted, showIntroIfFirst);
+            return;
+          }
+        }
+      }
+
       const game = useGameStore.getState();
       const draft = game.learning.stepCodeDrafts[step.stepId];
       const tier: AssistanceTier =
@@ -248,7 +315,6 @@ export function App(): React.JSX.Element {
       const initialCode = draft?.code ?? step.starters[tier] ?? step.starters.guided;
 
       visibleScenarioIndexRef.current = 0;
-      const loc = useSettingsStore.getState().locale;
       const syncedLabel = step.isBonus
         ? `${loc === 'id' ? 'Bonus' : 'Bonus'}: ${step.title[loc]}`
         : step.title[loc];
@@ -402,8 +468,34 @@ export function App(): React.JSX.Element {
           if (ui.inGameOverlay === 'editor') {
             ui.setInGameOverlay('explore');
           } else {
-            const step = getStepById(useGameStore.getState().quests.activeStepId ?? '') ?? ALL_AWAKENING_STEPS[0]!;
-            openStepInEditor(step, true);
+            const loc = useSettingsStore.getState().locale;
+            const qr = questRunnerRef.current;
+            const activeQuest = qr?.getActiveQuest();
+            if (!qr || !activeQuest) {
+              ui.pushToast({
+                kind: 'info',
+                message: loc === 'id' ? 'Tidak ada quest aktif saat ini.' : 'No active quest currently.',
+              });
+              break;
+            }
+            const nextObj = qr.getNextObjectiveForQuest(activeQuest.id);
+            if (!nextObj || nextObj.type !== 'code_step') {
+              const hintMsg =
+                nextObj?.hint?.[loc] ??
+                activeQuest.hint?.[loc] ??
+                (loc === 'id'
+                  ? `Langkah saat ini memerlukan interaksi dunia: ${nextObj?.label[loc] ?? activeQuest.title[loc]}`
+                  : `Current step requires world interaction: ${nextObj?.label[loc] ?? activeQuest.title[loc]}`);
+              ui.pushToast({
+                kind: 'info',
+                message: hintMsg,
+              });
+              break;
+            }
+            const step = getStepById(nextObj.targetId);
+            if (step) {
+              openStepInEditor(step, true);
+            }
           }
           break;
         }
@@ -473,6 +565,18 @@ export function App(): React.JSX.Element {
 
       // 1. World item pickup (3 Blue Crystals in Supply Grove)
       if (kind === 'item' || targetId.startsWith('awakening_crystal_')) {
+        const lockCheck = isQuestLocked('interlude_find_bit');
+        if (lockCheck.locked) {
+          EventBus.emit('audio.cue', { cue: 'bit_bump' });
+          useUIStore.getState().pushToast({
+            kind: 'warning',
+            message:
+              loc === 'id'
+                ? `🔒 Kristal Biru belum aktif. Selesaikan quest "${lockCheck.prereqTitle?.id ?? 'sebelumnya'}" terlebih dahulu!`
+                : `🔒 Blue Crystal not active yet. Complete quest "${lockCheck.prereqTitle?.en ?? 'previous'}" first!`,
+          });
+          return;
+        }
         if (!gameState.world.collectedWorldItemIds.includes(targetId)) {
           gameState.collectWorldItem(targetId, 'blue_crystal', 1);
           // Ensure go_to supply_grove doesn't block crystal collect if player arrived via skybridge edge
@@ -527,13 +631,117 @@ export function App(): React.JSX.Element {
         return;
       }
 
+      // Sequential Prerequisite Guards for Devices & NPCs
+      if (targetId === 'beacon_terminal') {
+        const lockCheck = isQuestLocked('m1_hello_architect');
+        if (lockCheck.locked) {
+          EventBus.emit('audio.cue', { cue: 'bit_bump' });
+          useUIStore.getState().pushToast({
+            kind: 'warning',
+            message:
+              loc === 'id'
+                ? '🔒 Terminal Suar tidak merespons! Hidupkan kembali NEO di alas batu (pedestal) terlebih dahulu.'
+                : '🔒 Beacon Terminal unresponsive! Reboot NEO on the pedestal first.',
+          });
+          return;
+        }
+      }
+
+      if (targetId === 'bit_robot') {
+        const lockCheck = isQuestLocked('interlude_find_bit');
+        if (lockCheck.locked) {
+          EventBus.emit('audio.cue', { cue: 'bit_bump' });
+          useUIStore.getState().pushToast({
+            kind: 'warning',
+            message:
+              loc === 'id'
+                ? `🔒 Robot BIT tertidur lelap. Selesaikan quest "${lockCheck.prereqTitle?.id ?? 'sebelumnya'}" terlebih dahulu!`
+                : `🔒 Robot BIT is asleep. Complete quest "${lockCheck.prereqTitle?.en ?? 'previous'}" first!`,
+          });
+          return;
+        }
+        const totalCrystals = gameState.world.collectedWorldItemIds.filter((id) =>
+          id.startsWith('awakening_crystal_')
+        ).length;
+        if (totalCrystals < 3) {
+          EventBus.emit('audio.cue', { cue: 'bit_bump' });
+          useUIStore.getState().pushToast({
+            kind: 'warning',
+            message:
+              loc === 'id'
+                ? `⚡ BIT kehabisan daya (${totalCrystals}/3 Kristal Biru). Kumpulkan 3 Kristal Biru di Hutan Pasokan!`
+                : `⚡ BIT is out of power (${totalCrystals}/3 Blue Crystals). Collect 3 Blue Crystals in Supply Grove!`,
+          });
+          return;
+        }
+      }
+
+      if (targetId === 'old_tamo') {
+        const lockCheck = isQuestLocked('m3_locked_gate');
+        if (lockCheck.locked) {
+          EventBus.emit('audio.cue', { cue: 'bit_bump' });
+          useUIStore.getState().pushToast({
+            kind: 'warning',
+            message:
+              loc === 'id'
+                ? `🔒 Kakek Tamo sedang bermeditasi. Selesaikan quest "${lockCheck.prereqTitle?.id ?? 'sebelumnya'}" terlebih dahulu!`
+                : `🔒 Old Tamo is meditating. Complete quest "${lockCheck.prereqTitle?.en ?? 'previous'}" first!`,
+          });
+          return;
+        }
+      }
+
+      if (targetId === 'mira') {
+        const lockCheck = isQuestLocked('m4_automated_farm');
+        if (lockCheck.locked) {
+          EventBus.emit('audio.cue', { cue: 'bit_bump' });
+          useUIStore.getState().pushToast({
+            kind: 'warning',
+            message:
+              loc === 'id'
+                ? `🔒 Ladang Terasering belum terbuka. Selesaikan quest "${lockCheck.prereqTitle?.id ?? 'sebelumnya'}" terlebih dahulu!`
+                : `🔒 Terrace Farm is not accessible yet. Complete quest "${lockCheck.prereqTitle?.en ?? 'previous'}" first!`,
+          });
+          return;
+        }
+      }
+
+      if (targetId === 'bolt') {
+        const lockCheck = isQuestLocked('m5_blueprint');
+        if (lockCheck.locked) {
+          EventBus.emit('audio.cue', { cue: 'bit_bump' });
+          useUIStore.getState().pushToast({
+            kind: 'warning',
+            message:
+              loc === 'id'
+                ? `🔒 Bengkel BOLT terkunci. Selesaikan quest "${lockCheck.prereqTitle?.id ?? 'sebelumnya'}" terlebih dahulu!`
+                : `🔒 BOLT's Workshop is locked. Complete quest "${lockCheck.prereqTitle?.en ?? 'previous'}" first!`,
+          });
+          return;
+        }
+      }
+
+      if (targetId === 'core_altar') {
+        const lockCheck = isQuestLocked('final_core_shard');
+        if (lockCheck.locked) {
+          EventBus.emit('audio.cue', { cue: 'bit_bump' });
+          useUIStore.getState().pushToast({
+            kind: 'warning',
+            message:
+              loc === 'id'
+                ? `🔒 Altar Serpihan Inti tersegel. Selesaikan quest "${lockCheck.prereqTitle?.id ?? 'sebelumnya'}" terlebih dahulu!`
+                : `🔒 Core Shard Altar is sealed. Complete quest "${lockCheck.prereqTitle?.en ?? 'previous'}" first!`,
+          });
+          return;
+        }
+      }
+
       // 3. Advance sequential non-code objectives gracefully on interaction
       if (qr) {
         if (targetId === 'neo_pedestal') {
           qr.onGoTo('shrine_ledge');
         } else if (targetId === 'beacon_terminal') {
           qr.onGoTo('shrine_ledge');
-          qr.onInteract('neo_pedestal');
           qr.onGoTo('beacon_point');
         } else if (targetId === 'core_altar') {
           qr.onGoTo('core_spire');
@@ -591,6 +799,21 @@ export function App(): React.JSX.Element {
         core_altar: 'final_core_shard',
       };
       const mappedMissionId = terminalMissionMap[targetId];
+      if (mappedMissionId) {
+        const lockCheck = isQuestLocked(mappedMissionId);
+        if (lockCheck.locked) {
+          EventBus.emit('audio.cue', { cue: 'bit_bump' });
+          useUIStore.getState().pushToast({
+            kind: 'warning',
+            message:
+              loc === 'id'
+                ? `🔒 Perangkat ini terkunci! Selesaikan quest "${lockCheck.prereqTitle?.id ?? 'sebelumnya'}" terlebih dahulu.`
+                : `🔒 Device is locked! Complete quest "${lockCheck.prereqTitle?.en ?? 'previous'}" first.`,
+          });
+          return;
+        }
+      }
+
       if (
         mappedMissionId ||
         kind === 'puzzle' ||
@@ -642,7 +865,7 @@ export function App(): React.JSX.Element {
       actionPlayer.stop();
       runtime.dispose();
     };
-  }, [openStepInEditor, refreshSlotSummaries, syncQuestStore]);
+  }, [isQuestLocked, openStepInEditor, refreshSlotSummaries, syncQuestStore]);
 
   // Playtime ticker (1s resolution during active gameplay)
   useEffect(() => {

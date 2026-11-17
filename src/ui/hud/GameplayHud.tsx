@@ -35,6 +35,7 @@ export const GameplayHud: React.FC<GameplayHudProps> = ({
   const showFps = useSettingsStore((s) => s.graphics.showFps);
 
   const objectiveLabel = useGameStore((s) => s.objectiveLabel);
+  const objectiveHint = useGameStore((s) => s.objectiveHint);
   const activeMissionId = useGameStore((s) => s.quests.activeMissionId);
   const xp = useGameStore((s) => s.learning.xp);
   const cameraMode = useGameStore((s) => s.world.cameraMode);
@@ -265,6 +266,36 @@ export const GameplayHud: React.FC<GameplayHudProps> = ({
                     ? 'Jelajahi pulau dan temui NEO.'
                     : 'Explore the island and meet NEO.')}
               </div>
+              {objectiveHint && (
+                <div
+                  style={{
+                    marginTop: '5px',
+                    padding: '4px 8px',
+                    borderRadius: '7px',
+                    backgroundColor: '#FEF9C3',
+                    border: '1px solid #FDE047',
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: '5px',
+                    fontSize: isCompact ? '0.71875rem' : '0.78125rem',
+                    color: '#713F12',
+                    lineHeight: 1.35,
+                    fontWeight: 600,
+                  }}
+                >
+                  <span style={{ flexShrink: 0, fontSize: '0.85rem' }}>💡</span>
+                  <span
+                    style={{
+                      overflow: isCompact ? 'hidden' : undefined,
+                      display: isCompact ? '-webkit-box' : undefined,
+                      WebkitLineClamp: isCompact ? 2 : undefined,
+                      WebkitBoxOrient: isCompact ? 'vertical' : undefined,
+                    }}
+                  >
+                    {objectiveHint}
+                  </span>
+                </div>
+              )}
               {!isLandscapePhone && (
                 <div
                   style={{

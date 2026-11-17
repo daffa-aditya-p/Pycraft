@@ -765,6 +765,71 @@ export const JournalModal: React.FC<JournalModalProps> = ({ onPracticeKC }) => {
                               </div>
                             </div>
 
+                            {/* Prerequisites Lock Warning */}
+                            {isQuestLocked && quest.prerequisites.length > 0 && (() => {
+                              const unmet = quest.prerequisites
+                                .map((pid) => AWAKENING_QUESTS.find((q) => q.id === pid))
+                                .filter((q): q is QuestDefinition => q !== undefined && (quests.states[q.id] ?? 'locked') !== 'completed');
+                              if (unmet.length === 0) return null;
+                              return (
+                                <div
+                                  style={{
+                                    marginTop: '10px',
+                                    padding: '7px 12px',
+                                    borderRadius: '3px',
+                                    backgroundColor: '#FEF2F2',
+                                    border: '1px solid #FECACA',
+                                    color: '#991B1B',
+                                    fontSize: '0.8125rem',
+                                    fontWeight: 700,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                  }}
+                                >
+                                  <span>🔒</span>
+                                  <span>
+                                    {locale === 'id'
+                                      ? `Terkunci: Harus menyelesaikan quest "${unmet.map((p) => p.title.id).join(', ')}" terlebih dahulu.`
+                                      : `Locked: Must complete quest "${unmet.map((p) => p.title.en).join(', ')}" first.`}
+                                  </span>
+                                </div>
+                              );
+                            })()}
+
+                            {/* Quest Concept Guide & Hint */}
+                            {quest.hint && (
+                              <div
+                                style={{
+                                  marginTop: '10px',
+                                  padding: '8px 12px',
+                                  borderRadius: '3px',
+                                  backgroundColor: '#FEF9C3',
+                                  border: '1px solid #FDE047',
+                                  fontSize: '0.8125rem',
+                                  color: '#713F12',
+                                  lineHeight: 1.45,
+                                }}
+                              >
+                                <div
+                                  style={{
+                                    fontWeight: 700,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '6px',
+                                    marginBottom: '3px',
+                                    color: '#854D0E',
+                                  }}
+                                >
+                                  <span>💡</span>
+                                  <span>
+                                    {locale === 'id' ? 'Petunjuk Quest & Konsep Python:' : 'Quest Hint & Python Concept:'}
+                                  </span>
+                                </div>
+                                <div>{quest.hint[locale]}</div>
+                              </div>
+                            )}
+
                             {/* Unlocks note if applicable */}
                             {(quest.unlocksZoneId || quest.unlocksCosmetics) && (
                               <div
@@ -958,6 +1023,21 @@ export const JournalModal: React.FC<JournalModalProps> = ({ onPracticeKC }) => {
                                               ({Math.min(objective.requiredCount ?? 1, collectCount)}/
                                               {objective.requiredCount ?? 1})
                                             </span>
+                                          )}
+
+                                          {/* Objective actionable hint */}
+                                          {objective.hint && (
+                                            <div
+                                              style={{
+                                                marginTop: '3px',
+                                                fontSize: '0.75rem',
+                                                color: isActive ? '#92400E' : isCompleted ? '#15803D' : '#6B7280',
+                                                lineHeight: 1.35,
+                                                fontWeight: isActive ? 600 : 500,
+                                              }}
+                                            >
+                                              💡 {objective.hint[locale]}
+                                            </div>
                                           )}
                                         </div>
                                       </div>

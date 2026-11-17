@@ -145,6 +145,7 @@ export function createInitialSavePayload(
 export interface GameStoreState extends SaveStatePayload {
   activeSlotId: SlotId | null;
   objectiveLabel: string | null;
+  objectiveHint: string | null;
   isObservingPlayback: boolean;
   activePuzzleZoneId: string | null;
   dirty: boolean;
@@ -181,6 +182,7 @@ export interface GameStoreState extends SaveStatePayload {
     activeMissionId: string | null;
     activeStepId: string | null;
     objectiveLabel: string | null;
+    objectiveHint?: string | null;
   }) => void;
   completeMissionStep: (
     missionId: string,
@@ -207,6 +209,7 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
   ...INITIAL_PAYLOAD,
   activeSlotId: null,
   objectiveLabel: null,
+  objectiveHint: null,
   isObservingPlayback: false,
   activePuzzleZoneId: null,
   dirty: false,
@@ -231,6 +234,7 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
       activeSlotId: slotId,
       ...fresh,
       objectiveLabel: null,
+      objectiveHint: null,
       isObservingPlayback: false,
       activePuzzleZoneId: null,
       dirty: true,
@@ -356,6 +360,7 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
         activeStepId: snapshot.activeStepId,
       },
       objectiveLabel: snapshot.objectiveLabel,
+      objectiveHint: snapshot.objectiveHint ?? null,
       dirty: true,
     }));
   },

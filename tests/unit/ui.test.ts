@@ -28,6 +28,7 @@ import {
   getUnlockedSnippetChips,
 } from '@/editor/autocomplete';
 import { EventBus, useEditorStore, useGameStore, useSettingsStore, useUIStore } from '@/stores';
+import { AWAKENING_QUESTS } from '@/content/awakening/quests';
 
 // Ensure React 19 act() works cleanly in jsdom
 (globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -517,5 +518,63 @@ describe('JournalModal & Quest Objectives System (Acts 1-4)', () => {
       window.dispatchEvent(new Event('resize'));
     });
     expect(el.querySelector('[data-testid="portrait-orientation-guard"]')).toBeNull();
+  });
+
+  it('all 8 Awakening quests and all 36 objectives contain localized hints in id and en', () => {
+    expect(AWAKENING_QUESTS.length).toBe(8);
+    let totalObjectives = 0;
+    for (const q of AWAKENING_QUESTS) {
+      expect(q.hint).toBeDefined();
+      expect(q.hint?.id.length).toBeGreaterThan(10);
+      expect(q.hint?.en.length).toBeGreaterThan(10);
+      totalObjectives += q.objectives.length;
+      for (const obj of q.objectives) {
+        expect(obj.hint).toBeDefined();
+        expect(obj.hint?.id.length).toBeGreaterThan(5);
+        expect(obj.hint?.en.length).toBeGreaterThan(5);
+      }
+    }
+    expect(totalObjectives).toBe(36);
+  });
+
+  it('renders quest hint and prerequisite lock warning in JournalModal', () => {
+    useUIStore.setState({
+      screen: 'in_game',
+      inGameOverlay: 'journal',
+      journalTab: 'quests',
+    });
+    useGameStore.setState((s) => ({
+      ...s,
+      quests: {
+        ...s.quests,
+        states: {
+          prologue: 'active',
+          m1_hello_architect: 'locked',
+        },
+      },
+    }));
+
+    const el = mount(React.createElement(JournalModal, {}));
+    expect(el.textContent).toContain('Petunjuk Quest & Konsep Python:');
+    // m1_hello_architect has prerequisite 'prologue'
+    expect(el.textContent).toContain('Terkunci: Harus menyelesaikan quest');
+  });
+
+  it('renders objective hint in GameplayHud when objectiveHint is present in store', () => {
+    useUIStore.setState({
+      screen: 'in_game',
+      inGameOverlay: 'explore',
+    });
+    useGameStore.setState((s) => ({
+      ...s,
+      objectiveLabel: 'Hidupkan NEO di alas batu',
+      objectiveHint: 'Dekati alas batu silinder tempat kapsul stasis NEO berada, lalu tekan [E].',
+    }));
+
+    const el = mount(React.createElement(GameplayHud, {}));
+    const badge = el.querySelector('[data-testid="hud-objective-badge"]');
+    expect(badge).not.toBeNull();
+    expect(badge?.textContent).toContain('Hidupkan NEO di alas batu');
+    expect(badge?.textContent).toContain('Dekati alas batu silinder tempat kapsul stasis NEO berada');
   });
 });

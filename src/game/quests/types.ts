@@ -17,6 +17,7 @@ export interface QuestObjective {
   requiredCount?: number;
   missionId?: string;
   label: { id: string; en: string };
+  hint?: { id: string; en: string };
   islandId: string;
   markerPosition?: [number, number, number];
 }
@@ -27,6 +28,7 @@ export interface QuestDefinition {
   regionId: string;
   title: { id: string; en: string };
   summary: { id: string; en: string };
+  hint?: { id: string; en: string };
   prerequisites: string[];
   objectives: QuestObjective[];
   rewardXP: number;
