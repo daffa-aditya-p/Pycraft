@@ -1,6 +1,6 @@
 import React from 'react';
 import { EventBus, useGameStore, useSettingsStore, useUIStore } from '@/stores';
-import { IconJournal, IconPlay, IconSave, IconSettings } from '../icons';
+import { IconJournal, IconPlay, IconSave, IconSettings, IconSpark } from '../icons';
 import { formatRelativeTime } from '../layout';
 
 export interface PauseMenuProps {
@@ -125,6 +125,19 @@ export const PauseMenu: React.FC<PauseMenuProps> = ({
           onClick={() => navigateTo('progress')}
         >
           <span>{locale === 'id' ? 'Peta Dunia' : 'World Map'}</span>
+        </button>
+
+        <button
+          type="button"
+          className="btn-slate"
+          onClick={() => {
+            setInGameOverlay('cinematic');
+          }}
+        >
+          <IconSpark size={18} />
+          <span>
+            {locale === 'id' ? 'Tonton Ulang Sinematik' : 'Replay Cinematic'}
+          </span>
         </button>
 
         <button

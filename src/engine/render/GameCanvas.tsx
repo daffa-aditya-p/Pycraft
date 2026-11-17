@@ -310,7 +310,7 @@ function AwakeningScene({
         sprint: moveSnap.sprint,
         jumpPressed: moveSnap.jump,
         cameraYaw: cameraYawRef.current,
-        observationLocked: game.isObservingPlayback || moveSnap.suspended,
+        observationLocked: game.isObservingPlayback || moveSnap.suspended || ui.inGameOverlay === 'cinematic',
       },
       storageRef.current,
     );

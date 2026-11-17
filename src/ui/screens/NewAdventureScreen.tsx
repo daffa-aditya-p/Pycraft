@@ -95,6 +95,7 @@ export const NewAdventureScreen: React.FC<NewAdventureScreenProps> = ({
     } else {
       resetForNewAdventure(selectedSlot, cleanName, appearance);
       useSettingsStore.getState().setLastActiveSlotId(selectedSlot);
+      useUIStore.getState().setInGameOverlay('cinematic');
       navigateTo('loading_world');
     }
   };

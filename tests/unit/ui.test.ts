@@ -9,6 +9,7 @@ import {
 } from '@/ui/index';
 import { GameModesScreen } from '@/ui/screens/GameModesScreen';
 import { TitleScreen } from '@/ui/screens/TitleScreen';
+import { CinematicIntroOverlay } from '@/ui/screens/CinematicIntroOverlay';
 import { WorldProgressScreen } from '@/ui/screens/WorldProgressScreen';
 import { GameplayHud } from '@/ui/hud/GameplayHud';
 import { TouchControls } from '@/ui/hud/TouchControls';
@@ -300,5 +301,48 @@ describe('UI Screens, Accessibility & RC-10 Behaviors', () => {
     });
     expect(useUIStore.getState().editorAutoCollapsedForRestoration).toBe(false);
     vi.useRealTimers();
+  });
+});
+
+describe('Cinematic Intro Overlay & Lore Narration', () => {
+  it('renders letterbox bars, subtitle card, speaker badge, and skip button', () => {
+    const onComplete = vi.fn();
+    const el = mount(React.createElement(CinematicIntroOverlay, { onComplete }));
+
+    const overlay = el.querySelector('[data-testid="cinematic-intro-overlay"]');
+    expect(overlay).not.toBeNull();
+    expect(overlay?.textContent).toContain('Aetheria: Chronicles');
+    expect(overlay?.textContent).toContain('Suara Purba Aetheria');
+    expect(overlay?.textContent).toContain('Lewati');
+  });
+
+  it('completes cinematic on skip button click and emits camera release', () => {
+    const onComplete = vi.fn();
+    let shotEvent: unknown = 'init';
+    EventBus.on('cinematic.shot', (s) => {
+      shotEvent = s;
+    });
+
+    const el = mount(React.createElement(CinematicIntroOverlay, { onComplete }));
+    const skipBtn = el.querySelector<HTMLButtonElement>('button.btn-primary-chamfer');
+    expect(skipBtn).not.toBeNull();
+
+    act(() => {
+      skipBtn?.click();
+    });
+
+    expect(onComplete).toHaveBeenCalledTimes(1);
+    expect(shotEvent).toBeNull();
+  });
+
+  it('completes cinematic on Escape or Space keydown', () => {
+    const onComplete = vi.fn();
+    mount(React.createElement(CinematicIntroOverlay, { onComplete }));
+
+    act(() => {
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    });
+
+    expect(onComplete).toHaveBeenCalledTimes(1);
   });
 });

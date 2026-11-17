@@ -64,9 +64,11 @@ export {
   computeCameraPose,
   lerpCameraPose,
   computeTargetViewOffset,
+  getActiveCinematicShot,
   type CameraMode,
   type CameraPoseInput,
   type CameraPoseOutput,
+  type CinematicShotData,
 } from './camera/CameraRig';
 
 export {

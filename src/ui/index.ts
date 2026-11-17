@@ -12,6 +12,10 @@ export { SettingsScreen, type SettingsScreenProps, type SettingsTab } from './sc
 export { SaveManagementScreen, type SaveManagementScreenProps } from './screens/SaveManagementScreen';
 export { PauseMenu, type PauseMenuProps } from './screens/PauseMenu';
 export {
+  CinematicIntroOverlay,
+  type CinematicIntroOverlayProps,
+} from './screens/CinematicIntroOverlay';
+export {
   MissionCompleteModal,
   type MissionCompleteModalProps,
   type PracticedConceptSummary,
@@ -33,3 +37,4 @@ export {
   type LearningIntroModalProps,
 } from './panels/LearningIntroModal';
 export { JournalModal, type JournalModalProps } from './panels/JournalModal';
+export { GuidebookModal, type GuidebookModalProps } from './components/GuidebookModal';

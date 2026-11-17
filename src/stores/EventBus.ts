@@ -78,6 +78,7 @@ export interface PycraftEventMap {
     targetId: string;
     preset: 'speaker' | 'device' | 'overview' | 'release';
   };
+  'cinematic.shot': { position: [number, number, number]; lookAt: [number, number, number]; fov?: number; driftSpeed?: number } | null;
   'camera.mode.changed': { mode: 'third_person' | 'isometric' };
   'runtime.status.changed': { status: RuntimeStatus; message?: string };
   'runtime.input.requested': { runId: string; prompt: string };

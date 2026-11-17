@@ -47,6 +47,19 @@ export interface CameraPoseOutput {
   fov: number;
 }
 
+export interface CinematicShotData {
+  position: [number, number, number];
+  lookAt: [number, number, number];
+  fov?: number;
+  driftSpeed?: number;
+}
+
+let activeCinematicShot: CinematicShotData | null = null;
+
+export function getActiveCinematicShot(): CinematicShotData | null {
+  return activeCinematicShot;
+}
+
 /**
  * Pure camera pose calculation for unit testing and per-frame camera interpolation.
  */
@@ -185,9 +198,15 @@ export function CameraRig({
       targetId: string;
       preset: 'speaker' | 'device' | 'overview' | 'release';
     } | null,
+    // Cinematic shot tracking
+    cinematicShot: null as CinematicShotData | null,
+    cinematicCurrentPos: [0, 0, 0] as [number, number, number],
+    cinematicCurrentLookAt: [0, 0, 0] as [number, number, number],
+    cinematicInitialized: false,
+    cinematicWasActive: false,
   });
 
-  // Subscribe to input actions (V toggle, Z/C iso rotate) & dialogue camera requests
+  // Subscribe to input actions (V toggle, Z/C iso rotate), dialogue requests & cinematic shots
   useEffect(() => {
     const unsubInput = inputManager.onAction((action) => {
       const s = stateRef.current;
@@ -234,19 +253,136 @@ export function CameraRig({
       }
     });
 
+    const unsubCinematic = EventBus.on('cinematic.shot', (shot) => {
+      const s = stateRef.current;
+      activeCinematicShot = shot;
+      if (!shot) {
+        if (s.cinematicWasActive) {
+          s.cinematicWasActive = false;
+          s.cinematicInitialized = false;
+          s.cinematicShot = null;
+          s.fromPose = {
+            position: [camera.position.x, camera.position.y, camera.position.z],
+            lookAt: [
+              playerPosRef.current[0],
+              playerPosRef.current[1] + 1.25,
+              playerPosRef.current[2],
+            ],
+            fov:
+              camera instanceof THREE.PerspectiveCamera
+                ? camera.fov
+                : CAMERA_CONSTANTS.TP_FOV,
+          };
+          s.mode = 'third_person';
+          s.transitionActive = true;
+          s.transitionElapsed = 0;
+        }
+      } else {
+        s.cinematicShot = shot;
+        if (!s.cinematicInitialized) {
+          s.cinematicCurrentPos = [shot.position[0], shot.position[1], shot.position[2]];
+          s.cinematicCurrentLookAt = [shot.lookAt[0], shot.lookAt[1], shot.lookAt[2]];
+          camera.position.set(shot.position[0], shot.position[1], shot.position[2]);
+          camera.lookAt(shot.lookAt[0], shot.lookAt[1], shot.lookAt[2]);
+          if (camera instanceof THREE.PerspectiveCamera) {
+            camera.fov = shot.fov ?? 42;
+            camera.updateProjectionMatrix();
+          }
+          s.cinematicInitialized = true;
+          s.cinematicWasActive = true;
+        }
+      }
+    });
+
     return () => {
       unsubInput();
       unsubCam();
       unsubDialogue();
+      unsubCinematic();
     };
   }, [camera, inputManager, playerPosRef]);
 
-  useFrame((_, delta) => {
+  useFrame((threeState, delta) => {
     const dt = Math.min(0.05, delta);
     const s = stateRef.current;
     const ui = useUIStore.getState();
     const game = useGameStore.getState();
     const settings = useSettingsStore.getState();
+
+    // 0. Cinematic camera override during prologue/cutscene
+    if (ui.screen === 'in_game' && ui.inGameOverlay === 'cinematic') {
+      const shot = s.cinematicShot ?? activeCinematicShot;
+      if (shot) {
+        if (!s.cinematicInitialized) {
+          s.cinematicCurrentPos = [shot.position[0], shot.position[1], shot.position[2]];
+          s.cinematicCurrentLookAt = [shot.lookAt[0], shot.lookAt[1], shot.lookAt[2]];
+          camera.position.set(shot.position[0], shot.position[1], shot.position[2]);
+          camera.lookAt(shot.lookAt[0], shot.lookAt[1], shot.lookAt[2]);
+          if (camera instanceof THREE.PerspectiveCamera) {
+            camera.fov = shot.fov ?? 42;
+            camera.updateProjectionMatrix();
+          }
+          s.cinematicInitialized = true;
+          s.cinematicWasActive = true;
+        }
+
+        const lerpRate = Math.min(1, dt * (shot.driftSpeed ?? 2.4));
+        s.cinematicCurrentPos[0] += (shot.position[0] - s.cinematicCurrentPos[0]) * lerpRate;
+        s.cinematicCurrentPos[1] += (shot.position[1] - s.cinematicCurrentPos[1]) * lerpRate;
+        s.cinematicCurrentPos[2] += (shot.position[2] - s.cinematicCurrentPos[2]) * lerpRate;
+
+        // Subtle atmospheric drone sway
+        const swayTime = threeState.clock.elapsedTime;
+        const swayX = Math.sin(swayTime * 0.45) * 0.14;
+        const swayY = Math.cos(swayTime * 0.35) * 0.08;
+
+        s.cinematicCurrentLookAt[0] += (shot.lookAt[0] + swayX - s.cinematicCurrentLookAt[0]) * lerpRate;
+        s.cinematicCurrentLookAt[1] += (shot.lookAt[1] + swayY - s.cinematicCurrentLookAt[1]) * lerpRate;
+        s.cinematicCurrentLookAt[2] += (shot.lookAt[2] - s.cinematicCurrentLookAt[2]) * lerpRate;
+
+        camera.position.set(
+          s.cinematicCurrentPos[0],
+          s.cinematicCurrentPos[1],
+          s.cinematicCurrentPos[2],
+        );
+        camera.lookAt(
+          s.cinematicCurrentLookAt[0],
+          s.cinematicCurrentLookAt[1],
+          s.cinematicCurrentLookAt[2],
+        );
+
+        const targetFov = shot.fov ?? 38;
+        if (camera instanceof THREE.PerspectiveCamera) {
+          camera.fov += (targetFov - camera.fov) * lerpRate;
+          camera.updateProjectionMatrix();
+        }
+        camera.clearViewOffset();
+        return;
+      }
+    }
+
+    // Smooth transition out of cinematic when exiting cinematic overlay
+    if (s.cinematicWasActive && ui.inGameOverlay !== 'cinematic') {
+      s.cinematicWasActive = false;
+      s.cinematicInitialized = false;
+      s.cinematicShot = null;
+      activeCinematicShot = null;
+      s.fromPose = {
+        position: [camera.position.x, camera.position.y, camera.position.z],
+        lookAt: [
+          playerPosRef.current[0],
+          playerPosRef.current[1] + 1.25,
+          playerPosRef.current[2],
+        ],
+        fov:
+          camera instanceof THREE.PerspectiveCamera
+            ? camera.fov
+            : CAMERA_CONSTANTS.TP_FOV,
+      };
+      s.mode = 'third_person';
+      s.transitionActive = true;
+      s.transitionElapsed = 0;
+    }
 
     // 1. Title screen & pre-game slow orbit (12 deg/min)
     if (ui.screen !== 'in_game') {

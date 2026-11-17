@@ -22,7 +22,8 @@ export type InGameOverlay =
   | 'map'
   | 'paused'
   | 'mission_complete'
-  | 'learning_intro';
+  | 'learning_intro'
+  | 'cinematic';
 
 export type JournalTab = 'quests' | 'inventory' | 'skill_tree' | 'profile';
 export type LayoutClass = 'D' | 'T' | 'L' | 'P';

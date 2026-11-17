@@ -51,6 +51,7 @@ import {
   type SlotSummary,
 } from '@/stores';
 import {
+  CinematicIntroOverlay,
   DialogueBox,
   GameModesScreen,
   GameplayHud,
@@ -459,7 +460,7 @@ export function App(): React.JSX.Element {
     return () => window.clearInterval(timer);
   }, [screen, inGameOverlay]);
 
-  const enterLoadedGame = useCallback(async () => {
+  const enterLoadedGame = useCallback(async (isNewGame = false) => {
     const game = useGameStore.getState();
     questRunnerRef.current = new QuestRunner(AWAKENING_QUESTS, {
       states: game.quests.states,
@@ -479,7 +480,37 @@ export function App(): React.JSX.Element {
     await new Promise((r) => setTimeout(r, 180));
     useUIStore.getState().setWorldLoadProgress(100, 'Siap!');
     navigateTo('in_game', { pushHistory: false });
+    if (isNewGame) {
+      useUIStore.getState().setInGameOverlay('cinematic');
+    } else {
+      useUIStore.getState().setInGameOverlay('explore');
+    }
   }, [navigateTo, syncQuestStore]);
+
+  const handleCinematicComplete = useCallback(() => {
+    const loc = useSettingsStore.getState().locale;
+    useUIStore.getState().setInGameOverlay('explore');
+    const qr = questRunnerRef.current;
+    if (qr) {
+      qr.startQuest('awakening_q1');
+      syncQuestStore();
+    }
+    const tree = AWAKENING_DIALOGUES.prologue_neo_reboot;
+    if (tree && dialogueRunnerRef.current) {
+      const node = dialogueRunnerRef.current.start(tree, loc);
+      if (node) {
+        useUIStore.getState().setDialogue({
+          active: true,
+          npcId: 'neo_pedestal',
+          speakerName: node.speaker,
+          lines: [node.text[loc]],
+          lineIndex: 0,
+          choices: (node.choices ?? []).map((c) => ({ id: c.id, label: c.label[loc] })),
+        });
+        useUIStore.getState().setInGameOverlay('dialogue');
+      }
+    }
+  }, [syncQuestStore]);
 
   const handleContinueAdventure = useCallback(
     async (slot: SlotSummary) => {
@@ -523,7 +554,7 @@ export function App(): React.JSX.Element {
         });
         useSettingsStore.getState().setLastActiveSlotId(slot.slotId);
         useUIStore.getState().setSaveReadOnlyMode(result.readOnly);
-        await enterLoadedGame();
+        await enterLoadedGame(false);
       }
     },
     [enterLoadedGame, navigateTo]
@@ -543,7 +574,7 @@ export function App(): React.JSX.Element {
         useUIStore.getState().setSaveReadOnlyMode(res.errorCode === 'READ_ONLY_TAB');
         await refreshSlotSummaries();
       }
-      await enterLoadedGame();
+      await enterLoadedGame(true);
     },
     [enterLoadedGame, refreshSlotSummaries]
   );
@@ -962,8 +993,12 @@ export function App(): React.JSX.Element {
 
           {screen === 'in_game' && (
             <>
+              {inGameOverlay === 'cinematic' && (
+                <CinematicIntroOverlay onComplete={handleCinematicComplete} />
+              )}
+
               <GameplayHud
-                isCinematic={inGameOverlay === 'dialogue'}
+                isCinematic={inGameOverlay === 'dialogue' || inGameOverlay === 'cinematic'}
                 onInteract={(targetId) =>
                   EventBus.emit('player.interact', {
                     targetId,

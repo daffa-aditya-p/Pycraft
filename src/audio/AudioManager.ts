@@ -146,6 +146,43 @@ class WebAudioManager {
     }, 2200);
   }
 
+  playCinematicDrone(step: number): void {
+    const settings = useSettingsStore.getState();
+    if (settings.audio.muted || settings.audio.music <= 0.01) return;
+    const ctx = this.ensureContext();
+    if (!ctx || !this.musicGain) return;
+    if (ctx.state === 'suspended') {
+      void ctx.resume();
+    }
+    const now = ctx.currentTime;
+    // Chords tailored for each cinematic act:
+    // Step 0/1: C maj 9 ethereal floating (C3, G3, D4, E4)
+    // Step 2: A min 7 solemn silence (A2, E3, C4, G4)
+    // Step 3: F maj 7 awakening promise (F2, C3, A3, E4)
+    // Step 4: G maj triumphant dawn (G2, D3, B3, G4)
+    const chords: number[][] = [
+      [130.81, 196.0, 293.66, 329.63],
+      [110.0, 164.81, 261.63, 392.0],
+      [87.31, 130.81, 220.0, 329.63],
+      [98.0, 146.83, 246.94, 392.0],
+    ];
+    const freqs = chords[Math.max(0, Math.min(chords.length - 1, step))]!;
+    for (let i = 0; i < freqs.length; i++) {
+      const freq = freqs[i]!;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = i % 2 === 0 ? 'sine' : 'triangle';
+      osc.frequency.setValueAtTime(freq, now);
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.linearRampToValueAtTime(0.07 / freqs.length, now + 1.2);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 5.5);
+      osc.connect(gain);
+      gain.connect(this.musicGain);
+      osc.start(now);
+      osc.stop(now + 5.6);
+    }
+  }
+
   playCue(cue: AudioCueId): void {
     const settings = useSettingsStore.getState();
     if (settings.audio.muted || settings.audio.sfx <= 0.01) return;

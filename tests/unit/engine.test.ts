@@ -16,6 +16,7 @@ import {
   serializeGeneratedWorld,
 } from '@/engine';
 import { EventBus } from '@/stores/EventBus';
+import { CINEMATIC_ACTS, interpolateCinematicPose } from '@/ui/screens/CinematicIntroOverlay';
 
 describe('Voxel Engine: ChunkStorage, Greedy Mesher & 4-Level AO', () => {
   it('achieves >= 65% face reduction on flat/stepped terrain via greedy meshing', () => {
@@ -305,6 +306,42 @@ describe('CameraRig Math & 7 Awakening Islands Generator', () => {
       // Every coordinate should be a multiple of 0.125 / 2 = 0.0625
       expect(Math.abs((pos.getX(i) * 16) % 1)).toBeLessThan(1e-5);
       expect(em.getX(i)).toBeLessThanOrEqual(Math.fround(1.2) + 1e-6);
+    }
+  });
+});
+
+describe('Cinematic Intro Camera Math & Choreography', () => {
+  it('interpolates start to end camera pose with cubic ease-in-out', () => {
+    const start = { position: [0, 10, 0] as [number, number, number], lookAt: [0, 0, 0] as [number, number, number], fov: 40 };
+    const end = { position: [10, 20, 30] as [number, number, number], lookAt: [5, 5, 5] as [number, number, number], fov: 30 };
+
+    const atStart = interpolateCinematicPose(start, end, 0);
+    expect(atStart.position).toEqual([0, 10, 0]);
+    expect(atStart.lookAt).toEqual([0, 0, 0]);
+    expect(atStart.fov).toBe(40);
+
+    const atEnd = interpolateCinematicPose(start, end, 1);
+    expect(atEnd.position).toEqual([10, 20, 30]);
+    expect(atEnd.lookAt).toEqual([5, 5, 5]);
+    expect(atEnd.fov).toBe(30);
+
+    const atMid = interpolateCinematicPose(start, end, 0.5);
+    expect(atMid.position[0]).toBeCloseTo(5, 3);
+    expect(atMid.position[1]).toBeCloseTo(15, 3);
+    expect(atMid.position[2]).toBeCloseTo(15, 3);
+    expect(atMid.fov).toBeCloseTo(35, 3);
+  });
+
+  it('validates all 5 Cinematic Acts have smooth continuous camera waypoints and positive durations', () => {
+    expect(CINEMATIC_ACTS).toHaveLength(5);
+    for (const act of CINEMATIC_ACTS) {
+      expect(act.durationSec).toBeGreaterThanOrEqual(4);
+      expect(act.cameraStart.fov).toBeGreaterThan(20);
+      expect(act.cameraStart.fov).toBeLessThan(60);
+      expect(act.cameraEnd.fov).toBeGreaterThan(20);
+      expect(act.cameraEnd.fov).toBeLessThan(60);
+      expect(act.text.id.length).toBeGreaterThan(15);
+      expect(act.text.en.length).toBeGreaterThan(15);
     }
   });
 });

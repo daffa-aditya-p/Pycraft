@@ -92,6 +92,15 @@ export const IconFullscreen: React.FC<IconProps> = ({ size = 20, className }) =>
   </svg>
 );
 
+export const IconExitFullscreen: React.FC<IconProps> = ({ size = 20, className }) => (
+  <svg {...baseSvgProps(size, className)}>
+    <polyline points='9 4 9 9 4 9' />
+    <polyline points='15 4 15 9 20 9' />
+    <polyline points='20 15 15 15 15 20' />
+    <polyline points='4 15 9 15 9 20' />
+  </svg>
+);
+
 export const IconCamera: React.FC<IconProps> = ({ size = 20, className }) => (
   <svg {...baseSvgProps(size, className)}>
     <rect x="3" y="7" width="18" height="12" />
@@ -208,5 +217,57 @@ export const IconSettings: React.FC<IconProps> = ({ size = 20, className }) => (
   <svg {...baseSvgProps(size, className)}>
     <rect x="9" y="9" width="6" height="6" />
     <path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1" />
+  </svg>
+);
+
+
+export const IconVolumeOn: React.FC<IconProps> = ({ size = 20, className }) => (
+  <svg {...baseSvgProps(size, className)}>
+    <polygon points="11,5 6,9 2,9 2,15 6,15 11,19" fill="currentColor" stroke="none" />
+    <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+    <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+  </svg>
+);
+
+export const IconVolumeMute: React.FC<IconProps> = ({ size = 20, className }) => (
+  <svg {...baseSvgProps(size, className)}>
+    <polygon points="11,5 6,9 2,9 2,15 6,15 11,19" fill="currentColor" stroke="none" />
+    <line x1="23" y1="9" x2="17" y2="15" />
+    <line x1="17" y1="9" x2="23" y2="15" />
+  </svg>
+);
+
+export const IconSpark: React.FC<IconProps> = ({ size = 20, className }) => (
+  <svg {...baseSvgProps(size, className)}>
+    <polygon points="12,2 15,9 22,12 15,15 12,22 9,15 2,12 9,9" fill="currentColor" stroke="none" />
+  </svg>
+);
+
+export const IconFolder: React.FC<IconProps> = ({ size = 20, className }) => (
+  <svg {...baseSvgProps(size, className)}>
+    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+  </svg>
+);
+
+export const IconMap: React.FC<IconProps> = ({ size = 20, className }) => (
+  <svg {...baseSvgProps(size, className)}>
+    <polygon points="1,6 8,2 16,6 23,2 23,18 16,22 8,18 1,22" />
+    <line x1="8" y1="2" x2="8" y2="18" />
+    <line x1="16" y1="6" x2="16" y2="22" />
+  </svg>
+);
+
+export const IconLayers: React.FC<IconProps> = ({ size = 20, className }) => (
+  <svg {...baseSvgProps(size, className)}>
+    <polygon points="12,2 2,7 12,12 22,7" />
+    <polyline points="2 12 12 17 22 12" />
+    <polyline points="2 17 12 22 22 17" />
+  </svg>
+);
+
+export const IconTerminal: React.FC<IconProps> = ({ size = 20, className }) => (
+  <svg {...baseSvgProps(size, className)}>
+    <polyline points="4 17 10 11 4 5" />
+    <line x1="12" y1="19" x2="20" y2="19" />
   </svg>
 );
