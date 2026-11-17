@@ -95,6 +95,8 @@ export interface InstancedPropGroupProps {
   castShadow?: boolean;
 }
 
+const _propDummy = new THREE.Object3D();
+
 function InstancedPropGroup({
   type,
   placements,
@@ -130,14 +132,13 @@ function InstancedPropGroup({
     const mesh = meshRef.current;
     if (!mesh || placements.length === 0) return;
     const t = state.clock.elapsedTime;
-    const dummy = new THREE.Object3D();
     placements.forEach((p, idx) => {
       const bob = Math.sin(t * 2.5 + idx * 1.6) * (type === 'crystal' ? 0.08 : 0.03);
-      dummy.position.set(p.position[0], p.position[1] + bob, p.position[2]);
-      dummy.rotation.set(0, p.rotationY + (type === 'crystal' ? t * 0.45 : 0), 0);
-      dummy.scale.setScalar(p.scale);
-      dummy.updateMatrix();
-      mesh.setMatrixAt(idx, dummy.matrix);
+      _propDummy.position.set(p.position[0], p.position[1] + bob, p.position[2]);
+      _propDummy.rotation.set(0, p.rotationY + (type === 'crystal' ? t * 0.45 : 0), 0);
+      _propDummy.scale.setScalar(p.scale);
+      _propDummy.updateMatrix();
+      mesh.setMatrixAt(idx, _propDummy.matrix);
     });
     mesh.instanceMatrix.needsUpdate = true;
   });

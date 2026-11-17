@@ -71,6 +71,7 @@ export const SaveStatePayloadSchema = z.object({
   quests: z.object({
     states: z.record(z.string(), z.enum(['locked', 'available', 'active', 'completed'])),
     completedStepIds: z.array(z.string()),
+    completedObjectiveIds: z.array(z.string()).optional(),
     activeMissionId: z.string().nullable(),
     activeStepId: z.string().nullable(),
   }),

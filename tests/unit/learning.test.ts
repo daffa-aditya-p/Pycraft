@@ -892,6 +892,72 @@ describe('CuratedMentorProvider', () => {
     const card = await curatedMentorProvider.getConceptCard('N4', 'en');
     expect(card?.title).toContain('return');
   });
+
+  it('translates worker AST slug messageId like too_many_prints into readable Indonesian/English text', async () => {
+    const provider = new CuratedMentorProvider();
+    const idResp = await provider.explainError({
+      missionId: 'm1_hello_architect',
+      stepId: 'm1_bonus',
+      locale: 'id',
+      assistanceTier: 'mastery',
+      attemptNumber: 1,
+      playerCode: 'print("a")\nprint("b")',
+      targetKCs: ['F5'],
+      astReport: {
+        ok: false,
+        comments: [],
+        mixedTabsSpaces: false,
+        constructCounts: {},
+        statementLines: 2,
+        printCalls: 2,
+        inputCalls: 0,
+        hasInputInLoop: false,
+        definedFunctions: [],
+        traps: [],
+        ruleFailures: [
+          {
+            rule: 'maxPrintCalls',
+            messageId: 'too_many_prints',
+            message: 'Maksimal 1 pemanggilan print() pada langkah ini.',
+          },
+        ],
+      },
+      simSummary: { robotPos: [0, 0], actionsExecuted: 0, warningCodes: [] },
+    });
+    expect(idResp.body).not.toBe('too_many_prints');
+    expect(idResp.body).toContain('Maksimal 1 pemanggilan print()');
+
+    const enResp = await provider.explainError({
+      missionId: 'm1_hello_architect',
+      stepId: 'm1_bonus',
+      locale: 'en',
+      assistanceTier: 'mastery',
+      attemptNumber: 1,
+      playerCode: 'print("a")\nprint("b")',
+      targetKCs: ['F5'],
+      astReport: {
+        ok: false,
+        comments: [],
+        mixedTabsSpaces: false,
+        constructCounts: {},
+        statementLines: 2,
+        printCalls: 2,
+        inputCalls: 0,
+        hasInputInLoop: false,
+        definedFunctions: [],
+        traps: [],
+        ruleFailures: [
+          {
+            rule: 'maxPrintCalls',
+            messageId: 'too_many_prints',
+            message: 'Maksimal 1 pemanggilan print() pada langkah ini.',
+          },
+        ],
+      },
+      simSummary: { robotPos: [0, 0], actionsExecuted: 0, warningCodes: [] },
+    });
+    expect(enResp.body).toContain('too many print() calls');
+  });
 });
 
 describe('4-Stage Validator Pipeline & RC-01 Comment Tokenization', () => {

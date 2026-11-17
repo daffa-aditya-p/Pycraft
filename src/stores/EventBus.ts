@@ -70,6 +70,7 @@ export interface PycraftEventMap {
   'world.item.collected': { itemId: string; itemType: string; count: number };
   'world.lore.discovered': { noteId: string };
   'world.player.respawned': { anchorId: string; position: [number, number, number] };
+  'world.player.zone_step': { islandId: string; position: [number, number, number] };
   'player.interact': {
     targetId: string;
     kind: 'npc' | 'device' | 'item' | 'lore' | 'puzzle';

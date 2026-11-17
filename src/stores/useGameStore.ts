@@ -48,6 +48,7 @@ export interface SaveStatePayload {
   quests: {
     states: Record<string, 'locked' | 'available' | 'active' | 'completed'>;
     completedStepIds: string[];
+    completedObjectiveIds?: string[];
     activeMissionId: string | null;
     activeStepId: string | null;
   };
@@ -125,6 +126,7 @@ export function createInitialSavePayload(
         final_core_shard: 'locked',
       },
       completedStepIds: [],
+      completedObjectiveIds: [],
       activeMissionId: 'prologue',
       activeStepId: null,
     },
@@ -172,6 +174,14 @@ export interface GameStoreState extends SaveStatePayload {
     stepId: string | null,
     objectiveLabel?: string | null
   ) => void;
+  syncQuestRunnerSnapshot: (snapshot: {
+    states: Record<string, 'locked' | 'available' | 'active' | 'completed'>;
+    completedStepIds: string[];
+    completedObjectiveIds: string[];
+    activeMissionId: string | null;
+    activeStepId: string | null;
+    objectiveLabel: string | null;
+  }) => void;
   completeMissionStep: (
     missionId: string,
     stepId: string,
@@ -332,6 +342,21 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
         activeStepId: stepId,
       },
       objectiveLabel: objectiveLabel !== undefined ? objectiveLabel : s.objectiveLabel,
+    }));
+  },
+
+  syncQuestRunnerSnapshot: (snapshot) => {
+    set((s) => ({
+      quests: {
+        ...s.quests,
+        states: { ...snapshot.states },
+        completedStepIds: [...snapshot.completedStepIds],
+        completedObjectiveIds: [...snapshot.completedObjectiveIds],
+        activeMissionId: snapshot.activeMissionId,
+        activeStepId: snapshot.activeStepId,
+      },
+      objectiveLabel: snapshot.objectiveLabel,
+      dirty: true,
     }));
   },
 

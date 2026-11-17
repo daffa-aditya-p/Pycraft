@@ -145,13 +145,23 @@ export const LearningIntroModal: React.FC<LearningIntroModalProps> = ({
               className="btn-slate"
               onClick={() => {
                 setRanPreview(true);
-                onTryExample?.(exampleCode);
               }}
               style={{ alignSelf: 'flex-start' }}
             >
               <IconPlay size={16} />
-              <span>{locale === 'id' ? 'Coba Jalankan' : 'Try Running'}</span>
+              <span>{locale === 'id' ? 'Lihat Contoh Output' : 'Preview Output'}</span>
             </button>
+
+            {onTryExample && (
+              <button
+                type="button"
+                className="btn-parchment"
+                onClick={() => onTryExample(exampleCode)}
+                style={{ alignSelf: 'flex-start', minHeight: '36px', fontSize: '0.8125rem' }}
+              >
+                {locale === 'id' ? 'Salin Contoh ke Editor' : 'Copy Example to Editor'}
+              </button>
+            )}
 
             {ranPreview && (
               <div

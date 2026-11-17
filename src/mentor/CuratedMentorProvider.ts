@@ -75,11 +75,35 @@ export class CuratedMentorProvider implements MentorProvider {
 
     if (ctx.astReport && !ctx.astReport.ok && ctx.astReport.ruleFailures.length > 0) {
       const failure = ctx.astReport.ruleFailures[0]!;
+      const msgKey = failure.messageId;
+      const isSlugKey = /^[a-z0-9_]+$/i.test(msgKey);
+
+      const enSlugMap: Record<string, string> = {
+        too_many_prints: 'You used too many print() calls on this step. Combine lines into one print() using \\n.',
+        missing_comment: 'Add at least one Python comment starting with #.',
+        too_many_statements: 'Your code exceeds the maximum statement line limit for this challenge.',
+        forbidden_print: 'Do not use print() on this step.',
+        missing_function_name: 'Define the required function name with def ...():.',
+        missing_for: 'This challenge requires a for loop.',
+        missing_while: 'This challenge requires a while loop.',
+        missing_if: 'This challenge requires an if branch.',
+        missing_functiondef: 'This challenge requires defining a function with def.',
+        missing_return: 'Your function must return a value using return.',
+      };
+
+      const resolvedBody = isId
+        ? isSlugKey
+          ? failure.message
+          : msgKey
+        : isSlugKey
+          ? enSlugMap[msgKey] ?? failure.message
+          : failure.message;
+
       return {
         source: 'curated',
         visorMood: 'thinking',
         headline: isId ? 'Periksa Struktur Kode' : 'Check Code Structure',
-        body: (isId ? failure.messageId : failure.message).slice(0, 240),
+        body: resolvedBody.slice(0, 240),
         highlightLines: failure.line ? [failure.line] : undefined,
         rung: 1,
         conceptCardId: ctx.targetKCs[0],

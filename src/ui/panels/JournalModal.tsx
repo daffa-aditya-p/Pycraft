@@ -174,10 +174,14 @@ export const JournalModal: React.FC<JournalModalProps> = ({ onPracticeKC }) => {
       }));
     }
 
-    // Active quest: determine which objective is current
+    // 1. Exact completion from synced QuestRunner state when available
+    const completedObjs = quests.completedObjectiveIds ?? [];
+    const hasExplicitCompletion =
+      completedObjs.length > 0 || quests.completedStepIds.length > 0;
+
+    // 2. Determine which objective is currently active
     let activeIndex = -1;
 
-    // 1. Check if objectiveLabel matches
     if (objectiveLabel) {
       const cleanLabel = objectiveLabel.trim().toLowerCase();
       const matchIdx = quest.objectives.findIndex(
@@ -190,7 +194,6 @@ export const JournalModal: React.FC<JournalModalProps> = ({ onPracticeKC }) => {
       }
     }
 
-    // 2. Check activeStepId
     if (activeIndex === -1 && quests.activeStepId) {
       const stepIdx = quest.objectives.findIndex(
         (o) => o.type === 'code_step' && o.targetId === quests.activeStepId
@@ -200,27 +203,34 @@ export const JournalModal: React.FC<JournalModalProps> = ({ onPracticeKC }) => {
       }
     }
 
-    // 3. Fallback: first incomplete code step
-    if (activeIndex === -1) {
+    if (activeIndex === -1 && hasExplicitCompletion) {
       const firstIncIdx = quest.objectives.findIndex(
-        (o) => o.type === 'code_step' && !quests.completedStepIds.includes(o.targetId)
+        (o) =>
+          !completedObjs.includes(o.id) &&
+          !(o.type === 'code_step' && quests.completedStepIds.includes(o.targetId))
       );
       if (firstIncIdx !== -1) {
         activeIndex = firstIncIdx;
       }
     }
 
-    // 4. Default to first
     if (activeIndex === -1) {
       activeIndex = 0;
     }
 
-    return quest.objectives.map((obj, idx) => ({
-      objective: obj,
-      isCompleted: idx < activeIndex,
-      isActive: idx === activeIndex,
-      isPending: idx > activeIndex,
-    }));
+    return quest.objectives.map((obj, idx) => {
+      const explicitDone =
+        completedObjs.includes(obj.id) ||
+        (obj.type === 'code_step' && quests.completedStepIds.includes(obj.targetId));
+      const isCompleted = explicitDone || idx < activeIndex;
+      const isActive = !isCompleted && idx === activeIndex;
+      return {
+        objective: obj,
+        isCompleted,
+        isActive,
+        isPending: !isCompleted && !isActive,
+      };
+    });
   };
 
   const filteredActs =

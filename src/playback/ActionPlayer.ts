@@ -77,10 +77,12 @@ function mapActionToAudioCue(ev: ActionRunEvent): AudioCueId | null {
 
 function formatActionNarration(ev: ActionRunEvent): string {
   const argsStr = ev.args.map((a) => JSON.stringify(a)).join(', ');
+  const resultSuffix =
+    ev.result === null || ev.result === undefined ? '' : ` -> ${String(ev.result)}`;
   if (ev.warningCode) {
-    return `${ev.kind}(${argsStr}) -> ${String(ev.result)} [${ev.warningCode}]`;
+    return `${ev.kind}(${argsStr})${resultSuffix} [${ev.warningCode}]`;
   }
-  return `${ev.kind}(${argsStr}) -> ${String(ev.result)}`;
+  return `${ev.kind}(${argsStr})${resultSuffix}`;
 }
 
 export class ActionPlayer {
@@ -516,11 +518,13 @@ export class ActionPlayer {
         const mult = speedMultiplier(this.speed);
         const animMs = mult === Infinity ? 0 : Math.round(ev.durationMs / mult);
         this.callbacks.onActionAnimate?.(ev, stateSnapshot, animMs);
-        store?.appendConsole({
-          kind: 'action',
-          text: formatActionNarration(ev),
-          line: ev.line,
-        });
+        if (ev.kind !== 'beacon.print') {
+          store?.appendConsole({
+            kind: 'action',
+            text: formatActionNarration(ev),
+            line: ev.line,
+          });
+        }
         const cue = mapActionToAudioCue(ev);
         if (cue) {
           EventBus.emit('audio.cue', { cue });

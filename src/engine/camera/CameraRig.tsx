@@ -464,15 +464,13 @@ export function CameraRig({
       return;
     }
 
-    // 2. Quest active camera mode transition:
-    // Camera only changes position/mode:
-    //   (A) When pressing 'V' (manual player toggle)
-    //   (B) When actively working on a quest (code editor, learning intro, or BIT playback)
-    // Walking through world areas/islands NEVER changes the camera automatically!
+    // 2. Quest active camera mode transition (honoring settings.controls.autoIsoInPuzzle):
+    // Camera only auto-switches if user opted into autoIsoInPuzzle, or via manual 'V' toggle.
     const isWorkingOnQuest =
-      ui.inGameOverlay === 'editor' ||
-      ui.inGameOverlay === 'learning_intro' ||
-      game.isObservingPlayback;
+      settings.controls.autoIsoInPuzzle &&
+      (ui.inGameOverlay === 'editor' ||
+        ui.inGameOverlay === 'learning_intro' ||
+        game.isObservingPlayback);
 
     if (isWorkingOnQuest && !s.wasWorkingOnQuest) {
       s.wasWorkingOnQuest = true;
@@ -513,7 +511,7 @@ export function CameraRig({
       // Smoothly blend suggested perspective if present and no active player drag
       if (s.suggestedYaw !== null) {
         s.tpYaw = lerpAngle(s.tpYaw, s.suggestedYaw, Math.min(1, dt * 3.0));
-        if (Math.abs(((s.suggestedYaw - s.tpYaw + Math.PI) % (Math.PI * 2)) - Math.PI) < 0.01) {
+        if (Math.abs(lerpAngle(0, s.suggestedYaw - s.tpYaw, 1)) < 0.01) {
           s.suggestedYaw = null;
         }
       }

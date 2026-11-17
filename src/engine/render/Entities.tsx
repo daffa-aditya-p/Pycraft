@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import type { ArchitectAppearance, CosmeticsState } from '../../stores/useGameStore';
 import { useGameStore } from '../../stores/useGameStore';
 import { useSettingsStore } from '../../stores/useSettingsStore';
+import { useUIStore } from '../../stores/useUIStore';
 import { hexToLinearRgb } from '../voxel/palette';
 import { AWAKENING_QUESTS } from '../../content/awakening/quests';
 import type { InteractablePlacement } from '../voxel/islandGenerator';
@@ -683,6 +684,7 @@ export function getActiveQuestTargetInfo(
   gameQuests: {
     states: Record<string, string>;
     completedStepIds: string[];
+    completedObjectiveIds?: string[];
     activeMissionId: string | null;
     activeStepId: string | null;
   },
@@ -707,9 +709,15 @@ export function getActiveQuestTargetInfo(
     };
   }
 
+  const completedObjs = gameQuests.completedObjectiveIds ?? [];
   const activeObj = quest.objectives.find((obj) => {
-    // Objective or step already completed
-    if (gameQuests.completedStepIds.includes(obj.id) || gameQuests.completedStepIds.includes(obj.targetId)) {
+    // Objective or code step already completed
+    if (
+      completedObjs.includes(obj.id) ||
+      gameQuests.completedStepIds.includes(obj.id) ||
+      (obj.type === 'code_step' && gameQuests.completedStepIds.includes(obj.targetId)) ||
+      gameQuests.completedStepIds.includes(obj.targetId)
+    ) {
       return false;
     }
     if (obj.type === 'collect' && obj.targetId === 'blue_crystal') {
@@ -940,6 +948,7 @@ export function InteractivePromptBadge({
       position={[0, heightOffset, 0]}
       center
       distanceFactor={9}
+      zIndexRange={[15, 0]}
       style={{ pointerEvents: 'none', userSelect: 'none' }}
     >
       <div
@@ -992,11 +1001,13 @@ function InteractableHighlightNode({
   playerPosRef,
   isQuest,
   isPromptActive,
+  allowBadge,
 }: {
   item: InteractablePlacement;
   playerPosRef: React.MutableRefObject<[number, number, number]>;
   isQuest: boolean;
   isPromptActive: boolean;
+  allowBadge: boolean;
 }) {
   const rootRef = useRef<THREE.Group>(null);
   const [showBadge, setShowBadge] = useState(false);
@@ -1053,7 +1064,7 @@ function InteractableHighlightNode({
         />
       )}
 
-      {showBadge && (
+      {allowBadge && showBadge && (
         <InteractivePromptBadge
           label={item.label}
           keyHint="E"
@@ -1081,6 +1092,9 @@ export function InteractablesHighlightLayer({
   activePromptTargetId,
 }: InteractablesHighlightLayerProps) {
   const questsState = useGameStore((s) => s.quests);
+  const screen = useUIStore((s) => s.screen);
+  const inGameOverlay = useUIStore((s) => s.inGameOverlay);
+  const allowBadge = screen === 'in_game' && inGameOverlay === 'explore';
 
   const questInfo = useMemo(
     () => getActiveQuestTargetInfo(questsState, collectedWorldItemIds),
@@ -1107,6 +1121,7 @@ export function InteractablesHighlightLayer({
             playerPosRef={playerPosRef}
             isQuest={isQuest}
             isPromptActive={isPromptActive}
+            allowBadge={allowBadge}
           />
         );
       })}

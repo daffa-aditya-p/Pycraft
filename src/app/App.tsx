@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   ALL_AWAKENING_STEPS,
   AWAKENING_DIALOGUES,
+  AWAKENING_LORE_NOTES,
   AWAKENING_QUESTS,
   getMissionById,
   getStepById,
@@ -23,6 +24,7 @@ import {
 import {
   createInitialKCMastery,
   evaluateValidationPipeline,
+  getKC,
   selectRecommendedTier,
   updateKCMastery,
 } from '@/learning';
@@ -112,6 +114,17 @@ function mapSlotHeadersToSummaries(headers: SlotHeaderRecord[]): SlotSummary[] {
   });
 }
 
+const COSMETIC_LABELS: Record<string, { id: string; en: string }> = {
+  neo_visor_amber: { id: 'Visor Amber NEO', en: 'NEO Amber Visor' },
+  neo_visor_turquoise: { id: 'Visor Turquoise NEO', en: 'NEO Turquoise Visor' },
+  bit_paint_moss: { id: 'Cat Lumut BIT', en: 'BIT Moss Paint' },
+  bit_paint_clay: { id: 'Cat Terakota BIT', en: 'BIT Clay Paint' },
+  bit_paint_slate: { id: 'Cat Sabak BIT', en: 'BIT Slate Paint' },
+  bit_paint_sky: { id: 'Cat Langit BIT', en: 'BIT Sky Paint' },
+  bit_acc_lantern: { id: 'Aksesori Lentera BIT', en: 'BIT Lantern Accessory' },
+  bit_acc_flag: { id: 'Aksesori Bendera BIT', en: 'BIT Flag Accessory' },
+};
+
 function getZoneCenter(islandId: string): [number, number, number] {
   const zone = AWAKENING_ZONES.find((z) => z.id === islandId);
   if (!zone) return [0, 1, 0];
@@ -180,6 +193,23 @@ export function App(): React.JSX.Element {
     return ALL_AWAKENING_STEPS[0]!;
   }, [activeMissionId, activeStepId]);
 
+  const completedStepIds = useGameStore((s) => s.quests.completedStepIds);
+
+  const nextStepInMission: MissionStepManifest | null = useMemo(() => {
+    const mission = getMissionById(activeStep.missionId);
+    if (!mission) return null;
+    // Prioritize remaining uncompleted main steps first
+    const remainingMain = mission.steps.find(
+      (s) => !s.isBonus && s.stepId !== activeStep.stepId && !completedStepIds.includes(s.stepId)
+    );
+    if (remainingMain) return remainingMain;
+
+    // Next sequential step in order (including optional bonus step once main steps are done)
+    const idx = mission.steps.findIndex((s) => s.stepId === activeStep.stepId);
+    if (idx < 0 || idx + 1 >= mission.steps.length) return null;
+    return mission.steps[idx + 1] ?? null;
+  }, [activeStep, completedStepIds]);
+
   const refreshSlotSummaries = useCallback(async () => {
     const mgr = saveManagerRef.current;
     if (!mgr) return;
@@ -199,7 +229,14 @@ export function App(): React.JSX.Element {
     const objLabel = nextObj ? nextObj.label[useSettingsStore.getState().locale] : null;
     const missionId = nextObj?.missionId ?? activeQuest?.id ?? null;
     const stepId = nextObj?.type === 'code_step' ? nextObj.targetId : null;
-    useGameStore.getState().setActiveMissionStep(missionId, stepId, objLabel);
+    useGameStore.getState().syncQuestRunnerSnapshot({
+      states: qr.getStates(),
+      completedStepIds: qr.getCompletedStepIds(),
+      completedObjectiveIds: qr.getCompletedObjectiveIds(),
+      activeMissionId: missionId,
+      activeStepId: stepId,
+      objectiveLabel: objLabel,
+    });
   }, []);
 
   const openStepInEditor = useCallback(
@@ -211,7 +248,11 @@ export function App(): React.JSX.Element {
       const initialCode = draft?.code ?? step.starters[tier] ?? step.starters.guided;
 
       visibleScenarioIndexRef.current = 0;
-      useGameStore.getState().setActiveMissionStep(step.missionId, step.stepId);
+      const loc = useSettingsStore.getState().locale;
+      const syncedLabel = step.isBonus
+        ? `${loc === 'id' ? 'Bonus' : 'Bonus'}: ${step.title[loc]}`
+        : step.title[loc];
+      useGameStore.getState().setActiveMissionStep(step.missionId, step.stepId, syncedLabel);
       useGameStore.getState().setActivePuzzleZone(step.missionId);
       useEditorStore.getState().loadStepEditor(step.stepId, initialCode, tier);
 
@@ -306,9 +347,18 @@ export function App(): React.JSX.Element {
         }
         syncQuestStore();
       } else if (action.type === 'open_mission') {
+        const mission = getMissionById(action.missionId);
+        const completedSteps = useGameStore.getState().quests.completedStepIds;
+        const firstIncomplete = mission?.steps.find(
+          (s) => !s.isBonus && !completedSteps.includes(s.stepId)
+        );
+        const requestedStep = action.stepId ? getStepById(action.stepId) : undefined;
         const step =
-          (action.stepId ? getStepById(action.stepId) : undefined) ??
-          getMissionById(action.missionId)?.steps[0];
+          (requestedStep && !completedSteps.includes(requestedStep.stepId)
+            ? requestedStep
+            : firstIncomplete) ??
+          requestedStep ??
+          mission?.steps[0];
         if (step) {
           openStepInEditor(step, true);
         }
@@ -384,24 +434,138 @@ export function App(): React.JSX.Element {
       }
     });
 
-    const unsubInteract = EventBus.on('player.interact', ({ targetId }) => {
+    const unsubZoneStep = EventBus.on('world.player.zone_step', ({ islandId, position }) => {
+      const qr = questRunnerRef.current;
+      if (!qr) return;
+      let changed = false;
+
+      // Auto-complete Stasis Shrine movement objective when moving toward ledge/pedestal or crossing islands
+      const activeQ = qr.getActiveQuest();
+      const nextObj = activeQ ? qr.getNextObjectiveForQuest(activeQ.id) : undefined;
+      if (nextObj?.type === 'go_to') {
+        if (nextObj.targetId === 'shrine_ledge') {
+          const movedFromSpawn = Math.hypot(position[0] - (-48), position[2] - 52) >= 2.2;
+          if (movedFromSpawn || islandId !== 'stasis_shrine') {
+            if (qr.onGoTo('shrine_ledge').length > 0) changed = true;
+          }
+        }
+        // Check physical arrival at island zone OR proximity to its spawn anchor/center
+        const targetZone = AWAKENING_ZONES.find((z) => z.id === nextObj.targetId);
+        if (
+          islandId === nextObj.targetId ||
+          (targetZone &&
+            Math.hypot(position[0] - targetZone.center[0], position[2] - targetZone.center[2]) <=
+              targetZone.radius + 1.5)
+        ) {
+          if (qr.onGoTo(nextObj.targetId).length > 0) changed = true;
+        }
+      }
+
+      if (changed) {
+        syncQuestStore();
+      }
+    });
+
+    const unsubInteract = EventBus.on('player.interact', ({ targetId, kind }) => {
       const loc = useSettingsStore.getState().locale;
       const qr = questRunnerRef.current;
+      const gameState = useGameStore.getState();
+
+      // 1. World item pickup (3 Blue Crystals in Supply Grove)
+      if (kind === 'item' || targetId.startsWith('awakening_crystal_')) {
+        if (!gameState.world.collectedWorldItemIds.includes(targetId)) {
+          gameState.collectWorldItem(targetId, 'blue_crystal', 1);
+          // Ensure go_to supply_grove doesn't block crystal collect if player arrived via skybridge edge
+          qr?.onGoTo('supply_grove');
+          qr?.onCollect('blue_crystal', 1);
+          syncQuestStore();
+          EventBus.emit('audio.cue', { cue: 'crystal_pickup' });
+          const totalCrystals = useGameStore
+            .getState()
+            .world.collectedWorldItemIds.filter((id) => id.startsWith('awakening_crystal_')).length;
+          useUIStore.getState().pushToast({
+            kind: 'success',
+            message:
+              loc === 'id'
+                ? `Kristal Biru dikumpulkan (${Math.min(3, totalCrystals)}/3)!`
+                : `Blue Crystal collected (${Math.min(3, totalCrystals)}/3)!`,
+          });
+          useUIStore.getState().setActivePrompt(null);
+        }
+        return;
+      }
+
+      // 2. Ancient Lore Notes discovery & reading
+      if (kind === 'lore' || targetId.startsWith('lore_')) {
+        const noteNumMatch = targetId.match(/(\d+)$/);
+        const paddedId = noteNumMatch ? `lore_${noteNumMatch[1]!.padStart(2, '0')}` : targetId;
+        const note =
+          AWAKENING_LORE_NOTES.find((n) => n.id === targetId || n.id === paddedId) ??
+          AWAKENING_LORE_NOTES[0];
+        const firstDiscover = !gameState.world.discoveredLoreNoteIds.includes(targetId);
+        gameState.discoverLoreNote(targetId);
+        if (note) {
+          if (firstDiscover) {
+            progressionRef.current?.awardLoreNoteXP(note.id, note.xp);
+          }
+          useUIStore.getState().setDialogue({
+            active: true,
+            npcId: targetId,
+            speakerName: note.title[loc],
+            lines: [note.body[loc]],
+            lineIndex: 0,
+            choices: [],
+          });
+          useUIStore.getState().setInGameOverlay('dialogue');
+          useUIStore.getState().pushToast({
+            kind: 'info',
+            message: firstDiscover
+              ? `${note.title[loc]} (+${note.xp} XP)`
+              : note.title[loc],
+          });
+        }
+        return;
+      }
+
+      // 3. Advance sequential non-code objectives gracefully on interaction
       if (qr) {
+        if (targetId === 'neo_pedestal') {
+          qr.onGoTo('shrine_ledge');
+        } else if (targetId === 'beacon_terminal') {
+          qr.onGoTo('shrine_ledge');
+          qr.onInteract('neo_pedestal');
+          qr.onGoTo('beacon_point');
+        } else if (targetId === 'core_altar') {
+          qr.onGoTo('core_spire');
+        }
         qr.onInteract(targetId);
         qr.onTalkTo(targetId);
         syncQuestStore();
       }
+
+      // 4. Direct NPC / Device Dialogues
+      const completedSteps = useGameStore.getState().quests.completedStepIds;
       const tree =
         targetId === 'neo_pedestal'
           ? AWAKENING_DIALOGUES.prologue_neo_reboot
-          : targetId === 'beacon_terminal'
+          : targetId === 'beacon_terminal' &&
+              !completedSteps.includes('m1_s1') &&
+              !seenIntroStepsRef.current.has('beacon_terminal_dialogue')
             ? AWAKENING_DIALOGUES.m1_beacon_intro
             : targetId === 'bit_robot'
               ? AWAKENING_DIALOGUES.interlude_bit_wake
-              : undefined;
+              : targetId === 'old_tamo'
+                ? AWAKENING_DIALOGUES.m3_tamo_intro
+                : targetId === 'mira'
+                  ? AWAKENING_DIALOGUES.m4_mira_intro
+                  : targetId === 'bolt'
+                    ? AWAKENING_DIALOGUES.m5_bolt_intro
+                    : undefined;
 
       if (tree && dialogueRunnerRef.current) {
+        if (targetId === 'beacon_terminal') {
+          seenIntroStepsRef.current.add('beacon_terminal_dialogue');
+        }
         const node = dialogueRunnerRef.current.start(tree, loc);
         if (node) {
           useUIStore.getState().setDialogue({
@@ -417,9 +581,33 @@ export function App(): React.JSX.Element {
         }
       }
 
-      if (targetId.includes('terminal') || targetId.includes('beacon') || targetId.includes('gate') || targetId.includes('farm') || targetId.includes('depot') || targetId.includes('altar')) {
-        const step = getStepById(useGameStore.getState().quests.activeStepId ?? '') ?? ALL_AWAKENING_STEPS[0]!;
-        openStepInEditor(step, true);
+      // 5. Open Mission Code Editor directly for terminals & consoles
+      const terminalMissionMap: Record<string, string> = {
+        beacon_terminal: 'm1_hello_architect',
+        bit_terminal: 'm2_data_collector',
+        gate_console: 'm3_locked_gate',
+        farm_console: 'm4_automated_farm',
+        workshop_console: 'm5_blueprint',
+        core_altar: 'final_core_shard',
+      };
+      const mappedMissionId = terminalMissionMap[targetId];
+      if (
+        mappedMissionId ||
+        kind === 'puzzle' ||
+        targetId.includes('terminal') ||
+        targetId.includes('console') ||
+        targetId.includes('altar')
+      ) {
+        const mission = mappedMissionId ? getMissionById(mappedMissionId) : undefined;
+        const activeStepInStore = getStepById(useGameStore.getState().quests.activeStepId ?? '');
+        const chosenStep =
+          (mission
+            ? (activeStepInStore && activeStepInStore.missionId === mission.missionId
+                ? activeStepInStore
+                : mission.steps.find((s) => !s.isBonus && !completedSteps.includes(s.stepId)) ??
+                  mission.steps[0])
+            : activeStepInStore) ?? ALL_AWAKENING_STEPS[0]!;
+        openStepInEditor(chosenStep, true);
       }
     });
 
@@ -447,6 +635,7 @@ export function App(): React.JSX.Element {
       unsubSaveStatus();
       unsubToast();
       unsubAction();
+      unsubZoneStep();
       unsubInteract();
       unbind();
       void manager.dispose();
@@ -466,9 +655,14 @@ export function App(): React.JSX.Element {
 
   const enterLoadedGame = useCallback(async (isNewGame = false) => {
     const game = useGameStore.getState();
+    const collectedCrystals = game.world.collectedWorldItemIds.filter((id) =>
+      id.startsWith('awakening_crystal_')
+    ).length;
     questRunnerRef.current = new QuestRunner(AWAKENING_QUESTS, {
       states: game.quests.states,
       completedStepIds: game.quests.completedStepIds,
+      completedObjectiveIds: game.quests.completedObjectiveIds,
+      collectCounts: collectedCrystals > 0 ? { blue_crystal: collectedCrystals } : undefined,
     });
     progressionRef.current = new ProgressionController({
       xp: game.learning.xp,
@@ -496,7 +690,7 @@ export function App(): React.JSX.Element {
     useUIStore.getState().setInGameOverlay('explore');
     const qr = questRunnerRef.current;
     if (qr) {
-      qr.startQuest('awakening_q1');
+      qr.startQuest('prologue');
       syncQuestStore();
     }
     const tree = AWAKENING_DIALOGUES.prologue_neo_reboot;
@@ -780,13 +974,21 @@ export function App(): React.JSX.Element {
             'awakening'
           );
           game.updateKCMastery(kcId, nextRec);
+          const kcDef = getKC(kcId);
           practicedSummaries.push({
             kcId,
-            title: kcId,
+            title: kcDef?.title[loc] ?? kcId,
             previousScore: prevScore,
             newScore: nextRec.score,
           });
         }
+
+        const wasMissionCompleteBefore = (() => {
+          const m = getMissionById(step.missionId);
+          if (!m) return false;
+          const prevCompleted = useGameStore.getState().quests.completedStepIds;
+          return m.steps.filter((s) => !s.isBonus).every((s) => prevCompleted.includes(s.stepId));
+        })();
 
         const xpAwarded = game.completeMissionStep(step.missionId, step.stepId, ed.tier, step.xp);
         if (step.unlocksCosmeticId) {
@@ -796,23 +998,30 @@ export function App(): React.JSX.Element {
         syncQuestStore();
 
         const mission = getMissionById(step.missionId);
-        const isLastMainStep =
+        const nowCompleted = useGameStore.getState().quests.completedStepIds;
+        const allMainCompletedNow = Boolean(
           mission &&
-          mission.steps.filter((s) => !s.isBonus).slice(-1)[0]?.stepId === step.stepId;
+            !step.isBonus &&
+            !wasMissionCompleteBefore &&
+            mission.steps.filter((s) => !s.isBonus).every((s) => nowCompleted.includes(s.stepId))
+        );
 
-        if (mission && isLastMainStep) {
+        if (mission && allMainCompletedNow) {
           // RC-10: Auto-collapse editor during 5s restoration sequence
           useUIStore.getState().collapseEditorForRestoration(true);
           game.markZoneRestored(mission.islandId, mission.missionId);
           EventBus.emit('audio.cue', { cue: 'quest_complete' });
           window.setTimeout(() => {
             useUIStore.getState().collapseEditorForRestoration(false);
+            const unlockedLabel = step.unlocksCosmeticId
+              ? COSMETIC_LABELS[step.unlocksCosmeticId]?.[loc] ?? step.unlocksCosmeticId
+              : null;
             setMissionCompleteState({
               open: true,
               missionTitle: mission.title[loc],
               xpGained: xpAwarded,
               conceptsPracticed: practicedSummaries,
-              rewardsUnlocked: step.unlocksCosmeticId ? [step.unlocksCosmeticId] : [],
+              rewardsUnlocked: unlockedLabel ? [unlockedLabel] : [],
               playerCodeSnippet: playerCode,
               neoLine:
                 loc === 'id'
@@ -841,6 +1050,18 @@ export function App(): React.JSX.Element {
           });
         }
 
+        const mergedAstReport =
+          validation.stage2.failures.length > 0 && runEnd.astReport
+            ? {
+                ...runEnd.astReport,
+                ok: false,
+                ruleFailures:
+                  runEnd.astReport.ruleFailures.length > 0
+                    ? runEnd.astReport.ruleFailures
+                    : validation.stage2.failures,
+              }
+            : runEnd.astReport;
+
         const ctx: MentorContext = {
           locale: loc,
           missionId: step.missionId,
@@ -851,7 +1072,7 @@ export function App(): React.JSX.Element {
           attemptNumber: attempt,
           lastError: errorInfo,
           failedScenarioId: validation.firstFailedScenarioId,
-          astReport: runEnd.astReport,
+          astReport: mergedAstReport,
           simSummary: {
             robotPos: [0, 0],
             actionsExecuted: 0,
@@ -859,12 +1080,25 @@ export function App(): React.JSX.Element {
           },
         };
         const mentorResp = await mentorRef.current.explainError(ctx);
+        const fallbackMsg = validation.feedback?.[loc];
+        const useValidationFeedback =
+          Boolean(fallbackMsg) &&
+          !errorInfo &&
+          !validation.firstFailedScenarioId &&
+          (mentorResp.errorTag === 'unknown_error' || mentorResp.errorTag === undefined);
+        if (fallbackMsg && !errorInfo) {
+          ed.appendConsole({ kind: 'warning', text: fallbackMsg });
+        }
         ed.setMentorPanel({
           open: true,
           activeRung: mentorResp.rung,
           visorMood: mentorResp.visorMood,
-          errorHeadline: mentorResp.headline,
-          errorBody: mentorResp.body,
+          errorHeadline: useValidationFeedback
+            ? loc === 'id'
+              ? 'Belum Memenuhi Syarat Langkah'
+              : 'Step Requirement Not Met'
+            : mentorResp.headline,
+          errorBody: useValidationFeedback && fallbackMsg ? fallbackMsg : mentorResp.body,
           socraticQuestion: mentorResp.socraticQuestion,
           highlightLines: mentorResp.highlightLines,
           codeSnippet: mentorResp.codeSnippet,
@@ -1081,7 +1315,11 @@ export function App(): React.JSX.Element {
                 conceptSummary={currentSlide?.body[locale] ?? activeStep.goal[locale]}
                 inWorldNote={activeStep.goal[locale]}
                 exampleCode={currentSlide?.exampleCode ?? activeStep.referenceSolution}
-                exampleOutput={activeStep.title[locale]}
+                exampleOutput={
+                  locale === 'id'
+                    ? 'Menampilkan teks hasil eksekusi contoh ke Konsol & Suar.'
+                    : 'Prints the sample result to Console & Beacon.'
+                }
                 onTryExample={(exampleCode) => {
                   useEditorStore.getState().setCode(exampleCode, false);
                   setInGameOverlay('editor');
@@ -1093,10 +1331,27 @@ export function App(): React.JSX.Element {
                 <EditorErrorBoundary>
                   <EditorWorkspace
                     stepTitle={activeStep.title[locale]}
+                    stepGoal={activeStep.goal[locale]}
                     requirementChips={activeStep.requirementChips[locale]}
                     capabilities={activeStep.capabilities}
                     targetKCs={activeStep.targetKCs}
                     guidedTemplate={activeStep.starters.guided}
+                    hasNextStep={nextStepInMission !== null}
+                    nextStepTitle={nextStepInMission?.title[locale]}
+                    onNextStep={() => {
+                      if (nextStepInMission) {
+                        openStepInEditor(nextStepInMission, true);
+                      }
+                    }}
+                    onChangeTier={(nextTier) => {
+                      const ed = useEditorStore.getState();
+                      const prevStarter = activeStep.starters[ed.tier] ?? activeStep.starters.guided;
+                      const nextStarter = activeStep.starters[nextTier] ?? activeStep.starters.guided;
+                      ed.setTier(nextTier);
+                      if (!ed.timeline.isDirtyAfterEdit || ed.code.trim() === prevStarter.trim()) {
+                        ed.setCode(nextStarter, false);
+                      }
+                    }}
                     onRun={(playerCode) => void handleRunCode(playerCode)}
                     onStop={() => {
                       runtimeRef.current?.stop();

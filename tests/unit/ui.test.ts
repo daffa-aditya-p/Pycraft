@@ -412,4 +412,36 @@ describe('JournalModal & Quest Objectives System (Acts 1-4)', () => {
     expect(useUIStore.getState().inGameOverlay).toBe('journal');
     expect(useUIStore.getState().journalTab).toBe('quests');
   });
+
+  it('renders stepGoal task banner and btn-next-step CTA when runtimeStatus is completed', () => {
+    const onNextStep = vi.fn();
+    useUIStore.setState({
+      editorDockOpen: true,
+      inGameOverlay: 'editor',
+      layoutClass: 'D',
+    });
+    useEditorStore.setState({
+      runtimeStatus: 'completed',
+    });
+
+    const el = mount(
+      React.createElement(EditorWorkspace, {
+        stepTitle: '1.1 Suara Pertama',
+        stepGoal: 'Cetak "Halo Aetheria" di Terminal Suar.',
+        hasNextStep: true,
+        nextStepTitle: '1.2 Urutan Boot',
+        onNextStep,
+      })
+    );
+
+    expect(el.querySelector('[data-testid="editor-step-goal"]')?.textContent).toContain(
+      'Cetak "Halo Aetheria" di Terminal Suar.'
+    );
+    const nextBtn = el.querySelector<HTMLButtonElement>('[data-testid="btn-next-step"]');
+    expect(nextBtn).not.toBeNull();
+    act(() => {
+      nextBtn?.click();
+    });
+    expect(onNextStep).toHaveBeenCalledTimes(1);
+  });
 });

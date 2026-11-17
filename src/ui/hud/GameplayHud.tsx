@@ -45,6 +45,8 @@ export const GameplayHud: React.FC<GameplayHudProps> = ({
   const dismissToast = useUIStore((s) => s.dismissToast);
   const activePrompt = useUIStore((s) => s.activePrompt);
   const inGameOverlay = useUIStore((s) => s.inGameOverlay);
+  const editorDockOpen = useUIStore((s) => s.editorDockOpen);
+  const editorAutoCollapsed = useUIStore((s) => s.editorAutoCollapsedForRestoration);
   const layoutClass = useUIStore((s) => s.layoutClass);
   const inputMode = useUIStore((s) => s.inputMode);
   const setInGameOverlay = useUIStore((s) => s.setInGameOverlay);
@@ -163,6 +165,12 @@ export const GameplayHud: React.FC<GameplayHudProps> = ({
               alignItems: 'flex-start',
               justifyContent: 'space-between',
               gap: '12px',
+              paddingRight:
+                (editorDockOpen || inGameOverlay === 'editor') &&
+                !editorAutoCollapsed &&
+                layoutClass !== 'P'
+                  ? 'calc(44vw + 10px)'
+                  : 0,
             }}
           >
             {/* Top-Left Objective Tracker (Clickable to open Quests/Objectives) */}

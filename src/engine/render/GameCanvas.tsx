@@ -240,20 +240,8 @@ function AwakeningScene({
     };
   }, [rebuildToken]);
 
-  // Listen for Interact (E) action -> emit player.interact for nearest interactable
+  // Listen for playback & audio events (E interact action is handled in App.tsx)
   useEffect(() => {
-    const unsubAction = globalInputManager.onAction((action) => {
-      if (action === 'interact') {
-        const prompt = useUIStore.getState().activePrompt;
-        if (prompt) {
-          EventBus.emit('player.interact', {
-            targetId: prompt.targetId,
-            kind: prompt.kind,
-          });
-        }
-      }
-    });
-
     const unsubPlayback = EventBus.on('playback.state.changed', ({ state }) => {
       useGameStore.getState().setObservingPlayback(state === 'playing' || state === 'paused');
       if (state === 'idle' || state === 'finished' || state === 'fault') {
@@ -270,7 +258,6 @@ function AwakeningScene({
     });
 
     return () => {
-      unsubAction();
       unsubPlayback();
       unsubAudioCue();
     };
@@ -361,15 +348,19 @@ function AwakeningScene({
         ctrl.state.currentIslandId,
       );
       game.tickPlaytime(0.25);
+      EventBus.emit('world.player.zone_step', {
+        islandId: ctrl.state.currentIslandId,
+        position: [...ctrl.state.position],
+      });
 
-      // Proximity check for interactables (< 2.4 u)
+      // Proximity check for interactables (3.2u horizontal radius, 3.0u vertical tolerance)
       let nearestPrompt: {
         targetId: string;
         label: string;
         keyHint: string;
         kind: 'npc' | 'device' | 'item' | 'lore' | 'puzzle';
       } | null = null;
-      let bestDistSq = 2.6 * 2.6;
+      let bestScore = Infinity;
       const px = ctrl.state.position[0];
       const py = ctrl.state.position[1];
       const pz = ctrl.state.position[2];
@@ -380,15 +371,18 @@ function AwakeningScene({
         const dx = item.position[0] - px;
         const dy = item.position[1] - py;
         const dz = item.position[2] - pz;
-        const dSq = dx * dx + dy * dy + dz * dz;
-        if (dSq < bestDistSq) {
-          bestDistSq = dSq;
-          nearestPrompt = {
-            targetId: item.id,
-            label: item.label,
-            keyHint: 'E',
-            kind: item.kind,
-          };
+        const horizSq = dx * dx + dz * dz;
+        if (horizSq <= 3.2 * 3.2 && Math.abs(dy) <= 3.2) {
+          const score = horizSq + dy * dy * 0.25;
+          if (score < bestScore) {
+            bestScore = score;
+            nearestPrompt = {
+              targetId: item.id,
+              label: item.label,
+              keyHint: 'E',
+              kind: item.kind,
+            };
+          }
         }
       }
 

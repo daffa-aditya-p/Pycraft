@@ -112,4 +112,23 @@ describe('3D Interactable & Quest Highlighting System', () => {
     expect(bitRobot!.zoneId).toBe('supply_grove');
     expect(bitRobot!.position).toEqual([18, 5.5, 14]);
   });
+
+  it('uses completedObjectiveIds to advance highlight from non-code objective to next objective', () => {
+    const world = generateAwakeningWorld();
+    const oldTamo = world.interactables.find((i) => i.id === 'old_tamo')!;
+    const gateConsole = world.interactables.find((i) => i.id === 'gate_console')!;
+
+    const targetInfo = getActiveQuestTargetInfo({
+      states: { m3_locked_gate: 'active' },
+      completedStepIds: [],
+      completedObjectiveIds: ['m3_tamo'],
+      activeMissionId: 'm3_locked_gate',
+      activeStepId: 'm3_s1',
+    });
+
+    expect(targetInfo.activeObjectiveId).toBe('m3_o1');
+    expect(targetInfo.targetId).toBe('m3_s1');
+    expect(isInteractableQuestTarget(oldTamo, targetInfo)).toBe(false);
+    expect(isInteractableQuestTarget(gateConsole, targetInfo)).toBe(true);
+  });
 });

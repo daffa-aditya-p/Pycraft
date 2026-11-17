@@ -33,10 +33,15 @@ export type EditorBottomTab = 'console' | 'variables' | 'timeline';
 
 export interface EditorWorkspaceProps {
   stepTitle?: string;
+  stepGoal?: string;
   requirementChips?: string[];
   capabilities?: string[];
   targetKCs?: string[];
   guidedTemplate?: string;
+  hasNextStep?: boolean;
+  nextStepTitle?: string;
+  onNextStep?: () => void;
+  onChangeTier?: (tier: AssistanceTier) => void;
   onRun?: (code: string) => void;
   onStop?: () => void;
   onResetCode?: () => void;
@@ -66,10 +71,15 @@ const SPEEDS: Array<{ value: PlaybackSpeed; label: string }> = [
 
 export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
   stepTitle,
+  stepGoal,
   requirementChips = [],
   capabilities = [],
   targetKCs = [],
   guidedTemplate,
+  hasNextStep = false,
+  nextStepTitle,
+  onNextStep,
+  onChangeTier,
   onRun,
   onStop,
   onResetCode,
@@ -374,6 +384,7 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
       zIndex: 45,
       display: 'flex',
       flexDirection: 'column',
+      backgroundColor: '#1C2427',
     };
   }
 
@@ -621,7 +632,13 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
                   type="button"
                   data-testid={`tier-btn-${tItem.id}`}
                   aria-pressed={tier === tItem.id}
-                  onClick={() => setTier(tItem.id)}
+                  onClick={() => {
+                    if (onChangeTier) {
+                      onChangeTier(tItem.id);
+                    } else {
+                      setTier(tItem.id);
+                    }
+                  }}
                   style={{
                     minHeight: '32px',
                     padding: '2px 8px',
@@ -639,6 +656,27 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
                 </button>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* Explicit Mission Goal / Task Instruction Banner */}
+        {!isPeekSheet && !editorAutoCollapsed && !isKeyboardFullOverlay && stepGoal && (
+          <div
+            data-testid="editor-step-goal"
+            style={{
+              padding: '8px 10px',
+              backgroundColor: '#243034',
+              borderLeft: '3px solid #F2B544',
+              borderRadius: '2px',
+              fontSize: '0.84rem',
+              lineHeight: 1.45,
+              color: '#E8EEF0',
+            }}
+          >
+            <strong style={{ color: '#F2B544', marginRight: '6px' }}>
+              {locale === 'id' ? 'Tugas:' : 'Task:'}
+            </strong>
+            <span>{stepGoal}</span>
           </div>
         )}
       </header>
@@ -723,6 +761,27 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
               <IconHint size={16} />
               <span>{locale === 'id' ? 'Petunjuk NEO' : 'NEO Hint'}</span>
             </button>
+
+            {runtimeStatus === 'completed' && hasNextStep && onNextStep && (
+              <button
+                type="button"
+                data-testid="btn-next-step"
+                className="btn-primary-chamfer"
+                onClick={onNextStep}
+                style={{
+                  minHeight: '38px',
+                  padding: '4px 12px',
+                  fontSize: '0.8125rem',
+                  marginLeft: 'auto',
+                }}
+              >
+                <span>
+                  {locale === 'id'
+                    ? `Lanjut${nextStepTitle ? `: ${nextStepTitle}` : ' Langkah Berikutnya'} →`
+                    : `Next${nextStepTitle ? `: ${nextStepTitle}` : ' Step'} →`}
+                </span>
+              </button>
+            )}
           </div>
 
           {/* CodeMirror 6 Editor */}
