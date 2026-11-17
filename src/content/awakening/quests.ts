@@ -178,7 +178,7 @@ export const AWAKENING_QUESTS: readonly QuestDefinition[] = [
           en: 'Look for light pillars and blue halo rings around trees in Supply Grove. Approach and press [E] to collect 3 crystals.',
         },
         islandId: 'supply_grove',
-        markerPosition: [11, 5, 22],
+        markerPosition: [11, 5.5, 22],
       },
       {
         id: 'int_3_bit',
@@ -190,7 +190,7 @@ export const AWAKENING_QUESTS: readonly QuestDefinition[] = [
           en: 'With 3 blue crystals in hand, approach robot BIT under the grand tree and press [E] to power him on.',
         },
         islandId: 'supply_grove',
-        markerPosition: [18, 5, 14],
+        markerPosition: [18, 5.5, 14],
       },
     ],
     rewardXP: 25,

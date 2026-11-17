@@ -908,13 +908,13 @@ export function isInteractableQuestTarget(
 
   // Island waypoint navigation
   if (questInfo.objectiveType === 'go_to') {
-    if (questInfo.targetId === 'beacon_point' && item.id === 'beacon_terminal') return true;
-    if (questInfo.targetId === 'core_spire' && item.id === 'core_altar') return true;
-    if (questInfo.targetId === 'shrine_ledge' && item.id === 'neo_pedestal') return true;
-    if (questInfo.targetId === 'supply_grove' && (item.id === 'bit_robot' || item.id === 'bit_terminal')) return true;
-    if (questInfo.targetId === 'gatehouse_rock' && (item.id === 'old_tamo' || item.id === 'gate_console')) return true;
-    if (questInfo.targetId === 'terrace_farm' && (item.id === 'mira' || item.id === 'farm_console')) return true;
-    if (questInfo.targetId === 'bolts_workshop' && (item.id === 'bolt' || item.id === 'workshop_console')) return true;
+    if ((questInfo.targetId === 'shrine_ledge' || questInfo.targetId === 'stasis_shrine') && item.id === 'neo_pedestal') return true;
+    if ((questInfo.targetId === 'beacon_point' || questInfo.targetId === 'island_beacon') && item.id === 'beacon_terminal') return true;
+    if ((questInfo.targetId === 'supply_grove' || questInfo.targetId === 'island_supply') && (item.id === 'bit_robot' || item.id === 'bit_terminal')) return true;
+    if ((questInfo.targetId === 'gatehouse_rock' || questInfo.targetId === 'island_gatehouse') && (item.id === 'old_tamo' || item.id === 'gate_console')) return true;
+    if ((questInfo.targetId === 'terrace_farm' || questInfo.targetId === 'island_farm') && (item.id === 'mira' || item.id === 'farm_console')) return true;
+    if ((questInfo.targetId === 'bolts_workshop' || questInfo.targetId === 'island_workshop') && (item.id === 'bolt' || item.id === 'workshop_console')) return true;
+    if ((questInfo.targetId === 'core_spire' || questInfo.targetId === 'island_core') && item.id === 'core_altar') return true;
   }
 
   return false;
