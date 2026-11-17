@@ -456,7 +456,9 @@ function buildCampfire(
 /**
  * Island A: Neoclassical Stasis Sanctuary
  * Classical sanctuary rotunda with sunken stasis dais for neo_pedestal [-48, 4, 48],
- * radial mosaic floor, classical Doric/Corinthian pillars, stone architraves,
+ * radial core vein & ceramic mosaic floor, Corinthian colonnades with capitals,
+ * overhead circular architraves with cascading hanging wisteria/vines,
+ * dedicated reading alcove for lore_note_1 [-53, 4, 46], floating mini-satellite,
  * and seamless stone steps from spawn [-48, 4, 52] to bridge [-39, 3, 43].
  */
 function buildStasisSanctuary(
@@ -467,7 +469,7 @@ function buildStasisSanctuary(
   zoneId: string,
 ): void {
   // Paved Grand Sanctuary Precinct
-  pavePad(storage, cx - 8, cx + 8, cz - 8, cz + 8, y, VoxelId.PATH_STONE, zoneId);
+  pavePad(storage, cx - 9, cx + 9, cz - 9, cz + 9, y, VoxelId.PATH_STONE, zoneId);
 
   // 1. Sunken Stasis Dais (radius <= 3.2):
   // Dais floor remains at y=3 (top face 4.0) housing neo_pedestal at [-48, 4.0, 48]
@@ -490,21 +492,22 @@ function buildStasisSanctuary(
     }
   }
 
-  // 2. Surrounding Raised Sanctuary Rotunda Colonnade (radius 3.6 to 7.2):
+  // 2. Surrounding Raised Sanctuary Rotunda Colonnade (radius 3.6 to 7.5):
   // Elevated to y=4 (top face 5.0) creating the majestic sunken rotunda look!
   for (let dx = -7; dx <= 7; dx++) {
     for (let dz = -7; dz <= 7; dz++) {
       const dist = Math.sqrt(dx * dx + dz * dz);
-      if (dist >= 3.6 && dist <= 7.2) {
-        // Keep south approach (spawn [-48, 52]) and east approach (bridge [-39, 43])
-        // clear at y=3 with stepped transition for effortless walking!
+      if (dist >= 3.6 && dist <= 7.5) {
+        // Keep south approach (spawn [-48, 52]), east approach (bridge [-39, 43]),
+        // and west approach (reading alcove [-53, 46]) clear at y=3 with stepped transition!
         const isSouthOpen = Math.abs(dx) <= 1 && dz >= 2;
         const isEastOpen = Math.abs(dz) <= 1 && dx >= 2;
-        if (!isSouthOpen && !isEastOpen) {
+        const isWestOpen = Math.abs(dz) <= 1 && dx <= -2;
+        if (!isSouthOpen && !isEastOpen && !isWestOpen) {
           storage.setVoxel(cx + dx, y + 1, cz + dz, VoxelId.PATH_STONE, zoneId);
           storage.setVoxel(cx + dx, y, cz + dz, VoxelId.STONE_LIGHT, zoneId);
           // Concentric circular white ceramic mosaic ring
-          if (Math.abs(dist - 5.4) < 0.6) {
+          if (Math.abs(dist - 5.5) < 0.6) {
             storage.setVoxel(cx + dx, y + 1, cz + dz, VoxelId.CERAMIC_WHITE, zoneId);
           }
         }
@@ -512,18 +515,16 @@ function buildStasisSanctuary(
     }
   }
 
-  // 3. Classical Rotunda Columns & Overhead Architraves
-  // Circular colonnade ringing the rotunda
+  // 3. Corinthian Rotunda Columns & Overhead Architraves
+  // Classical pillars ringing the rotunda
   const colCoords: [number, number][] = [
-    [cx - 5, cz],      // West
-    [cx - 4, cz - 4],  // North-West
-    [cx, cz - 5],      // North
-    [cx + 4, cz - 4],  // North-East
-    [cx + 5, cz - 2],  // East flank (above path)
-    [cx + 5, cz + 2],  // East flank (below path)
-    [cx - 4, cz + 4],  // South-West
-    [cx - 2, cz + 5],  // South flank
-    [cx + 2, cz + 5],  // South flank
+    [cx - 5, cz - 2], [cx - 5, cz + 2],  // West flanks
+    [cx - 4, cz - 4],                    // North-West
+    [cx, cz - 5],                        // North
+    [cx + 4, cz - 4],                    // North-East
+    [cx + 5, cz - 2], [cx + 5, cz + 2],  // East flanks
+    [cx - 3, cz + 5], [cx + 3, cz + 5],  // South flanks
+    [cx - 2, cz - 5], [cx + 2, cz - 5],  // North flank twins
   ];
 
   for (const [colX, colZ] of colCoords) {
@@ -533,7 +534,7 @@ function buildStasisSanctuary(
     for (let h = 3; h <= 5; h++) {
       storage.setVoxel(colX, y + h, colZ, VoxelId.CERAMIC_WHITE, zoneId);
     }
-    // Classical capital
+    // Corinthian capital
     storage.setVoxel(colX, y + 6, colZ, VoxelId.STONE_LIGHT, zoneId);
   }
 
@@ -541,10 +542,19 @@ function buildStasisSanctuary(
   for (let dx = -5; dx <= 5; dx++) {
     for (let dz = -5; dz <= 5; dz++) {
       const dist = Math.sqrt(dx * dx + dz * dz);
-      if (Math.abs(dist - 5.0) < 0.8) {
+      if (Math.abs(dist - 5.2) < 0.9) {
         storage.setVoxel(cx + dx, y + 6, cz + dz, VoxelId.STONE_LIGHT, zoneId);
         if (Math.abs(dx) <= 1 || Math.abs(dz) <= 1) {
           storage.setVoxel(cx + dx, y + 7, cz + dz, VoxelId.CERAMIC_WHITE, zoneId);
+        }
+        // Hanging Wisteria & Flowering Vines suspended from architraves
+        if ((dx + dz) % 3 === 0 && dist > 4.5 && dist < 5.8) {
+          const isSouthOpen = Math.abs(dx) <= 1 && dz >= 2;
+          const isEastOpen = Math.abs(dz) <= 1 && dx >= 2;
+          const isWestOpen = Math.abs(dz) <= 1 && dx <= -2;
+          if (!isSouthOpen && !isEastOpen && !isWestOpen) {
+            storage.setVoxel(cx + dx, y + 5, cz + dz, (dx * dz) % 2 === 0 ? VoxelId.FOLIAGE_BLOSSOM : VoxelId.FOLIAGE_LIGHT, zoneId);
+          }
         }
       }
     }
@@ -570,13 +580,44 @@ function buildStasisSanctuary(
   for (let h = 1; h <= 6; h++) {
     storage.setVoxel(cx, y + h, cz, VoxelId.AIR, zoneId);
   }
+
+  // 5. Dedicated Classical Reading Alcove for lore_note_1 [-53, 4.0, 46]
+  // Semicircular ashlar stone wall behind pedestal
+  for (let z = 44; z <= 48; z++) {
+    storage.setVoxel(-55, y, z, VoxelId.STONE_MID, zoneId);
+    storage.setVoxel(-55, y + 1, z, VoxelId.STONE_LIGHT, zoneId);
+    storage.setVoxel(-55, y + 2, z, VoxelId.STONE_LIGHT, zoneId);
+    storage.setVoxel(-55, y + 3, z, VoxelId.STONE_MID, zoneId);
+    storage.setVoxel(-54, y + 4, z, VoxelId.STONE_LIGHT, zoneId);
+  }
+  // Curved wing walls
+  storage.setVoxel(-54, y + 1, 44, VoxelId.STONE_LIGHT, zoneId);
+  storage.setVoxel(-54, y + 2, 44, VoxelId.STONE_LIGHT, zoneId);
+  storage.setVoxel(-54, y + 1, 48, VoxelId.STONE_LIGHT, zoneId);
+  storage.setVoxel(-54, y + 2, 48, VoxelId.STONE_LIGHT, zoneId);
+  // Carved stone reading pedestal at [-53, 46]
+  storage.setVoxel(-53, y, 46, VoxelId.STONE_LIGHT, zoneId);
+  storage.setVoxel(-53, y - 1, 46, VoxelId.STONE_MID, zoneId);
+  // Sconce amber lantern on alcove wall
+  storage.setVoxel(-54, y + 3, 46, VoxelId.BRONZE, zoneId);
+  storage.setVoxel(-54, y + 4, 46, VoxelId.LAMP_AMBER, zoneId);
+  // Stone benches flanking the pedestal
+  storage.setVoxel(-53, y + 1, 45, VoxelId.STONE_LIGHT, zoneId);
+  storage.setVoxel(-53, y + 1, 47, VoxelId.STONE_LIGHT, zoneId);
+  // Clear ample headroom y=4..8 at [-53, 46]
+  for (let h = 1; h <= 5; h++) {
+    storage.setVoxel(-53, y + h, 46, VoxelId.AIR, zoneId);
+  }
+
+  // 6. Floating Mini-Satellite off the southwest cliff
+  buildSatelliteIsland(storage, -58, y + 3, 54, 2.8, 115, zoneId, VoxelId.CRYSTAL_BLUE);
 }
 
 /**
  * Island B: Grand Coastal Citadel
- * Cliffside coastal citadel with scenic stone overlook terrace for beacon_terminal [-12, 6, 30],
- * cobblestone plaza, timber cottage with stone chimney, dual waterfalls feeding a stream
- * under an arched bridge, and lore_note_2 at a peaceful scenic viewpoint [-23, 5, 32].
+ * Cliffside coastal citadel with grand astrolabe overlook plaza for beacon_terminal [-12, 6, 30],
+ * crenellated stone balustrades, timber cottage with stone chimney, dual waterfalls feeding
+ * a mountain stream under an arched stone bridge, and scenic pergola for lore_note_2 [-23, 5, 32].
  */
 function buildBeaconCitadel(
   storage: ChunkStorage,
@@ -586,53 +627,77 @@ function buildBeaconCitadel(
   zoneId: string,
 ): void {
   // Paved grand cobblestone plaza
-  pavePad(storage, cx - 12, cx + 8, cz - 8, cz + 7, y, VoxelId.PATH_STONE, zoneId);
+  pavePad(storage, cx - 12, cx + 8, cz - 8, cz + 8, y, VoxelId.PATH_STONE, zoneId);
 
-  // 1. Cliffside Overlook Terrace for beacon_terminal [-12, 6, 30] (cx+4, cz-2):
-  for (let x = cx + 2; x <= cx + 6; x++) {
-    for (let z = cz - 4; z <= cz; z++) {
-      storage.setVoxel(x, y, z, VoxelId.STONE_LIGHT, zoneId);
-      if (x === cx + 2 || z === cz) {
-        storage.setVoxel(x, y, z, VoxelId.CERAMIC_WHITE, zoneId);
+  // 1. Grand Astrolabe Overlook Plaza for beacon_terminal [-12, 6, 30] (cx+4, cz-2):
+  for (let x = cx + 2; x <= cx + 7; x++) {
+    for (let z = cz - 5; z <= cz + 1; z++) {
+      const dist = Math.sqrt((x - (cx + 4)) ** 2 + (z - (cz - 2)) ** 2);
+      if (dist <= 3.2) {
+        let vId: number = VoxelId.STONE_LIGHT;
+        if (Math.abs(dist - 2.0) < 0.6) {
+          vId = VoxelId.CERAMIC_WHITE;
+        } else if (dist < 0.8) {
+          vId = VoxelId.CORE_VEIN;
+        }
+        storage.setVoxel(x, y, z, vId, zoneId);
+        // Foundation corbels underneath overhang
+        storage.setVoxel(x, y - 1, z, VoxelId.STONE_MID, zoneId);
+        storage.setVoxel(x, y - 2, z, VoxelId.STONE_DARK, zoneId);
       }
     }
   }
+
   // Crenellated stone parapet balustrade along eastern & northern cliff edge
-  for (let z = cz - 4; z <= cz; z++) {
+  for (let z = cz - 5; z <= cz + 1; z++) {
     const isCrenel = z % 2 === 0;
-    storage.setVoxel(cx + 6, y + 1, z, isCrenel ? VoxelId.STONE_MID : VoxelId.STONE_LIGHT, zoneId);
+    storage.setVoxel(cx + 7, y + 1, z, isCrenel ? VoxelId.STONE_MID : VoxelId.STONE_LIGHT, zoneId);
   }
-  for (let x = cx + 2; x <= cx + 6; x++) {
+  for (let x = cx + 2; x <= cx + 7; x++) {
     const isCrenel = x % 2 === 0;
-    storage.setVoxel(x, y + 1, cz - 4, isCrenel ? VoxelId.STONE_MID : VoxelId.STONE_LIGHT, zoneId);
+    storage.setVoxel(x, y + 1, cz - 5, isCrenel ? VoxelId.STONE_MID : VoxelId.STONE_LIGHT, zoneId);
   }
   // Decorative brass corner lamp posts
-  storage.setVoxel(cx + 6, y + 2, cz - 4, VoxelId.BRONZE, zoneId);
-  storage.setVoxel(cx + 6, y + 3, cz - 4, VoxelId.LAMP_AMBER, zoneId);
-  storage.setVoxel(cx + 6, y + 2, cz, VoxelId.BRONZE, zoneId);
-  storage.setVoxel(cx + 6, y + 3, cz, VoxelId.LAMP_AMBER, zoneId);
+  storage.setVoxel(cx + 7, y + 2, cz - 5, VoxelId.BRONZE, zoneId);
+  storage.setVoxel(cx + 7, y + 3, cz - 5, VoxelId.LAMP_AMBER, zoneId);
+  storage.setVoxel(cx + 7, y + 2, cz + 1, VoxelId.BRONZE, zoneId);
+  storage.setVoxel(cx + 7, y + 3, cz + 1, VoxelId.LAMP_AMBER, zoneId);
 
   // Terminal Pad at [-12, 30] (surface 6.0)
-  storage.setVoxel(cx + 4, y, cz - 2, VoxelId.STONE_LIGHT, zoneId);
+  storage.setVoxel(cx + 4, y, cz - 2, VoxelId.CERAMIC_WHITE, zoneId);
   for (let h = 1; h <= 5; h++) {
     storage.setVoxel(cx + 4, y + h, cz - 2, VoxelId.AIR, zoneId);
   }
 
-  // 2. Peaceful Scenic Viewpoint for lore_note_2 [-23, 5, 32] (cx-7, cz):
+  // 2. Scenic Pergola for lore_note_2 [-23, 5, 32] (cx-7, cz):
   storage.setVoxel(-23, y - 1, 32, VoxelId.STONE_MID, zoneId);
   storage.setVoxel(-23, y, 32, VoxelId.STONE_LIGHT, zoneId);
   // Low stone retaining wall & flower boxes
   storage.setVoxel(-24, y + 1, 32, VoxelId.STONE_MID, zoneId);
   storage.setVoxel(-24, y + 1, 31, VoxelId.FOLIAGE_BLOSSOM, zoneId);
   storage.setVoxel(-24, y + 1, 33, VoxelId.FOLIAGE_BLOSSOM, zoneId);
+  storage.setVoxel(-22, y + 1, 31, VoxelId.FLOWER_YELLOW, zoneId);
+  storage.setVoxel(-22, y + 1, 33, VoxelId.FLOWER_YELLOW, zoneId);
   // Pergola posts & trellis overhead
   storage.setVoxel(-24, y + 2, 31, VoxelId.WOOD_DARK, zoneId);
   storage.setVoxel(-24, y + 3, 31, VoxelId.WOOD_DARK, zoneId);
   storage.setVoxel(-24, y + 2, 33, VoxelId.WOOD_DARK, zoneId);
   storage.setVoxel(-24, y + 3, 33, VoxelId.WOOD_DARK, zoneId);
-  storage.setVoxel(-24, y + 4, 31, VoxelId.WOOD_PLANK, zoneId);
-  storage.setVoxel(-24, y + 4, 32, VoxelId.FOLIAGE_LIGHT, zoneId);
-  storage.setVoxel(-24, y + 4, 33, VoxelId.WOOD_PLANK, zoneId);
+  storage.setVoxel(-22, y + 2, 31, VoxelId.WOOD_DARK, zoneId);
+  storage.setVoxel(-22, y + 3, 31, VoxelId.WOOD_DARK, zoneId);
+  storage.setVoxel(-22, y + 2, 33, VoxelId.WOOD_DARK, zoneId);
+  storage.setVoxel(-22, y + 3, 33, VoxelId.WOOD_DARK, zoneId);
+  // Overhead timber beams with hanging wisteria blossoms
+  for (let x = -24; x <= -22; x++) {
+    for (let z = 31; z <= 33; z++) {
+      storage.setVoxel(x, y + 4, z, VoxelId.WOOD_PLANK, zoneId);
+      if ((x + z) % 2 === 0) {
+        storage.setVoxel(x, y + 5, z, VoxelId.FOLIAGE_BLOSSOM, zoneId);
+      }
+    }
+  }
+  // Amber lantern
+  storage.setVoxel(-24, y + 3, 32, VoxelId.LAMP_AMBER, zoneId);
   for (let h = 1; h <= 4; h++) {
     storage.setVoxel(-23, y + h, 32, VoxelId.AIR, zoneId);
   }
@@ -669,7 +734,7 @@ function buildBeaconCitadel(
   storage.setVoxel(cx - 3, y + 5, cz + 4, VoxelId.STONE_MID, zoneId);
   storage.setVoxel(cx - 3, y + 6, cz + 4, VoxelId.STONE_MID, zoneId);
   storage.setVoxel(cx - 3, y + 7, cz + 4, VoxelId.STONE_LIGHT, zoneId);
-  storage.setVoxel(cx - 3, y + 8, cz + 4, VoxelId.STONE_MID, zoneId);
+  storage.setVoxel(cx - 3, y + 8, cz + 4, VoxelId.CHAR_SLATE, zoneId);
   // Cottage door & lantern
   storage.setVoxel(cx - 1, y + 1, cz + 2, VoxelId.WOOD_PLANK, zoneId);
   storage.setVoxel(cx - 1, y + 2, cz + 2, VoxelId.WOOD_PLANK, zoneId);
@@ -681,6 +746,10 @@ function buildBeaconCitadel(
     for (let z = cz - 7; z <= cz - 5; z++) {
       storage.setVoxel(x, y, z, VoxelId.WATER_DEEP, zoneId);
       storage.setVoxel(x, y - 1, z, VoxelId.STONE_DARK, zoneId);
+      // Crystal accents around mountain spring
+      if (x === cx - 2 && z === cz - 7) {
+        storage.setVoxel(x, y + 1, z, VoxelId.CRYSTAL_BLUE, zoneId);
+      }
     }
   }
   // Stream channel running south (x=cx-1..cx, z=cz-4..cz+1)
@@ -691,8 +760,8 @@ function buildBeaconCitadel(
     storage.setVoxel(cx + 1, y, z, VoxelId.STONE_MID, zoneId);
   }
   // Waterfall 1: Cascade into plunge basin off southern cliff (z=cz+2..cz+7)
-  for (let drop = 0; drop <= 6; drop++) {
-    const col = drop === 6 ? VoxelId.WATER_FOAM : drop % 2 === 0 ? VoxelId.WATER_CASCADE : VoxelId.WATER_SHALLOW;
+  for (let drop = 0; drop <= 7; drop++) {
+    const col = drop === 7 ? VoxelId.WATER_FOAM : drop % 2 === 0 ? VoxelId.WATER_CASCADE : VoxelId.WATER_SHALLOW;
     storage.setVoxel(cx - 1, y - drop, cz + 7, col, zoneId);
     storage.setVoxel(cx, y - drop, cz + 7, col, zoneId);
   }
@@ -718,11 +787,14 @@ function buildBeaconCitadel(
 }
 
 /**
- * Island C: Supply Grove & Colossal Ancient Tree
- * Mystical world-tree grotto. BIT robot [18, 5.5, 14] in a cozy carved root alcove;
- * bit_terminal [20, 5, 12] under an expedition canopy; 3 crystals in scenic micro-biomes
- * (Crystal 1 [11, 5.5, 22] in grotto spring pool; Crystal 2 [19, 5.5, 9] in sunlit forest clearing;
- * Crystal 3 [24, 5.5, 18] on elevated cliff crag).
+ * Island C: Supply Grove & Colossal Ancient World Tree
+ * Mystical world-tree grotto with soaring hollow trunk and 3-tiered canopy;
+ * BIT robot [18, 5.5, 14] in a cozy carved root alcove with amber lantern;
+ * bit_terminal [20, 5, 12] on a timber boardwalk under an expedition teal canvas canopy;
+ * 3 crystals in distinct scenic micro-biomes:
+ * - Crystal 1 [11, 5.5, 22] in Sapphire Spring Grotto
+ * - Crystal 2 [19, 5.5, 9] in Sunlit Fairy Glen
+ * - Crystal 3 [24, 5.5, 18] on Windward Crag
  */
 function buildSupplyGroveAndTree(
   storage: ChunkStorage,
@@ -732,64 +804,86 @@ function buildSupplyGroveAndTree(
   zoneId: string,
 ): void {
   // Paved base paths and clearings
-  pavePad(storage, cx - 12, cx + 12, cz - 10, cz + 10, y, VoxelId.GRASS_TOP, zoneId);
+  pavePad(storage, cx - 12, cx + 12, cz - 11, cz + 11, y, VoxelId.GRASS_TOP, zoneId);
 
   // 1. Colossal Ancient World Tree (centered at [16, 15])
   const tx = cx;
   const tz = cz - 1;
 
-  // Massive Gnarled Buttress Roots
+  // Massive Gnarled Buttress Roots sprawling outward
   const rootOffsets = [
     [-3, 0], [3, 0], [0, -3], [0, 3],
     [-2, -2], [2, -2], [-2, 2], [2, 2],
-    [-3, -1], [3, -1], [-3, 1], [3, 1],
+    [-4, -1], [4, -1], [-4, 1], [4, 1],
+    [-1, -4], [1, -4], [-1, 4], [1, 4],
   ];
   for (const [rox, roz] of rootOffsets) {
     storage.setVoxel(tx + rox!, y + 1, tz + roz!, VoxelId.WOOD_DARK, zoneId);
     storage.setVoxel(tx + rox!, y, tz + roz!, VoxelId.WOOD_TRUNK, zoneId);
   }
 
-  // Hollow Arched Trunk Base (y+1 .. y+15)
-  for (let h = 1; h <= 15; h++) {
+  // Hollow Arched Walk-Through Trunk Base (y+1 .. y+16)
+  // Generates an arched tunnel from north to south (clearance y+1..y+4) so player can walk through!
+  for (let h = 1; h <= 16; h++) {
     for (let dx = -2; dx <= 2; dx++) {
       for (let dz = -2; dz <= 2; dz++) {
         const isCore = Math.abs(dx) <= 1 && Math.abs(dz) <= 1;
-        const isHollowArch = h <= 3 && Math.abs(dx) <= 1; // North-south walking tunnel
+        const isHollowArch = h <= 4 && Math.abs(dx) <= 1; // North-south walking tunnel
         if (isCore && !isHollowArch) {
           storage.setVoxel(tx + dx, y + h, tz + dz, VoxelId.WOOD_TRUNK, zoneId);
-        } else if (!isCore && (Math.abs(dx) === 2 || Math.abs(dz) === 2) && h <= 5) {
+        } else if (!isCore && (Math.abs(dx) === 2 || Math.abs(dz) === 2) && h <= 6) {
           storage.setVoxel(tx + dx, y + h, tz + dz, VoxelId.WOOD_DARK, zoneId);
         }
       }
     }
   }
+  // Clear walking path through the hollow tree tunnel
+  for (let dz = -2; dz <= 2; dz++) {
+    for (let h = 1; h <= 4; h++) {
+      storage.setVoxel(tx, y + h, tz + dz, VoxelId.AIR, zoneId);
+    }
+    storage.setVoxel(tx, y, tz + dz, VoxelId.PATH_STONE, zoneId);
+  }
 
-  // Spreading Canopy Tiers (y+10..y+18)
-  // Tier 1 broad canopy (radius 6)
-  for (let dx = -6; dx <= 6; dx++) {
-    for (let dz = -6; dz <= 6; dz++) {
+  // Spreading Canopy Tiers (y+11..y+19)
+  // Tier 1 broad lower canopy (radius 7.5) with drooping blossom foliage
+  for (let dx = -7; dx <= 7; dx++) {
+    for (let dz = -7; dz <= 7; dz++) {
       const d = Math.sqrt(dx * dx + dz * dz);
-      if (d <= 6.2 && d >= 1.8) {
-        storage.setVoxel(tx + dx, y + 10, tz + dz, VoxelId.FOLIAGE_DEEP, zoneId);
-        storage.setVoxel(tx + dx, y + 11, tz + dz, VoxelId.FOLIAGE_MID, zoneId);
-        if (d <= 4.5) {
-          storage.setVoxel(tx + dx, y + 12, tz + dz, VoxelId.FOLIAGE_LIGHT, zoneId);
+      if (d <= 7.5 && d >= 1.8) {
+        storage.setVoxel(tx + dx, y + 11, tz + dz, VoxelId.FOLIAGE_DEEP, zoneId);
+        storage.setVoxel(tx + dx, y + 12, tz + dz, VoxelId.FOLIAGE_MID, zoneId);
+        if (d <= 5.2) {
+          storage.setVoxel(tx + dx, y + 13, tz + dz, VoxelId.FOLIAGE_LIGHT, zoneId);
+        }
+        // Drooping blossom clusters on edges
+        if (d >= 6.0 && (dx + dz) % 3 === 0) {
+          storage.setVoxel(tx + dx, y + 10, tz + dz, VoxelId.FOLIAGE_BLOSSOM, zoneId);
         }
       }
     }
   }
-  // Tier 2 high crown (radius 4)
-  for (let dx = -4; dx <= 4; dx++) {
-    for (let dz = -4; dz <= 4; dz++) {
+  // Tier 2 high crown (radius 5)
+  for (let dx = -5; dx <= 5; dx++) {
+    for (let dz = -5; dz <= 5; dz++) {
       const d = Math.sqrt(dx * dx + dz * dz);
-      if (d <= 4.2) {
-        storage.setVoxel(tx + dx, y + 13, tz + dz, VoxelId.FOLIAGE_MID, zoneId);
-        storage.setVoxel(tx + dx, y + 14, tz + dz, VoxelId.FOLIAGE_LIGHT, zoneId);
-        storage.setVoxel(tx + dx, y + 15, tz + dz, VoxelId.FOLIAGE_BLOSSOM, zoneId);
+      if (d <= 5.0) {
+        storage.setVoxel(tx + dx, y + 14, tz + dz, VoxelId.FOLIAGE_MID, zoneId);
+        storage.setVoxel(tx + dx, y + 15, tz + dz, VoxelId.FOLIAGE_LIGHT, zoneId);
+        storage.setVoxel(tx + dx, y + 16, tz + dz, VoxelId.FOLIAGE_BLOSSOM, zoneId);
       }
     }
   }
-  storage.setVoxel(tx, y + 16, tz, VoxelId.FOLIAGE_BLOSSOM, zoneId);
+  // Tier 3 crown apex
+  for (let dx = -2; dx <= 2; dx++) {
+    for (let dz = -2; dz <= 2; dz++) {
+      if (Math.abs(dx) + Math.abs(dz) <= 2) {
+        storage.setVoxel(tx + dx, y + 17, tz + dz, VoxelId.FOLIAGE_BLOSSOM, zoneId);
+        storage.setVoxel(tx + dx, y + 18, tz + dz, VoxelId.FOLIAGE_LIGHT, zoneId);
+      }
+    }
+  }
+  storage.setVoxel(tx, y + 19, tz, VoxelId.FOLIAGE_BLOSSOM, zoneId);
 
   // 2. BIT Robot Cozy Carved Root Alcove at [18, 5.5, 14] (tx+2, tz-1)
   storage.setVoxel(18, y, 14, VoxelId.WOOD_PLANK, zoneId);
@@ -800,12 +894,12 @@ function buildSupplyGroveAndTree(
   storage.setVoxel(18, y + 3, 14, VoxelId.WOOD_DARK, zoneId);
   storage.setVoxel(18, y + 3, 15, VoxelId.WOOD_DARK, zoneId);
   storage.setVoxel(18, y + 3, 13, VoxelId.WOOD_DARK, zoneId);
-  storage.setVoxel(18, y + 3, 15, VoxelId.LAMP_AMBER, zoneId);
+  storage.setVoxel(18, y + 3, 14, VoxelId.LAMP_AMBER, zoneId);
   for (let h = 1; h <= 2; h++) {
     storage.setVoxel(18, y + h, 14, VoxelId.AIR, zoneId);
   }
 
-  // 3. Expedition Canopy for bit_terminal [20, 5, 12]:
+  // 3. Teal Expedition Canopy for bit_terminal [20, 5, 12]:
   storage.setVoxel(20, y, 12, VoxelId.WOOD_PLANK, zoneId);
   for (let x = 19; x <= 22; x++) {
     for (let z = 11; z <= 13; z++) {
@@ -826,6 +920,9 @@ function buildSupplyGroveAndTree(
   for (let x = 19; x <= 22; x++) {
     for (let z = 11; z <= 13; z++) {
       storage.setVoxel(x, y + 3, z, VoxelId.CLOTH_TEAL, zoneId);
+      if (x === 20 || x === 21) {
+        storage.setVoxel(x, y + 4, z, VoxelId.CLOTH_TEAL, zoneId);
+      }
     }
   }
   storage.setVoxel(20, y + 2, 11, VoxelId.LAMP_AMBER, zoneId);
@@ -834,7 +931,7 @@ function buildSupplyGroveAndTree(
   }
 
   // 4. Three Scenic Crystal Micro-Biomes:
-  // Crystal 1 [11, 5.5, 22] in Grotto Spring Pool:
+  // Crystal 1 [11, 5.5, 22] in Sapphire Spring Grotto:
   for (let x = 9; x <= 13; x++) {
     for (let z = 20; z <= 24; z++) {
       const isPoolBorder = x === 9 || x === 13 || z === 20 || z === 24;
@@ -846,18 +943,30 @@ function buildSupplyGroveAndTree(
       }
     }
   }
+  // Grotto rock overhang with crystal trickle
+  storage.setVoxel(9, y + 1, 22, VoxelId.STONE_LIGHT, zoneId);
+  storage.setVoxel(9, y + 2, 22, VoxelId.CRYSTAL_BLUE, zoneId);
+  storage.setVoxel(9, y + 1, 21, VoxelId.FOLIAGE_BLOSSOM, zoneId);
   storage.setVoxel(11, y, 22, VoxelId.STONE_LIGHT, zoneId);
   for (let h = 1; h <= 4; h++) {
     storage.setVoxel(11, y + h, 22, VoxelId.AIR, zoneId);
   }
 
-  // Crystal 2 [19, 5.5, 9] in Sunlit Forest Clearing:
-  for (let x = 18; x <= 20; x++) {
-    for (let z = 8; z <= 10; z++) {
+  // Crystal 2 [19, 5.5, 9] in Sunlit Fairy Glen:
+  for (let x = 17; x <= 21; x++) {
+    for (let z = 7; z <= 11; z++) {
       storage.setVoxel(x, y, z, VoxelId.GRASS_TOP, zoneId);
       storage.setVoxel(x, y - 1, z, VoxelId.SOIL_WARM, zoneId);
+      if ((x === 17 || x === 21 || z === 7 || z === 11) && (x + z) % 2 === 0) {
+        storage.setVoxel(x, y + 1, z, VoxelId.FLOWER_YELLOW, zoneId);
+      }
     }
   }
+  // Stepping stones around crystal
+  storage.setVoxel(18, y, 9, VoxelId.CERAMIC_WHITE, zoneId);
+  storage.setVoxel(20, y, 9, VoxelId.CERAMIC_WHITE, zoneId);
+  storage.setVoxel(19, y, 8, VoxelId.CERAMIC_WHITE, zoneId);
+  storage.setVoxel(19, y, 10, VoxelId.CERAMIC_WHITE, zoneId);
   storage.setVoxel(19, y, 9, VoxelId.STONE_LIGHT, zoneId);
   storage.setVoxel(18, y + 1, 9, VoxelId.FLOWER_YELLOW, zoneId);
   storage.setVoxel(20, y + 1, 9, VoxelId.FLOWER_YELLOW, zoneId);
@@ -865,7 +974,7 @@ function buildSupplyGroveAndTree(
     storage.setVoxel(19, y + h, 9, VoxelId.AIR, zoneId);
   }
 
-  // Crystal 3 [24, 5.5, 18] on Elevated Cliff Crag:
+  // Crystal 3 [24, 5.5, 18] on Windward Crag:
   for (let x = 23; x <= 25; x++) {
     for (let z = 17; z <= 19; z++) {
       storage.setVoxel(x, y, z, VoxelId.STONE_LIGHT, zoneId);
@@ -873,6 +982,9 @@ function buildSupplyGroveAndTree(
       storage.setVoxel(x, y - 2, z, VoxelId.STONE_DARK, zoneId);
     }
   }
+  // Crag observation parapet
+  storage.setVoxel(25, y + 1, 18, VoxelId.STONE_LIGHT, zoneId);
+  storage.setVoxel(25, y + 2, 18, VoxelId.BRONZE, zoneId);
   storage.setVoxel(24, y, 18, VoxelId.CERAMIC_WHITE, zoneId);
   for (let h = 1; h <= 4; h++) {
     storage.setVoxel(24, y + h, 18, VoxelId.AIR, zoneId);
@@ -886,7 +998,7 @@ function buildSupplyGroveAndTree(
  * Island D: Fortified Fortress Gatehouse
  * Fortress gatehouse with towering mountain barbicans, crenellated battlements, glowing runic arch.
  * Old Tamo [43, 8, 5] at a fortified guard post; gate_console [46, 8, -2] integrated into
- * the fortress gate control pulpit; 3 rune plinths aligned before the gate.
+ * the fortress gate control pulpit; 3 glowing rune plinths aligned before the gate.
  */
 function buildFortressGatehouse(
   storage: ChunkStorage,
@@ -896,11 +1008,11 @@ function buildFortressGatehouse(
   zoneId: string,
 ): void {
   // Broad continuous stone plaza linking all stations
-  pavePad(storage, 36, 51, -10, 8, y, VoxelId.PATH_STONE, zoneId);
+  pavePad(storage, 36, 52, -10, 8, y, VoxelId.PATH_STONE, zoneId);
 
   // 1. Towering Mountain Barbicans:
-  // North Barbican: x=46..50, z=3..7 (y+1 .. y+9)
-  // South Barbican: x=46..50, z=-7..-3 (y+1 .. y+9)
+  // North Barbican: x=46..50, z=3..7 (y+1 .. y+10)
+  // South Barbican: x=46..50, z=-7..-3 (y+1 .. y+10)
   const towers: Array<[number, number, number, number]> = [
     [46, 50, 3, 7],
     [46, 50, -7, -3],
@@ -909,7 +1021,7 @@ function buildFortressGatehouse(
   for (const [x0, x1, z0, z1] of towers) {
     for (let x = x0; x <= x1; x++) {
       for (let z = z0; z <= z1; z++) {
-        for (let h = 1; h <= 8; h++) {
+        for (let h = 1; h <= 9; h++) {
           const isQuoin = (x === x0 || x === x1) && (z === z0 || z === z1);
           storage.setVoxel(
             x,
@@ -919,11 +1031,11 @@ function buildFortressGatehouse(
             zoneId,
           );
         }
-        // Crenellated Battlements at tower top (y+9)
+        // Machicolation & Crenellated Battlements at tower top (y+10)
         const isCrenel = (x + z) % 2 === 0;
         storage.setVoxel(
           x,
-          y + 9,
+          y + 10,
           z,
           isCrenel ? VoxelId.STONE_MID : VoxelId.STONE_LIGHT,
           zoneId,
@@ -933,10 +1045,10 @@ function buildFortressGatehouse(
   }
 
   // Stone Braziers with blazing fire on tower battlements
-  storage.setVoxel(48, y + 10, 5, VoxelId.BRONZE, zoneId);
-  storage.setVoxel(48, y + 11, 5, VoxelId.FIRE_ORANGE, zoneId);
-  storage.setVoxel(48, y + 10, -5, VoxelId.BRONZE, zoneId);
-  storage.setVoxel(48, y + 11, -5, VoxelId.FIRE_ORANGE, zoneId);
+  storage.setVoxel(48, y + 11, 5, VoxelId.BRONZE, zoneId);
+  storage.setVoxel(48, y + 12, 5, VoxelId.FIRE_ORANGE, zoneId);
+  storage.setVoxel(48, y + 11, -5, VoxelId.BRONZE, zoneId);
+  storage.setVoxel(48, y + 12, -5, VoxelId.FIRE_ORANGE, zoneId);
 
   // Parapet bridge & Glowing Runic Arch connecting barbicans overhead
   for (let z = -2; z <= 2; z++) {
@@ -960,16 +1072,18 @@ function buildFortressGatehouse(
   storage.setVoxel(43, y + 3, 6, VoxelId.WOOD_PLANK, zoneId);
   storage.setVoxel(42, y + 3, 6, VoxelId.WOOD_PLANK, zoneId);
   storage.setVoxel(44, y + 3, 6, VoxelId.WOOD_PLANK, zoneId);
+  storage.setVoxel(43, y + 4, 6, VoxelId.SLATE_ROOF, zoneId);
   storage.setVoxel(42, y + 2, 5, VoxelId.LAMP_AMBER, zoneId);
   for (let h = 1; h <= 4; h++) {
     storage.setVoxel(43, y + h, 5, VoxelId.AIR, zoneId);
   }
 
-  // 3. Gate Console Pulpit at [46, 8, -2]
+  // 3. Gate Control Pulpit for gate_console at [46, 8, -2]
   storage.setVoxel(46, y, -2, VoxelId.STONE_LIGHT, zoneId);
   storage.setVoxel(46, y, -1, VoxelId.STONE_MID, zoneId);
   storage.setVoxel(47, y + 1, -2, VoxelId.BRONZE, zoneId);
-  storage.setVoxel(47, y + 2, -2, VoxelId.LAMP_AMBER, zoneId);
+  storage.setVoxel(47, y + 2, -2, VoxelId.BRONZE, zoneId);
+  storage.setVoxel(47, y + 3, -2, VoxelId.LAMP_AMBER, zoneId);
   for (let h = 1; h <= 4; h++) {
     storage.setVoxel(46, y + h, -2, VoxelId.AIR, zoneId);
   }
@@ -980,6 +1094,8 @@ function buildFortressGatehouse(
     storage.setVoxel(44, y - 1, z, VoxelId.STONE_MID, zoneId);
     const runeId = z === -3 ? VoxelId.CRYSTAL_BLUE : z === 0 ? VoxelId.CRYSTAL_GREEN : VoxelId.CRYSTAL_RED;
     storage.setVoxel(45, y, z, runeId, zoneId);
+    // Glowing conduit channel leading from plinth to gate wall
+    storage.setVoxel(46, y, z, VoxelId.CORE_VEIN, zoneId);
     for (let h = 1; h <= 4; h++) {
       storage.setVoxel(44, y + h, z, VoxelId.AIR, zoneId);
     }
@@ -988,9 +1104,9 @@ function buildFortressGatehouse(
 
 /**
  * Island E: Stepped Tiered Agricultural Paradise
- * 3-tier stepped agricultural paradise with cascading water sluices and irrigation canals;
- * Miller's farmhouse with porch for Mira [11, 12, -26]; farm_console [11, 12, -33] mounted
- * at the central sluice bridge overlooking the whole terrace valley.
+ * 3-tier stepped agricultural paradise with stone retaining walls, cascading water sluices,
+ * irrigation canals, and lush crop rows; Miller's farmhouse with wrap-around porch for Mira [11, 12, -26];
+ * farm_console [11, 12, -33] mounted at the central sluice bridge overlooking the whole terrace valley.
  */
 function buildAgriculturalTerraces(
   storage: ChunkStorage,
@@ -999,13 +1115,17 @@ function buildAgriculturalTerraces(
   _cz: number, // -32
   zoneId: string,
 ): void {
-  // Stepped Terrace Fields
+  // Stepped Terrace Fields Foundation
   pavePad(storage, 5, 27, -40, -21, y + 1, VoxelId.GRASS_TOP, zoneId);
 
   // Stone retaining walls separating terrace levels
   for (let z = -39; z <= -22; z++) {
     storage.setVoxel(18, y + 1, z, VoxelId.STONE_LIGHT, zoneId);
     storage.setVoxel(18, y, z, VoxelId.STONE_MID, zoneId);
+    // Retaining buttress pilasters
+    if (z % 4 === 0) {
+      storage.setVoxel(19, y + 1, z, VoxelId.STONE_LIGHT, zoneId);
+    }
   }
 
   // Upper Reservoir Spring (x=20..25, z=-39..-34)
@@ -1072,6 +1192,10 @@ function buildAgriculturalTerraces(
   storage.setVoxel(11, y + 1, -26, VoxelId.WOOD_PLANK, zoneId);
   storage.setVoxel(11, y + 1, -25, VoxelId.WOOD_PLANK, zoneId);
   storage.setVoxel(11, y + 1, -27, VoxelId.WOOD_PLANK, zoneId);
+  storage.setVoxel(11, y + 2, -25, VoxelId.WOOD_DARK, zoneId);
+  storage.setVoxel(11, y + 3, -25, VoxelId.WOOD_DARK, zoneId);
+  storage.setVoxel(11, y + 2, -27, VoxelId.WOOD_DARK, zoneId);
+  storage.setVoxel(11, y + 3, -27, VoxelId.WOOD_DARK, zoneId);
   storage.setVoxel(11, y + 5, -26, VoxelId.WOOD_PLANK, zoneId);
   storage.setVoxel(11, y + 4, -25, VoxelId.LAMP_AMBER, zoneId);
   for (let h = 2; h <= 4; h++) {
@@ -1090,9 +1214,9 @@ function buildAgriculturalTerraces(
 
 /**
  * Island F: Magitech Industrial Workshop & Watchtower
- * Steampunk magitech industrial foundry; stone smelting furnace with fiery hearth and tall chimney;
- * heavy bronze gantry crane; watchtower bastion; BOLT [-13, 18, -46] at his drafting bench;
- * workshop_console [-17, 18, -49] on the gear workstation.
+ * Steampunk magitech industrial foundry; refractory stone smelting furnace with fiery hearth
+ * and tall chimney; heavy bronze cantilever gantry crane; watchtower bastion;
+ * BOLT [-13, 18, -46] at his drafting bench; workshop_console [-17, 18, -49] on the gear workstation.
  */
 function buildIndustrialWorkshop(
   storage: ChunkStorage,
@@ -1118,27 +1242,27 @@ function buildIndustrialWorkshop(
   storage.setVoxel(-11, y + 2, -50, VoxelId.STONE_DARK, zoneId);
   storage.setVoxel(-9, y + 2, -50, VoxelId.STONE_DARK, zoneId);
 
-  // Tall Industrial Chimney Stack (y+3 .. y+10)
-  for (let h = 3; h <= 10; h++) {
+  // Tall Industrial Chimney Stack (y+3 .. y+11)
+  for (let h = 3; h <= 11; h++) {
     storage.setVoxel(-10, y + h, -51, VoxelId.STONE_DARK, zoneId);
     if (h % 2 === 0) {
       storage.setVoxel(-10, y + h, -50, VoxelId.STONE_MID, zoneId);
     }
   }
-  storage.setVoxel(-10, y + 11, -51, VoxelId.CHAR_SLATE, zoneId);
+  storage.setVoxel(-10, y + 12, -51, VoxelId.CHAR_SLATE, zoneId);
 
   // Anvil plinth & water quench tank
   storage.setVoxel(-8, y + 2, -48, VoxelId.BRONZE, zoneId);
   storage.setVoxel(-8, y + 1, -47, VoxelId.WATER_SHALLOW, zoneId);
 
   // 2. Heavy Bronze Gantry Crane
-  for (let h = 1; h <= 7; h++) {
+  for (let h = 1; h <= 8; h++) {
     storage.setVoxel(-9, y + 1 + h, -53, VoxelId.BRONZE, zoneId);
   }
-  for (let x = -14; x <= -9; x++) {
-    storage.setVoxel(x, y + 8, -53, VoxelId.BRONZE, zoneId);
+  for (let x = -15; x <= -9; x++) {
+    storage.setVoxel(x, y + 9, -53, VoxelId.BRONZE, zoneId);
   }
-  storage.setVoxel(-14, y + 7, -53, VoxelId.LAMP_AMBER, zoneId);
+  storage.setVoxel(-15, y + 8, -53, VoxelId.LAMP_AMBER, zoneId);
 
   // 3. Fortified Watchtower Base Bastion (x=-23..-18, z=-52..-47)
   for (let x = -23; x <= -18; x++) {
@@ -1176,9 +1300,9 @@ function buildIndustrialWorkshop(
 
 /**
  * Island G: Celestial Citadel, Lighthouse & Core Shard Spire
- * Celestial citadel with tiered crystal obelisks, grand ceremonial stairways, triumphal stone arches,
- * striped hero lighthouse, and core_altar [-51, 24, -15] on an elevated celestial dais above a crystal rift,
- * with 3 floating satellite mini-islands.
+ * Celestial citadel with tiered crystal obelisks, grand ceremonial causeway,
+ * Triumphal Arch of Transcendence, striped hero lighthouse, elevated altar dais above
+ * a glowing crystal rift for core_altar [-51, 24, -15], and 3 floating satellite mini-islands.
  */
 function buildCelestialCitadel(
   storage: ChunkStorage,
@@ -1188,7 +1312,7 @@ function buildCelestialCitadel(
   zoneId: string,
 ): void {
   // Paved Lower Arrival Terrace (y=22) & Upper Sanctuary Plateau (y=23)
-  pavePad(storage, cx - 12, cx + 12, cz - 12, cz + 12, y + 1, VoxelId.PATH_STONE, zoneId);
+  pavePad(storage, cx - 13, cx + 13, cz - 13, cz + 13, y + 1, VoxelId.PATH_STONE, zoneId);
 
   // 1. Crystal Rift beneath core_altar:
   // Deep glowing bedrock fissure around ax=-51, az=-15
@@ -1231,7 +1355,7 @@ function buildCelestialCitadel(
     storage.setVoxel(ax, y + h, az, VoxelId.AIR, zoneId);
   }
 
-  // 3. Triumphal Stone Arch of the Architect (at x=-44, z=-21..-17)
+  // 3. Triumphal Arch of Transcendence (at x=-44, z=-21..-17)
   for (let h = 1; h <= 5; h++) {
     storage.setVoxel(-44, y + 1 + h, -21, VoxelId.CERAMIC_WHITE, zoneId);
     storage.setVoxel(-44, y + 1 + h, -17, VoxelId.CERAMIC_WHITE, zoneId);
