@@ -124,7 +124,18 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
     }
     if (typeof document === 'undefined') return;
     if (!document.fullscreenElement) {
-      void document.documentElement.requestFullscreen?.().catch(() => undefined);
+      void document.documentElement
+        .requestFullscreen?.()
+        .then(() => {
+          const orientation = window.screen?.orientation as
+            | (ScreenOrientation & { lock?: (mode: string) => Promise<void> })
+            | undefined;
+          if (window.matchMedia?.('(pointer: coarse)').matches) {
+            return orientation?.lock?.('landscape');
+          }
+          return undefined;
+        })
+        .catch(() => undefined);
     } else {
       void document.exitFullscreen?.().catch(() => undefined);
     }
@@ -233,6 +244,7 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
   }, [handleNavigate, handleToggleMute, handleToggleLocale, playConfirmSfx]);
 
   const isCompact = layoutClass === 'P' || layoutClass === 'L';
+  const isLandscapePhone = layoutClass === 'L';
 
   return (
     <main
@@ -243,11 +255,13 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
+        gap: isLandscapePhone ? '8px' : undefined,
         padding: isCompact
-          ? 'calc(16px + var(--sat)) calc(16px + var(--sar)) calc(16px + var(--sab)) calc(16px + var(--sal))'
+          ? 'calc(10px + var(--sat)) calc(14px + var(--sar)) calc(10px + var(--sab)) calc(14px + var(--sal))'
           : '32px 48px',
         pointerEvents: 'none',
-        overflow: 'hidden',
+        overflowX: 'hidden',
+        overflowY: isCompact ? 'auto' : 'hidden',
       }}
     >
       {/* Fullscreen Shutter Animation Overlay */}
@@ -553,15 +567,27 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
       {/* Main Content Area: Brand Logo & Vertical Console Menu */}
       <div
         style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: isCompact ? '10px' : '14px',
+          display: isLandscapePhone ? 'grid' : 'flex',
+          gridTemplateColumns: isLandscapePhone
+            ? 'minmax(240px, 0.92fr) minmax(290px, 1.08fr)'
+            : undefined,
+          alignItems: isLandscapePhone ? 'start' : undefined,
+          flexDirection: isLandscapePhone ? undefined : 'column',
+          gap: isLandscapePhone ? '10px' : isCompact ? '10px' : '14px',
           maxWidth: isCompact ? '100%' : '430px',
           width: '100%',
           pointerEvents: 'auto',
           zIndex: 5,
         }}
       >
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: isLandscapePhone ? '8px' : isCompact ? '10px' : '14px',
+            minWidth: 0,
+          }}
+        >
         {/* Brand Banner with 3D Isometric Voxel Cube Logo */}
         <section
           aria-label="PyCraft Brand"
@@ -569,21 +595,21 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
           style={{
             display: 'flex',
             flexDirection: 'column',
-            gap: '10px',
+            gap: isLandscapePhone ? '6px' : '10px',
             alignSelf: 'flex-start',
             width: '100%',
             background: 'linear-gradient(135deg, #0E7490 0%, #0D9488 100%)',
             border: '2px solid #A5F3FC',
             boxShadow: '0 6px 0 #0F766E, 0 16px 32px rgba(15, 50, 75, 0.25)',
-            padding: isCompact ? '14px 16px' : '18px 22px',
+            padding: isLandscapePhone ? '10px 12px' : isCompact ? '14px 16px' : '18px 22px',
             borderRadius: '16px',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: isLandscapePhone ? '10px' : '14px' }}>
             {/* 3D Isometric Voxel Cube SVG */}
             <svg
-              width="48"
-              height="48"
+              width={isLandscapePhone ? '36' : '48'}
+              height={isLandscapePhone ? '36' : '48'}
               viewBox="0 0 48 48"
               className="title-floating-logo"
               aria-hidden="true"
@@ -633,7 +659,7 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
                     margin: 0,
                     fontFamily: 'var(--font-display)',
                     fontWeight: 800,
-                    fontSize: isCompact ? '2.1rem' : '2.85rem',
+                    fontSize: isLandscapePhone ? '1.65rem' : isCompact ? '2.1rem' : '2.85rem',
                     letterSpacing: '0.06em',
                     lineHeight: 1,
                     textShadow: '0 3px 0 rgba(15, 45, 70, 0.35)',
@@ -684,7 +710,7 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
               backgroundColor: '#FFFFFF',
               border: '1.5px solid #99F6E4',
               borderRadius: '10px',
-              display: 'flex',
+              display: isLandscapePhone ? 'none' : 'flex',
               alignItems: 'center',
               gap: '6px',
               fontFamily: 'var(--font-code)',
@@ -850,17 +876,19 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
             </div>
           )}
         </section>
+        </div>
 
-        {/* Vertical Navigation Menu Panel */}
+        {/* Vertical / Landscape 2-Col Navigation Menu Panel */}
         <nav
           ref={menuRef}
           aria-label={locale === 'id' ? 'Menu Utama' : 'Main Menu'}
           onKeyDown={handleMenuKeyDown}
           className="surface-slate"
           style={{
-            padding: '10px',
-            display: 'flex',
-            flexDirection: 'column',
+            padding: isLandscapePhone ? '8px' : '10px',
+            display: isLandscapePhone ? 'grid' : 'flex',
+            gridTemplateColumns: isLandscapePhone ? 'repeat(2, minmax(0, 1fr))' : undefined,
+            flexDirection: isLandscapePhone ? undefined : 'column',
             gap: '6px',
             borderRadius: '16px',
           }}
@@ -879,7 +907,7 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
                 <span style={{ lineHeight: 1.2 }}>
                   {locale === 'id' ? 'Pilih Petualangan' : 'Select Adventure'}
                 </span>
-                <span style={{ fontSize: '0.6875rem', fontWeight: 500, color: '#4C697C' }}>
+                <span className="title-menu-sub" style={{ fontSize: '0.6875rem', fontWeight: 500, color: '#4C697C' }}>
                   {locale === 'id' ? 'Kelola 3 slot penyimpanan lokal' : 'Manage 3 local save slots'}
                 </span>
               </span>
@@ -918,7 +946,7 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
                 <span style={{ lineHeight: 1.2 }}>
                   {locale === 'id' ? 'Petualangan Baru' : 'New Adventure'}
                 </span>
-                <span style={{ fontSize: '0.6875rem', fontWeight: 500, color: '#4C697C' }}>
+                <span className="title-menu-sub" style={{ fontSize: '0.6875rem', fontWeight: 500, color: '#4C697C' }}>
                   {locale === 'id' ? 'Mulai perjalanan arsitek baru' : 'Begin a fresh architect journey'}
                 </span>
               </span>
@@ -953,7 +981,7 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
                 <span style={{ lineHeight: 1.2 }}>
                   {locale === 'id' ? 'Mode Permainan' : 'Game Modes'}
                 </span>
-                <span style={{ fontSize: '0.6875rem', fontWeight: 500, color: '#4C697C' }}>
+                <span className="title-menu-sub" style={{ fontSize: '0.6875rem', fontWeight: 500, color: '#4C697C' }}>
                   {locale === 'id' ? 'Petualangan, Otomasi & Sandbox' : 'Adventure, Automation & Sandbox'}
                 </span>
               </span>
@@ -987,7 +1015,7 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
                 <span style={{ lineHeight: 1.2 }}>
                   {locale === 'id' ? 'Dunia & Progres' : 'World & Progress'}
                 </span>
-                <span style={{ fontSize: '0.6875rem', fontWeight: 500, color: '#4C697C' }}>
+                <span className="title-menu-sub" style={{ fontSize: '0.6875rem', fontWeight: 500, color: '#4C697C' }}>
                   {locale === 'id' ? 'Peta 8 Wilayah & Monolit' : '8 Region Map & Monoliths'}
                 </span>
               </span>
@@ -1021,7 +1049,7 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
                 <span style={{ lineHeight: 1.2 }}>
                   {locale === 'id' ? 'Pengaturan' : 'Settings'}
                 </span>
-                <span style={{ fontSize: '0.6875rem', fontWeight: 500, color: '#4C697C' }}>
+                <span className="title-menu-sub" style={{ fontSize: '0.6875rem', fontWeight: 500, color: '#4C697C' }}>
                   {locale === 'id' ? 'Audio, Grafis, Bahasa & Kontrol' : 'Audio, Graphics, Language & Controls'}
                 </span>
               </span>
@@ -1061,7 +1089,7 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
                 <span style={{ lineHeight: 1.2, color: '#9A3412' }}>
                   {locale === 'id' ? 'Buku Panduan Arsitek' : 'Architect Guidebook'}
                 </span>
-                <span style={{ fontSize: '0.6875rem', fontWeight: 500, color: '#7C2D12' }}>
+                <span className="title-menu-sub" style={{ fontSize: '0.6875rem', fontWeight: 500, color: '#7C2D12' }}>
                   {locale === 'id' ? 'Kontrol, kenapa ada .json & tutorial Python' : 'Controls, why .json & Python tutorial'}
                 </span>
               </span>

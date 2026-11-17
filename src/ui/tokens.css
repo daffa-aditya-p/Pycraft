@@ -591,3 +591,22 @@ body,
     animation-duration: 0.8s;
   }
 }
+
+/* Mobile & Short Landscape Ergonomics */
+@media (max-height: 500px) and (orientation: landscape) {
+  .title-menu-btn {
+    min-height: 44px;
+    padding: 7px 10px;
+    font-size: 0.84rem;
+  }
+
+  .title-menu-sub {
+    display: none;
+  }
+
+  .btn-primary-chamfer,
+  .btn-slate,
+  .btn-parchment {
+    font-size: 0.875rem;
+  }
+}

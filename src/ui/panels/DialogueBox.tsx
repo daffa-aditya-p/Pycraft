@@ -13,6 +13,8 @@ export const DialogueBox: React.FC<DialogueBoxProps> = ({
   onClose,
 }) => {
   const locale = useSettingsStore((s) => s.locale);
+  const layoutClass = useUIStore((s) => s.layoutClass);
+  const isCompact = layoutClass === 'P' || layoutClass === 'L';
   const dialogue = useUIStore((s) => s.dialogue);
   const setDialogue = useUIStore((s) => s.setDialogue);
   const setInGameOverlay = useUIStore((s) => s.setInGameOverlay);
@@ -83,10 +85,13 @@ export const DialogueBox: React.FC<DialogueBoxProps> = ({
           pointerEvents: 'auto',
           width: '100%',
           maxWidth: '720px',
-          padding: '16px 20px',
+          maxHeight: isCompact ? 'calc(var(--app-h, 100dvh) - 24px)' : undefined,
+          overflowY: isCompact ? 'auto' : undefined,
+          padding: isCompact ? '12px 16px' : '16px 20px',
           display: 'flex',
           flexDirection: 'column',
-          gap: '12px',
+          gap: isCompact ? '8px' : '12px',
+          borderRadius: '14px',
         }}
       >
         <div

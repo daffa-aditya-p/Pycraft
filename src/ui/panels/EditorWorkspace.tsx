@@ -490,12 +490,12 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
       {/* Mission Header */}
       <header
         style={{
-          padding: '12px 14px',
+          padding: isLandscapePhone ? '8px 10px' : '12px 14px',
           background: 'linear-gradient(135deg, #0E7490 0%, #0D9488 100%)',
           borderBottom: '2px solid #0F766E',
           display: 'flex',
           flexDirection: 'column',
-          gap: '8px',
+          gap: isLandscapePhone ? '6px' : '8px',
         }}
       >
         <div
@@ -689,14 +689,16 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
           <div
             data-testid="editor-step-goal"
             style={{
-              padding: '8px 12px',
+              padding: isLandscapePhone ? '6px 10px' : '8px 12px',
               backgroundColor: '#FFFBEB',
               border: '1.5px solid #FCD34D',
               borderLeft: '5px solid #F59E0B',
               borderRadius: '10px',
-              fontSize: '0.84rem',
-              lineHeight: 1.45,
+              fontSize: isLandscapePhone ? '0.78rem' : '0.84rem',
+              lineHeight: 1.4,
               color: '#3E1F05',
+              maxHeight: isLandscapePhone ? '64px' : undefined,
+              overflowY: isLandscapePhone ? 'auto' : undefined,
             }}
           >
             <strong
@@ -730,11 +732,11 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
           {/* Toolbar */}
           <div
             style={{
-              padding: '8px 12px',
+              padding: isLandscapePhone ? '6px 8px' : '8px 12px',
               borderBottom: '1px solid #DFD5C0',
               display: 'flex',
               alignItems: 'center',
-              gap: '8px',
+              gap: isLandscapePhone ? '6px' : '8px',
               flexWrap: 'wrap',
               backgroundColor: '#F4EFE4',
             }}
@@ -836,7 +838,7 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
           >
             <Suspense
               fallback={
-                <div style={{ padding: '12px', color: '#8FA3A9' }}>
+                <div style={{ padding: '12px', color: '#4C697C' }}>
                   {locale === 'id' ? 'Memuat editor kode…' : 'Loading code editor…'}
                 </div>
               }
@@ -978,8 +980,8 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
           {!isKeyboardFullOverlay && (
             <div
               style={{
-                flex: '0 1 40%',
-                minHeight: '140px',
+                flex: isLandscapePhone ? '0 1 32%' : '0 1 40%',
+                minHeight: isLandscapePhone ? '86px' : '140px',
                 display: 'flex',
                 flexDirection: 'column',
                 borderTop: '2px solid #C8E2EE',

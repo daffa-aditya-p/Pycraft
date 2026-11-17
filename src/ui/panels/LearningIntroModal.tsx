@@ -60,10 +60,12 @@ export const LearningIntroModal: React.FC<LearningIntroModalProps> = ({
         style={{
           width: '100%',
           maxWidth: '560px',
-          padding: '24px',
+          maxHeight: '90dvh',
+          overflowY: 'auto',
+          padding: '20px',
           display: 'flex',
           flexDirection: 'column',
-          gap: '16px',
+          gap: '14px',
           borderRadius: '14px',
         }}
       >

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useSettingsStore } from '@/stores';
+import { useSettingsStore, useUIStore } from '@/stores';
 import {
   IconCamera,
   IconClose,
@@ -28,6 +28,8 @@ type GuidebookTab =
 
 export const GuidebookModal: React.FC<GuidebookModalProps> = ({ open, onClose }) => {
   const locale = useSettingsStore((s) => s.locale);
+  const layoutClass = useUIStore((s) => s.layoutClass);
+  const isCompact = layoutClass === 'L' || layoutClass === 'P';
   const [activeTab, setActiveTab] = useState<GuidebookTab>('overview');
 
   // Handle Escape key to close
@@ -105,7 +107,7 @@ export const GuidebookModal: React.FC<GuidebookModalProps> = ({ open, onClose })
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '20px',
+        padding: isCompact ? '10px' : '20px',
         pointerEvents: 'auto',
       }}
     >
@@ -114,7 +116,7 @@ export const GuidebookModal: React.FC<GuidebookModalProps> = ({ open, onClose })
         style={{
           width: '100%',
           maxWidth: '920px',
-          height: '85dvh',
+          height: isCompact ? '92dvh' : '85dvh',
           maxHeight: '740px',
           display: 'flex',
           flexDirection: 'column',
@@ -180,19 +182,21 @@ export const GuidebookModal: React.FC<GuidebookModalProps> = ({ open, onClose })
         </header>
 
         {/* Modal Body: Sidebar Tabs + Content Panel */}
-        <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
+        <div style={{ display: 'flex', flexDirection: isCompact ? 'column' : 'row', flex: 1, minHeight: 0 }}>
           {/* Navigation Sidebar */}
           <nav
             aria-label="Guidebook Sections"
             style={{
-              width: '230px',
+              width: isCompact ? '100%' : '230px',
               backgroundColor: '#EEF7FB',
-              borderRight: '1.5px solid #B6DCEB',
+              borderRight: isCompact ? 'none' : '1.5px solid #B6DCEB',
+              borderBottom: isCompact ? '1.5px solid #B6DCEB' : 'none',
               display: 'flex',
-              flexDirection: 'column',
-              padding: '10px',
+              flexDirection: isCompact ? 'row' : 'column',
+              padding: isCompact ? '8px' : '10px',
               gap: '6px',
-              overflowY: 'auto',
+              overflowX: isCompact ? 'auto' : 'hidden',
+              overflowY: isCompact ? 'hidden' : 'auto',
               flexShrink: 0,
             }}
           >
@@ -206,13 +210,16 @@ export const GuidebookModal: React.FC<GuidebookModalProps> = ({ open, onClose })
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '10px',
-                    padding: '10px 12px',
+                    gap: '8px',
+                    padding: isCompact ? '8px 12px' : '10px 12px',
+                    whiteSpace: isCompact ? 'nowrap' : undefined,
+                    flexShrink: 0,
                     backgroundColor: active ? '#FFFFFF' : 'transparent',
                     color: active ? '#0E7490' : '#335267',
                     border: '1.5px solid',
                     borderColor: active ? '#7CC4DF' : 'transparent',
-                    borderLeft: active ? '4px solid #F59E0B' : '4px solid transparent',
+                    borderLeft: !isCompact && active ? '4px solid #F59E0B' : !isCompact ? '4px solid transparent' : undefined,
+                    borderBottom: isCompact && active ? '3px solid #F59E0B' : isCompact ? '3px solid transparent' : undefined,
                     borderRadius: '8px',
                     fontSize: '0.8125rem',
                     fontWeight: active ? 700 : 500,
@@ -232,7 +239,7 @@ export const GuidebookModal: React.FC<GuidebookModalProps> = ({ open, onClose })
           <article
             style={{
               flex: 1,
-              padding: '24px 32px',
+              padding: isCompact ? '14px 16px' : '24px 32px',
               overflowY: 'auto',
               color: '#172B3A',
               fontSize: '0.9375rem',
@@ -503,7 +510,7 @@ export const GuidebookModal: React.FC<GuidebookModalProps> = ({ open, onClose })
                     : 'PyCraft features two camera perspectives purpose-built for different needs:'}
                 </p>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginTop: '16px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px', marginTop: '16px' }}>
                   <div
                     style={{
                       padding: '16px',

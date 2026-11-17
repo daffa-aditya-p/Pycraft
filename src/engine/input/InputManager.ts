@@ -78,7 +78,9 @@ export class InputManager {
   /** Called by TouchControls floating joystick */
   setTouchJoystick(x: number, y: number, sprint: boolean): void {
     this.touchMoveX = Math.max(-1, Math.min(1, x));
-    this.touchMoveZ = Math.max(-1, Math.min(1, y));
+    // TouchControls emits screen-space Y (negative when dragging thumb upward),
+    // whereas CharacterController expects positive moveZ for forward motion (matching KeyW).
+    this.touchMoveZ = Math.max(-1, Math.min(1, -y));
     this.touchSprint = sprint;
     useUIStore.getState().setInputMode('touch');
   }

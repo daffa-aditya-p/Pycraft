@@ -15,6 +15,8 @@ import { GameplayHud } from '@/ui/hud/GameplayHud';
 import { JournalModal } from '@/ui/panels/JournalModal';
 import { TouchControls } from '@/ui/hud/TouchControls';
 import { EditorWorkspace } from '@/ui/panels/EditorWorkspace';
+import { PortraitOrientationGuard } from '@/ui/components/PortraitOrientationGuard';
+import { InputManager } from '@/engine/input/InputManager';
 import {
   guidedBlanksExtension,
   guidedBlanksField,
@@ -443,5 +445,77 @@ describe('JournalModal & Quest Objectives System (Acts 1-4)', () => {
       nextBtn?.click();
     });
     expect(onNextStep).toHaveBeenCalledTimes(1);
+  });
+
+  it('maps upward virtual joystick drag to positive forward movement (not inverted)', () => {
+    const input = new InputManager();
+    useUIStore.setState({
+      screen: 'in_game',
+      inGameOverlay: 'explore',
+      inputMode: 'touch',
+    });
+
+    const onMove = (vec: { x: number; y: number; sprint: boolean }) => {
+      input.setTouchJoystick(vec.x, vec.y, vec.sprint);
+    };
+    const el = mount(React.createElement(TouchControls, { onJoystickMove: onMove }));
+    const zone = el.querySelector<HTMLDivElement>('[data-testid="touch-joystick-zone"]')!;
+    zone.setPointerCapture = vi.fn();
+    zone.hasPointerCapture = () => true;
+    zone.releasePointerCapture = vi.fn();
+
+    act(() => {
+      const downEvt = new MouseEvent('pointerdown', {
+        bubbles: true,
+        clientX: 100,
+        clientY: 250,
+      });
+      Object.defineProperty(downEvt, 'pointerId', { value: 11 });
+      zone.dispatchEvent(downEvt);
+    });
+
+    // Drag thumb UP on screen (clientY decreases: 250 -> 150) => forward
+    act(() => {
+      const upDrag = new MouseEvent('pointermove', {
+        bubbles: true,
+        clientX: 100,
+        clientY: 150,
+      });
+      Object.defineProperty(upDrag, 'pointerId', { value: 11 });
+      zone.dispatchEvent(upDrag);
+    });
+
+    const forwardSnap = input.getMovementInput();
+    expect(forwardSnap.moveZ).toBeGreaterThan(0.9);
+    expect(Math.abs(forwardSnap.moveX)).toBeLessThan(0.05);
+
+    // Drag thumb DOWN on screen (clientY increases: 250 -> 350) => backward
+    act(() => {
+      const downDrag = new MouseEvent('pointermove', {
+        bubbles: true,
+        clientX: 100,
+        clientY: 350,
+      });
+      Object.defineProperty(downDrag, 'pointerId', { value: 11 });
+      zone.dispatchEvent(downDrag);
+    });
+
+    const backwardSnap = input.getMovementInput();
+    expect(backwardSnap.moveZ).toBeLessThan(-0.9);
+  });
+
+  it('shows PortraitOrientationGuard on portrait mobile viewport and clears on landscape', () => {
+    Object.defineProperty(window, 'innerWidth', { value: 390, configurable: true });
+    Object.defineProperty(window, 'innerHeight', { value: 844, configurable: true });
+
+    const el = mount(React.createElement(PortraitOrientationGuard));
+    expect(el.querySelector('[data-testid="portrait-orientation-guard"]')).not.toBeNull();
+
+    act(() => {
+      Object.defineProperty(window, 'innerWidth', { value: 844, configurable: true });
+      Object.defineProperty(window, 'innerHeight', { value: 390, configurable: true });
+      window.dispatchEvent(new Event('resize'));
+    });
+    expect(el.querySelector('[data-testid="portrait-orientation-guard"]')).toBeNull();
   });
 });

@@ -31,6 +31,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   const navigateTo = useUIStore((s) => s.navigateTo);
   const pushToast = useUIStore((s) => s.pushToast);
   const fullscreenSupported = useUIStore((s) => s.fullscreenSupported);
+  const layoutClass = useUIStore((s) => s.layoutClass);
+  const isCompact = layoutClass === 'L' || layoutClass === 'P';
 
   const [activeTab, setActiveTab] = useState<SettingsTab>('audio');
 
@@ -61,7 +63,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         position: 'fixed',
         inset: 0,
         overflowY: 'auto',
-        padding: '24px',
+        padding: isCompact ? '12px' : '24px',
         backgroundColor: 'rgba(14, 50, 78, 0.42)',
         backdropFilter: 'blur(4px)',
         display: 'flex',
@@ -74,10 +76,10 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         style={{
           width: '100%',
           maxWidth: '920px',
-          padding: '24px',
+          padding: isCompact ? '14px' : '24px',
           display: 'flex',
           flexDirection: 'column',
-          gap: '20px',
+          gap: isCompact ? '14px' : '20px',
           borderRadius: '14px',
         }}
       >
@@ -90,19 +92,19 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             style={{
               margin: 0,
               fontFamily: 'var(--font-display)',
-              fontSize: '1.75rem',
+              fontSize: isCompact ? '1.35rem' : '1.75rem',
               color: '#0E7490',
             }}
           >
             {locale === 'id' ? 'Pengaturan' : 'Settings'}
           </h1>
-          <div style={{ width: '90px' }} />
+          <div style={{ width: isCompact ? '48px' : '90px' }} />
         </div>
 
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+            gridTemplateColumns: isCompact ? '1fr' : '220px 1fr',
             gap: '16px',
             alignItems: 'start',
           }}
@@ -110,7 +112,12 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           {/* Section List */}
           <nav
             aria-label={locale === 'id' ? 'Kategori Pengaturan' : 'Settings Categories'}
-            style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}
+            style={{
+              display: 'flex',
+              flexDirection: isCompact ? 'row' : 'column',
+              flexWrap: isCompact ? 'wrap' : 'nowrap',
+              gap: '8px',
+            }}
           >
             {tabs.map((tab) => {
               const active = activeTab === tab.id;
@@ -139,11 +146,10 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           <section
             className="surface-slate-raised"
             style={{
-              padding: '20px',
+              padding: isCompact ? '14px' : '20px',
               display: 'flex',
               flexDirection: 'column',
               gap: '16px',
-              gridColumn: 'span 2',
             }}
           >
             {activeTab === 'audio' && (

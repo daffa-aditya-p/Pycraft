@@ -624,7 +624,7 @@ export function GameCanvas() {
         <div
           style={{
             position: 'absolute',
-            top: '12px',
+            top: 'calc(12px + var(--sat))',
             left: '50%',
             transform: 'translateX(-50%)',
             background: '#FFFDF7',

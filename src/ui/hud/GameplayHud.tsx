@@ -129,6 +129,15 @@ export const GameplayHud: React.FC<GameplayHudProps> = ({
           : '#0E7490';
 
   const isCompact = layoutClass === 'P' || layoutClass === 'L';
+  const isLandscapePhone = layoutClass === 'L';
+  const dockOffsetRight =
+    (editorDockOpen || inGameOverlay === 'editor') && !editorAutoCollapsed && layoutClass !== 'P'
+      ? isLandscapePhone
+        ? 'calc(49vw + 8px)'
+        : layoutClass === 'T'
+          ? 'calc(46vw + 10px)'
+          : 'calc(44vw + 10px)'
+      : 0;
 
   return (
     <>
@@ -164,13 +173,8 @@ export const GameplayHud: React.FC<GameplayHudProps> = ({
               display: 'flex',
               alignItems: 'flex-start',
               justifyContent: 'space-between',
-              gap: '12px',
-              paddingRight:
-                (editorDockOpen || inGameOverlay === 'editor') &&
-                !editorAutoCollapsed &&
-                layoutClass !== 'P'
-                  ? 'calc(44vw + 10px)'
-                  : 0,
+              gap: isCompact ? '8px' : '12px',
+              paddingRight: dockOffsetRight,
             }}
           >
             {/* Top-Left Objective Tracker (Clickable to open Quests/Objectives) */}
@@ -189,14 +193,14 @@ export const GameplayHud: React.FC<GameplayHudProps> = ({
               className="surface-slate"
               style={{
                 pointerEvents: 'auto',
-                padding: isCompact ? '8px 12px' : '10px 14px',
-                maxWidth: isCompact ? '220px' : '330px',
+                padding: isCompact ? '6px 10px' : '10px 14px',
+                maxWidth: isLandscapePhone ? '210px' : isCompact ? '185px' : '330px',
                 textAlign: 'left',
                 cursor: 'pointer',
                 display: 'block',
                 background: 'linear-gradient(180deg, #FFFDF7 0%, #F4FAFD 100%)',
                 border: '2px solid #F59E0B',
-                borderRadius: '14px',
+                borderRadius: isCompact ? '11px' : '14px',
                 boxShadow: '0 4px 0 rgba(217, 119, 6, 0.28), 0 10px 22px rgba(15, 52, 76, 0.16)',
                 transition: 'transform 0.15s ease, border-color 0.15s ease',
               }}
@@ -212,12 +216,12 @@ export const GameplayHud: React.FC<GameplayHudProps> = ({
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  gap: '8px',
+                  gap: '6px',
                 }}
               >
                 <div
                   style={{
-                    fontSize: '0.75rem',
+                    fontSize: isCompact ? '0.6875rem' : '0.75rem',
                     fontWeight: 800,
                     textTransform: 'uppercase',
                     letterSpacing: '0.04em',
@@ -226,28 +230,34 @@ export const GameplayHud: React.FC<GameplayHudProps> = ({
                 >
                   {activeMissionId ?? (locale === 'id' ? 'Eksplorasi' : 'Exploration')} · {xp} XP
                 </div>
-                <span
-                  style={{
-                    fontSize: '0.6875rem',
-                    color: '#92400E',
-                    fontWeight: 800,
-                    backgroundColor: '#FEF3C7',
-                    border: '1px solid #FCD34D',
-                    padding: '1px 7px',
-                    borderRadius: '999px',
-                    letterSpacing: '0.03em',
-                  }}
-                >
-                  [O / J]
-                </span>
+                {!isCompact && (
+                  <span
+                    style={{
+                      fontSize: '0.6875rem',
+                      color: '#92400E',
+                      fontWeight: 800,
+                      backgroundColor: '#FEF3C7',
+                      border: '1px solid #FCD34D',
+                      padding: '1px 7px',
+                      borderRadius: '999px',
+                      letterSpacing: '0.03em',
+                    }}
+                  >
+                    [O / J]
+                  </span>
+                )}
               </div>
               <div
                 style={{
-                  marginTop: '4px',
-                  fontSize: '0.9rem',
+                  marginTop: isCompact ? '2px' : '4px',
+                  fontSize: isCompact ? '0.8rem' : '0.9rem',
                   fontWeight: 800,
                   color: '#172B3A',
-                  lineHeight: 1.35,
+                  lineHeight: 1.3,
+                  overflow: isCompact ? 'hidden' : undefined,
+                  display: isCompact ? '-webkit-box' : undefined,
+                  WebkitLineClamp: isCompact ? 2 : undefined,
+                  WebkitBoxOrient: isCompact ? 'vertical' : undefined,
                 }}
               >
                 {objectiveLabel ??
@@ -255,16 +265,18 @@ export const GameplayHud: React.FC<GameplayHudProps> = ({
                     ? 'Jelajahi pulau dan temui NEO.'
                     : 'Explore the island and meet NEO.')}
               </div>
-              <div
-                style={{
-                  marginTop: '4px',
-                  fontSize: '0.6875rem',
-                  fontWeight: 600,
-                  color: '#4C697C',
-                }}
-              >
-                {locale === 'id' ? 'Klik untuk daftar objektif' : 'Click for objectives list'}
-              </div>
+              {!isLandscapePhone && (
+                <div
+                  style={{
+                    marginTop: '4px',
+                    fontSize: '0.6875rem',
+                    fontWeight: 600,
+                    color: '#4C697C',
+                  }}
+                >
+                  {locale === 'id' ? 'Klik untuk daftar objektif' : 'Click for objectives list'}
+                </div>
+              )}
               {showFps && fps !== null && (
                 <div style={{ marginTop: '4px', fontSize: '0.75rem', color: '#0E7490', fontWeight: 700 }}>
                   {Math.round(fps)} FPS · {runtimeStatus}
@@ -417,7 +429,7 @@ export const GameplayHud: React.FC<GameplayHudProps> = ({
               gap: '8px',
             }}
           >
-            {activePrompt && inGameOverlay === 'explore' && (
+            {activePrompt && inGameOverlay === 'explore' && inputMode !== 'touch' && (
               <button
                 type="button"
                 data-testid="hud-interaction-prompt"

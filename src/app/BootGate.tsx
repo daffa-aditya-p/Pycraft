@@ -2,6 +2,10 @@ import React, { useEffect, useState, type ReactNode } from 'react';
 import { useUIStore, type LayoutClass } from '@/stores/useUIStore';
 import { useSettingsStore } from '@/stores/useSettingsStore';
 import { AudioManager } from '@/audio/AudioManager';
+import {
+  PortraitOrientationGuard,
+  tryLockLandscapeOrientation,
+} from '@/ui/components/PortraitOrientationGuard';
 
 function detectWebGL2(): boolean {
   if (typeof document === 'undefined') return false;
@@ -41,6 +45,9 @@ export function BootGate({ children }: { children: ReactNode }): React.JSX.Eleme
     const ui = useUIStore.getState();
     ui.setFullscreen(Boolean(document.fullscreenElement), detectFullscreenSupported());
     ui.setLayoutClass(detectLayoutClass(window.innerWidth, window.innerHeight));
+    if (window.matchMedia?.('(pointer: coarse)').matches && window.innerWidth < 1024) {
+      ui.setInputMode('touch');
+    }
 
     if (!hasWebGL2) {
       ui.setBootError('Browser atau perangkat ini belum mendukung WebGL2.');
@@ -99,13 +106,21 @@ export function BootGate({ children }: { children: ReactNode }): React.JSX.Eleme
     };
 
     const onFullscreenChange = (): void => {
-      useUIStore
-        .getState()
-        .setFullscreen(Boolean(document.fullscreenElement), detectFullscreenSupported());
+      const isFs = Boolean(document.fullscreenElement);
+      useUIStore.getState().setFullscreen(isFs, detectFullscreenSupported());
+      if (isFs && window.matchMedia?.('(pointer: coarse)').matches) {
+        void tryLockLandscapeOrientation();
+      }
+    };
+
+    const onOrientationChange = (): void => {
+      updateViewport();
+      window.setTimeout(updateViewport, 150);
     };
 
     updateViewport();
     window.addEventListener('resize', updateViewport);
+    window.addEventListener('orientationchange', onOrientationChange);
     window.visualViewport?.addEventListener('resize', updateViewport);
     window.addEventListener('pointerdown', onPointerDown, { passive: true });
     window.addEventListener('keydown', onKeyDown, { passive: true });
@@ -114,6 +129,7 @@ export function BootGate({ children }: { children: ReactNode }): React.JSX.Eleme
 
     return () => {
       window.removeEventListener('resize', updateViewport);
+      window.removeEventListener('orientationchange', onOrientationChange);
       window.visualViewport?.removeEventListener('resize', updateViewport);
       window.removeEventListener('pointerdown', onPointerDown);
       window.removeEventListener('keydown', onKeyDown);
@@ -187,5 +203,10 @@ export function BootGate({ children }: { children: ReactNode }): React.JSX.Eleme
     );
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      {children}
+      <PortraitOrientationGuard />
+    </>
+  );
 }

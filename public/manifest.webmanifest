@@ -4,8 +4,8 @@
   "description": "3D voxel adventure game where real Python code brings Aetheria's machines and islands back to life.",
   "start_url": "/",
   "display": "standalone",
-  "orientation": "any",
-  "theme_color": "#1C2427",
+  "orientation": "landscape",
+  "theme_color": "#0E7490",
   "background_color": "#D9EEF6",
   "lang": "id",
   "icons": [

@@ -70,7 +70,8 @@ export const TouchControls: React.FC<TouchControlsProps> = ({
   const cameraPointersRef = useRef<Map<number, ActiveTouchPoint>>(new Map());
   const prevPinchDistRef = useRef<number | null>(null);
 
-  const baseSize = layoutClass === 'P' ? 96 : 120;
+  const isLandscapePhone = layoutClass === 'L';
+  const baseSize = layoutClass === 'P' ? 92 : isLandscapePhone ? 96 : 116;
   const maxRadius = baseSize / 2;
 
   const updateJoystick = (clientX: number, clientY: number) => {
@@ -198,8 +199,12 @@ export const TouchControls: React.FC<TouchControlsProps> = ({
     : { right: 0, width: '60%' };
 
   const actionClusterSideStyle: React.CSSProperties = leftHanded
-    ? { left: 'calc(16px + var(--sal))', alignItems: 'flex-start' }
-    : { right: 'calc(16px + var(--sar))', alignItems: 'flex-end' };
+    ? { left: 'calc(12px + var(--sal))', alignItems: 'flex-start' }
+    : { right: 'calc(12px + var(--sar))', alignItems: 'flex-end' };
+
+  const restingPadSideStyle: React.CSSProperties = leftHanded
+    ? { right: 'calc(20px + var(--sar))' }
+    : { left: 'calc(20px + var(--sal))' };
 
   return (
     <div
@@ -227,6 +232,95 @@ export const TouchControls: React.FC<TouchControlsProps> = ({
           touchAction: 'none',
         }}
       >
+        {!joyState.active && (
+          <div
+            aria-hidden="true"
+            style={{
+              position: 'fixed',
+              bottom: 'calc(14px + var(--sab))',
+              ...restingPadSideStyle,
+              width: `${baseSize}px`,
+              height: `${baseSize}px`,
+              borderRadius: '50%',
+              border: '2px dashed rgba(8, 145, 178, 0.55)',
+              backgroundColor: 'rgba(255, 253, 247, 0.34)',
+              pointerEvents: 'none',
+            }}
+          >
+            <span
+              style={{
+                position: 'absolute',
+                top: '5px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                fontSize: '9px',
+                fontWeight: 800,
+                color: '#0E7490',
+                lineHeight: 1,
+              }}
+            >
+              ▲
+            </span>
+            <span
+              style={{
+                position: 'absolute',
+                bottom: '5px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                fontSize: '9px',
+                fontWeight: 800,
+                color: '#0E7490',
+                lineHeight: 1,
+              }}
+            >
+              ▼
+            </span>
+            <span
+              style={{
+                position: 'absolute',
+                left: '6px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                fontSize: '9px',
+                fontWeight: 800,
+                color: '#0E7490',
+                lineHeight: 1,
+              }}
+            >
+              ◀
+            </span>
+            <span
+              style={{
+                position: 'absolute',
+                right: '6px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                fontSize: '9px',
+                fontWeight: 800,
+                color: '#0E7490',
+                lineHeight: 1,
+              }}
+            >
+              ▶
+            </span>
+            <div
+              data-testid="touch-joystick-knob"
+              style={{
+                position: 'absolute',
+                left: '50%',
+                top: '50%',
+                width: isLandscapePhone ? '36px' : '40px',
+                height: isLandscapePhone ? '36px' : '40px',
+                borderRadius: '50%',
+                backgroundColor: 'rgba(8, 145, 178, 0.85)',
+                border: '2px solid #FFFFFF',
+                boxShadow: '0 2px 6px rgba(15, 52, 76, 0.22)',
+                transform: 'translate(-50%, -50%)',
+              }}
+            />
+          </div>
+        )}
+
         {joyState.active && (
           <div
             aria-hidden="true"
@@ -240,20 +334,21 @@ export const TouchControls: React.FC<TouchControlsProps> = ({
               border: `2.5px solid ${joyState.sprint ? '#F59E0B' : '#0891B2'}`,
               backgroundColor: 'rgba(255, 253, 247, 0.55)',
               pointerEvents: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
             }}
           >
             <div
+              data-testid="touch-joystick-knob"
               style={{
-                width: '40px',
-                height: '40px',
+                position: 'absolute',
+                left: '50%',
+                top: '50%',
+                width: isLandscapePhone ? '36px' : '40px',
+                height: isLandscapePhone ? '36px' : '40px',
                 borderRadius: '50%',
                 backgroundColor: joyState.sprint ? '#F59E0B' : '#0891B2',
                 border: '2px solid #FFFFFF',
                 boxShadow: '0 2px 6px rgba(15, 52, 76, 0.25)',
-                transform: `translate(${joyState.knobX}px, ${joyState.knobY}px)`,
+                transform: `translate(calc(-50% + ${Math.round(joyState.knobX)}px), calc(-50% + ${Math.round(joyState.knobY)}px))`,
               }}
             />
           </div>

@@ -1277,6 +1277,11 @@ export function App(): React.JSX.Element {
                     })
                   }
                   onToggleCamera={() => globalInputManager.triggerAction('camera_toggle')}
+                  onRotateIso={(dir) =>
+                    globalInputManager.triggerAction(
+                      dir < 0 ? 'iso_rotate_left' : 'iso_rotate_right',
+                    )
+                  }
                 />
               )}
 

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AudioManager } from '@/audio/AudioManager';
-import { EventBus, useGameStore, useSettingsStore } from '@/stores';
+import { EventBus, useGameStore, useSettingsStore, useUIStore } from '@/stores';
 import {
   IconClose,
   IconPlay,
@@ -179,6 +179,8 @@ export const CinematicIntroOverlay: React.FC<CinematicIntroOverlayProps> = ({ on
   const locale = useSettingsStore((s) => s.locale);
   const audioSettings = useSettingsStore((s) => s.audio);
   const playerName = useGameStore((s) => s.profile.name);
+  const layoutClass = useUIStore((s) => s.layoutClass);
+  const isLandscapePhone = layoutClass === 'L';
 
   const [actIndex, setActIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -398,16 +400,17 @@ export const CinematicIntroOverlay: React.FC<CinematicIntroOverlayProps> = ({ on
       <div
         style={{
           width: '100%',
-          minHeight: '80px',
-          height: '11vh',
+          minHeight: isLandscapePhone ? '52px' : '80px',
+          height: isLandscapePhone ? 'auto' : '11vh',
+          padding: isLandscapePhone ? '6px 14px' : '0 24px',
           background: 'linear-gradient(180deg, #0E2D44 0%, #143D59 100%)',
           borderBottom: '2px solid #F59E0B',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '0 24px',
           boxSizing: 'border-box',
           position: 'relative',
+          gap: '8px',
         }}
       >
         {/* World Crest & Title */}
@@ -561,9 +564,9 @@ export const CinematicIntroOverlay: React.FC<CinematicIntroOverlayProps> = ({ on
           width: '100%',
           display: 'flex',
           justifyContent: 'center',
-          padding: '0 24px',
+          padding: isLandscapePhone ? '0 14px' : '0 24px',
           boxSizing: 'border-box',
-          marginBottom: '20px',
+          marginBottom: isLandscapePhone ? '8px' : '20px',
         }}
       >
         <div
@@ -571,7 +574,9 @@ export const CinematicIntroOverlay: React.FC<CinematicIntroOverlayProps> = ({ on
           style={{
             maxWidth: '820px',
             width: '100%',
-            padding: '20px 28px',
+            padding: isLandscapePhone ? '12px 16px' : '20px 28px',
+            maxHeight: isLandscapePhone ? '56dvh' : undefined,
+            overflowY: isLandscapePhone ? 'auto' : undefined,
             boxShadow: '0 16px 40px rgba(14, 50, 78, 0.35)',
             borderLeft: '5px solid #F59E0B',
             borderRadius: '14px',
@@ -669,14 +674,14 @@ export const CinematicIntroOverlay: React.FC<CinematicIntroOverlayProps> = ({ on
       <div
         style={{
           width: '100%',
-          minHeight: '80px',
-          height: '11vh',
+          minHeight: isLandscapePhone ? '44px' : '80px',
+          height: isLandscapePhone ? 'auto' : '11vh',
           background: 'linear-gradient(180deg, #143D59 0%, #0E2D44 100%)',
           borderTop: '2px solid #F59E0B',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '0 24px',
+          padding: isLandscapePhone ? '6px 14px' : '0 24px',
           boxSizing: 'border-box',
         }}
       >
