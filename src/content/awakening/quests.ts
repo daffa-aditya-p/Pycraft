@@ -26,7 +26,7 @@ export const AWAKENING_QUESTS: readonly QuestDefinition[] = [
           en: 'Use W/A/S/D to move and Space to jump over the stone steps in the shrine.',
         },
         islandId: 'stasis_shrine',
-        markerPosition: [4, 1, 0],
+        markerPosition: [-43, 4, 45],
       },
       {
         id: 'pro_2_neo',
@@ -38,7 +38,7 @@ export const AWAKENING_QUESTS: readonly QuestDefinition[] = [
           en: 'Approach the stone pedestal holding NEO stasis capsule and press [E] to reboot him.',
         },
         islandId: 'stasis_shrine',
-        markerPosition: [6, 1, 0],
+        markerPosition: [-48, 4, 48],
       },
       {
         id: 'pro_3_beacon',
@@ -50,7 +50,7 @@ export const AWAKENING_QUESTS: readonly QuestDefinition[] = [
           en: 'Follow the stone bridge connecting Stasis Shrine to Beacon Point until reaching the Beacon Spire courtyard.',
         },
         islandId: 'beacon_point',
-        markerPosition: [18, 2, 0],
+        markerPosition: [-12, 6, 30],
       },
     ],
     rewardXP: 0,
@@ -82,6 +82,7 @@ export const AWAKENING_QUESTS: readonly QuestDefinition[] = [
           en: 'Open Beacon Terminal [E]. Write print("Halo, Dunia!") and run the code (Ctrl+Enter).',
         },
         islandId: 'beacon_point',
+        markerPosition: [-12, 6, 30],
       },
       {
         id: 'm1_o2',
@@ -94,6 +95,7 @@ export const AWAKENING_QUESTS: readonly QuestDefinition[] = [
           en: 'Print 3 checklist messages in order: print("Sistem v1.0"), print("Sensor OK"), print("Siap Beroperasi").',
         },
         islandId: 'beacon_point',
+        markerPosition: [-12, 6, 30],
       },
       {
         id: 'm1_o3',
@@ -106,6 +108,7 @@ export const AWAKENING_QUESTS: readonly QuestDefinition[] = [
           en: 'Add a hashtag (#) at the start of faulty red light lines to comment them out.',
         },
         islandId: 'beacon_point',
+        markerPosition: [-12, 6, 30],
       },
       {
         id: 'm1_o4',
@@ -118,6 +121,7 @@ export const AWAKENING_QUESTS: readonly QuestDefinition[] = [
           en: 'Use newline character \\n in a single print() call to print 3 lines at once.',
         },
         islandId: 'beacon_point',
+        markerPosition: [-12, 6, 30],
       },
       {
         id: 'm1_o5',
@@ -130,6 +134,7 @@ export const AWAKENING_QUESTS: readonly QuestDefinition[] = [
           en: 'Write nama = input("Nama: ") then print("Arsitek:", nama) to engrave your name.',
         },
         islandId: 'beacon_point',
+        markerPosition: [-12, 6, 30],
       },
     ],
     rewardXP: 150,
@@ -160,6 +165,7 @@ export const AWAKENING_QUESTS: readonly QuestDefinition[] = [
           en: 'Walk east across the bridge from Beacon Point to Supply Grove island.',
         },
         islandId: 'supply_grove',
+        markerPosition: [5, 5, 21],
       },
       {
         id: 'int_2_crystals',
@@ -172,6 +178,7 @@ export const AWAKENING_QUESTS: readonly QuestDefinition[] = [
           en: 'Look for light pillars and blue halo rings around trees in Supply Grove. Approach and press [E] to collect 3 crystals.',
         },
         islandId: 'supply_grove',
+        markerPosition: [11, 5, 22],
       },
       {
         id: 'int_3_bit',
@@ -183,6 +190,7 @@ export const AWAKENING_QUESTS: readonly QuestDefinition[] = [
           en: 'With 3 blue crystals in hand, approach robot BIT under the grand tree and press [E] to power him on.',
         },
         islandId: 'supply_grove',
+        markerPosition: [18, 5, 14],
       },
     ],
     rewardXP: 25,
@@ -213,6 +221,7 @@ export const AWAKENING_QUESTS: readonly QuestDefinition[] = [
           en: 'Declare variable kayu = 5, reassign it to kayu = 10, and output it with print(kayu).',
         },
         islandId: 'supply_grove',
+        markerPosition: [20, 5, 12],
       },
       {
         id: 'm2_o2',
@@ -225,6 +234,7 @@ export const AWAKENING_QUESTS: readonly QuestDefinition[] = [
           en: 'Store step distance in variable jarak, then command robot BIT forward using the variable.',
         },
         islandId: 'supply_grove',
+        markerPosition: [20, 5, 12],
       },
       {
         id: 'm2_o3',
@@ -237,6 +247,7 @@ export const AWAKENING_QUESTS: readonly QuestDefinition[] = [
           en: 'Sensor data is string text. Convert it to an integer using int(sensor_text).',
         },
         islandId: 'supply_grove',
+        markerPosition: [20, 5, 12],
       },
       {
         id: 'm2_o4',
@@ -249,6 +260,7 @@ export const AWAKENING_QUESTS: readonly QuestDefinition[] = [
           en: 'Scan gap length, calculate required planks, and build the wooden bridge until it connects across.',
         },
         islandId: 'supply_grove',
+        markerPosition: [20, 5, 12],
       },
     ],
     rewardXP: 175,
@@ -279,6 +291,7 @@ export const AWAKENING_QUESTS: readonly QuestDefinition[] = [
           en: 'Talk to Old Tamo standing before the grand stone gate at Gatehouse Rock [E].',
         },
         islandId: 'gatehouse_rock',
+        markerPosition: [43, 8, 5],
       },
       {
         id: 'm3_o1',
@@ -291,6 +304,7 @@ export const AWAKENING_QUESTS: readonly QuestDefinition[] = [
           en: 'Write 4 comparison expressions (e.g. 5 > 2, 10 == 10) to solve the rune truth puzzles.',
         },
         islandId: 'gatehouse_rock',
+        markerPosition: [46, 8, -2],
       },
       {
         id: 'm3_o2',
@@ -303,6 +317,7 @@ export const AWAKENING_QUESTS: readonly QuestDefinition[] = [
           en: 'Write if statement: if warna == "biru": gerbang.buka() to open the gate for blue crystals.',
         },
         islandId: 'gatehouse_rock',
+        markerPosition: [46, 8, -2],
       },
       {
         id: 'm3_o3',
@@ -315,6 +330,7 @@ export const AWAKENING_QUESTS: readonly QuestDefinition[] = [
           en: 'Complete the if block with else: lampu.merah() to signal denial when color does not match.',
         },
         islandId: 'gatehouse_rock',
+        markerPosition: [46, 8, -2],
       },
       {
         id: 'm3_o4',
@@ -327,6 +343,7 @@ export const AWAKENING_QUESTS: readonly QuestDefinition[] = [
           en: 'Use if ... elif ... else to handle three colors: blue opens, green alerts, other denies.',
         },
         islandId: 'gatehouse_rock',
+        markerPosition: [46, 8, -2],
       },
       {
         id: 'm3_o5',
@@ -339,6 +356,7 @@ export const AWAKENING_QUESTS: readonly QuestDefinition[] = [
           en: 'Use logical and operator: if warna == "biru" and beban >= 2: gerbang.buka() to verify both criteria.',
         },
         islandId: 'gatehouse_rock',
+        markerPosition: [46, 8, -2],
       },
     ],
     rewardXP: 200,
@@ -369,6 +387,7 @@ export const AWAKENING_QUESTS: readonly QuestDefinition[] = [
           en: 'Walk to Terrace Farm, meet Mira near the farm plots, and press [E] to offer assistance.',
         },
         islandId: 'terrace_farm',
+        markerPosition: [11, 12, -26],
       },
       {
         id: 'm4_o1',
@@ -381,6 +400,7 @@ export const AWAKENING_QUESTS: readonly QuestDefinition[] = [
           en: 'Plant the first 3 tiles manually by calling tanam() and maju() 3 times.',
         },
         islandId: 'terrace_farm',
+        markerPosition: [11, 12, -33],
       },
       {
         id: 'm4_o2',
@@ -393,6 +413,7 @@ export const AWAKENING_QUESTS: readonly QuestDefinition[] = [
           en: 'Use for i in range(6): and place tanam() and maju() inside the indented loop body.',
         },
         islandId: 'terrace_farm',
+        markerPosition: [11, 12, -33],
       },
       {
         id: 'm4_o3',
@@ -405,6 +426,7 @@ export const AWAKENING_QUESTS: readonly QuestDefinition[] = [
           en: 'Use range(1, 6) in a for loop to print marker numbers from 1 to 5 sequentially.',
         },
         islandId: 'terrace_farm',
+        markerPosition: [11, 12, -33],
       },
       {
         id: 'm4_o4',
@@ -417,6 +439,7 @@ export const AWAKENING_QUESTS: readonly QuestDefinition[] = [
           en: 'Use while robot.ada_tanah(): tanam() maju() to plant variable-length rows safely.',
         },
         islandId: 'terrace_farm',
+        markerPosition: [11, 12, -33],
       },
       {
         id: 'm4_o5',
@@ -429,6 +452,7 @@ export const AWAKENING_QUESTS: readonly QuestDefinition[] = [
           en: 'Create nested loops: outer loop moves between rows, inner loop plants across the row.',
         },
         islandId: 'terrace_farm',
+        markerPosition: [11, 12, -33],
       },
     ],
     rewardXP: 225,
@@ -459,6 +483,7 @@ export const AWAKENING_QUESTS: readonly QuestDefinition[] = [
           en: 'Walk to BOLT\'s Workshop island and talk to BOLT [E] to inspect the watchtower blueprints.',
         },
         islandId: 'bolts_workshop',
+        markerPosition: [-13, 18, -46],
       },
       {
         id: 'm5_o1',
@@ -471,6 +496,7 @@ export const AWAKENING_QUESTS: readonly QuestDefinition[] = [
           en: 'Define a modular function with def pasang_tiang(): then call it on the outer line.',
         },
         islandId: 'bolts_workshop',
+        markerPosition: [-17, 18, -49],
       },
       {
         id: 'm5_o2',
@@ -483,6 +509,7 @@ export const AWAKENING_QUESTS: readonly QuestDefinition[] = [
           en: 'Add parameter: def pasang_tiang(tinggi): and repeat block placement for the specified height.',
         },
         islandId: 'bolts_workshop',
+        markerPosition: [-17, 18, -49],
       },
       {
         id: 'm5_o3',
@@ -495,6 +522,7 @@ export const AWAKENING_QUESTS: readonly QuestDefinition[] = [
           en: 'Write hitung_balok(tinggi, tiang): and return the multiplication result using the return statement.',
         },
         islandId: 'bolts_workshop',
+        markerPosition: [-17, 18, -49],
       },
       {
         id: 'm5_o4',
@@ -507,6 +535,7 @@ export const AWAKENING_QUESTS: readonly QuestDefinition[] = [
           en: 'Call pasang_tiang() inside a loop to construct all 4 corner pillars of the watchtower.',
         },
         islandId: 'bolts_workshop',
+        markerPosition: [-17, 18, -49],
       },
     ],
     rewardXP: 250,
@@ -537,6 +566,7 @@ export const AWAKENING_QUESTS: readonly QuestDefinition[] = [
           en: 'Climb the stairs from BOLT\'s workshop to the elevated corridor leading to Core Spire.',
         },
         islandId: 'core_spire',
+        markerPosition: [-37, 22, -25],
       },
       {
         id: 'fin_a',
@@ -549,6 +579,7 @@ export const AWAKENING_QUESTS: readonly QuestDefinition[] = [
           en: 'Program robot BIT to navigate the energy corridor and collect all three plasma energy cells.',
         },
         islandId: 'core_spire',
+        markerPosition: [-51, 24, -15],
       },
       {
         id: 'fin_b',
@@ -561,6 +592,7 @@ export const AWAKENING_QUESTS: readonly QuestDefinition[] = [
           en: 'Write buat_anak_tangga() function to build the ascending energy staircase up to the floating altar.',
         },
         islandId: 'core_spire',
+        markerPosition: [-51, 24, -15],
       },
       {
         id: 'fin_c',
@@ -573,6 +605,7 @@ export const AWAKENING_QUESTS: readonly QuestDefinition[] = [
           en: 'Run the final initialization code sequence at the Core Shard Altar to reawaken the ancient civilization of Aetheria!',
         },
         islandId: 'core_spire',
+        markerPosition: [-51, 24, -15],
       },
     ],
     rewardXP: 300,

@@ -447,8 +447,9 @@ export function generateAwakeningWorld(options: { singleIslandOnly?: boolean } =
 
   // --- Island A: Stasis Shrine (-48, 2, 48) ---
   carveIslandFoundation(storage, -48, 2, 48, 10, 10, 11, 'stasis_shrine');
-  // Paved Shrine Courtyard & Awakening Altar Pad
-  pavePad(storage, -49, -43, 44, 48, 3, VoxelId.PATH_STONE, 'stasis_shrine');
+  // Paved Shrine Courtyard & Awakening Altar Promenade (smooth path from spawn [-48, 52] -> NEO pedestal [-44, 47] -> bridge [-39, 43])
+  pavePad(storage, -50, -42, 44, 53, 3, VoxelId.PATH_STONE, 'stasis_shrine');
+  pavePad(storage, -43, -38, 42, 46, 3, VoxelId.PATH_STONE, 'stasis_shrine');
   // Stasis Monolith Arch behind spawn
   storage.setVoxel(-49, 4, 45, VoxelId.STONE_MID, 'stasis_shrine');
   storage.setVoxel(-49, 5, 45, VoxelId.STONE_LIGHT, 'stasis_shrine');
@@ -496,6 +497,8 @@ export function generateAwakeningWorld(options: { singleIslandOnly?: boolean } =
   // --- Island B: Beacon Point & Cottage (-16, 4, 32) ---
   carveIslandFoundation(storage, -16, 4, 32, 12, 11, 23, 'beacon_point');
   buildBeaconCottageAndWaterfall(storage, -16, 5, 30, 'beacon_point');
+  // Broad paved avenue connecting arrival bridge [-27, 37] across courtyard to Beacon Terminal [-12, 30] and exit skybridge [-6, 26]
+  pavePad(storage, -28, -10, 26, 38, 5, VoxelId.PATH_STONE, 'beacon_point');
   props.push(
     { type: 'pine_tall', position: [-23, 6, 26], rotationY: 0.5, scale: 1, zoneId: 'beacon_point' },
     { type: 'oak', position: [-9, 5, 37], rotationY: 1.4, scale: 1, zoneId: 'beacon_point' },
@@ -513,9 +516,15 @@ export function generateAwakeningWorld(options: { singleIslandOnly?: boolean } =
 
   // --- Island C: Supply Grove (16, 4, 16) ---
   carveIslandFoundation(storage, 16, 4, 16, 12, 11, 37, 'supply_grove');
-  pavePad(storage, 17, 21, 11, 15, 4, VoxelId.GRASS_TOP, 'supply_grove');
-  pavePad(storage, 20, 20, 12, 12, 4, VoxelId.PATH_STONE, 'supply_grove');
+  // Broad continuous stone pathway connecting entry bridge [5, 21] through central camp to exit bridge [26, 11]
+  pavePad(storage, 5, 26, 18, 23, 4, VoxelId.PATH_STONE, 'supply_grove');
+  pavePad(storage, 14, 22, 10, 18, 4, VoxelId.PATH_STONE, 'supply_grove');
+  pavePad(storage, 20, 26, 10, 14, 4, VoxelId.PATH_STONE, 'supply_grove');
   buildCampfire(storage, 14, 19, 'supply_grove', 5);
+  // Dedicated carved pedestals for crystals so they are elevated, distinct and impossible to miss
+  storage.setVoxel(11, 4, 22, VoxelId.STONE_LIGHT, 'supply_grove');
+  storage.setVoxel(19, 4, 9, VoxelId.STONE_LIGHT, 'supply_grove');
+  storage.setVoxel(24, 4, 18, VoxelId.STONE_LIGHT, 'supply_grove');
   props.push(
     { type: 'pine_tall', position: [10, 6, 11], rotationY: 0.3, scale: 1, zoneId: 'supply_grove' },
     { type: 'pine_tall', position: [15, 6, 9], rotationY: 1.8, scale: 1.1, zoneId: 'supply_grove' },
@@ -540,7 +549,8 @@ export function generateAwakeningWorld(options: { singleIslandOnly?: boolean } =
 
   // --- Island D: Gatehouse Rock (48, 6, 0) ---
   carveIslandFoundation(storage, 48, 6, 0, 11, 11, 49, 'gatehouse_rock');
-  pavePad(storage, 42, 49, -4, 6, 7, VoxelId.PATH_STONE, 'gatehouse_rock');
+  // Continuous stone plaza linking arrival bridge [37, 7, 4], Old Tamo, Gate Console, and departure bridge [41, 7, -9]
+  pavePad(storage, 36, 49, -10, 7, 7, VoxelId.PATH_STONE, 'gatehouse_rock');
   // Fortified gatehouse arch & rune plinths (sculpted crystals mounted cleanly in WorldLandmarks)
   for (let dz = -4; dz <= 4; dz++) {
     for (let h = 1; h <= 4; h++) {
@@ -568,7 +578,9 @@ export function generateAwakeningWorld(options: { singleIslandOnly?: boolean } =
   // --- Island E: Terrace Farm & Dual Waterfalls (16, 10, -32) ---
   carveIslandFoundation(storage, 16, 10, -32, 13, 13, 61, 'terrace_farm');
   pavePad(storage, 6, 17, -36, -24, 11, VoxelId.GRASS_TOP, 'terrace_farm');
-  pavePad(storage, 10, 11, -34, -25, 11, VoxelId.PATH_STONE, 'terrace_farm');
+  // Continuous stone terrace walkways linking arrival bridge [27, -22] to Mira [11, -26], Farm Console [11, -33], and exit bridge [5, -38]
+  pavePad(storage, 10, 28, -26, -21, 11, VoxelId.PATH_STONE, 'terrace_farm');
+  pavePad(storage, 4, 12, -39, -26, 11, VoxelId.PATH_STONE, 'terrace_farm');
   // Tilled farm rows & dual waterfall
   for (let row = 0; row < 3; row++) {
     for (let col = 0; col < 5; col++) {
@@ -627,7 +639,8 @@ export function generateAwakeningWorld(options: { singleIslandOnly?: boolean } =
   // --- Island F: BOLT's Workshop & Watchtower (-16, 16, -48) ---
   carveIslandFoundation(storage, -16, 16, -48, 12, 11, 73, 'bolts_workshop');
   pavePad(storage, -22, -8, -53, -45, 17, VoxelId.GRASS_TOP, 'bolts_workshop');
-  pavePad(storage, -18, -13, -50, -46, 17, VoxelId.PATH_STONE, 'bolts_workshop');
+  // Continuous stone workshop floor connecting arrival skybridge [-6, -44], BOLT, console, to departure skybridge [-26, -40]
+  pavePad(storage, -27, -6, -53, -40, 17, VoxelId.PATH_STONE, 'bolts_workshop');
   // Depot & crane
   for (let x = -12; x <= -8; x++) {
     for (let z = -52; z <= -48; z++) {
@@ -660,6 +673,8 @@ export function generateAwakeningWorld(options: { singleIslandOnly?: boolean } =
   // --- Island G: Core Shard Spire & Lighthouse (-48, 22, -16) ---
   carveIslandFoundation(storage, -48, 22, -16, 13, 12, 89, 'core_spire');
   buildLighthouseAndCoreSpire(storage, -46, 23, -18, 'core_spire');
+  // Ceremonial stone walkway connecting arrival skybridge [-37, 22, -25] directly to Core Altar dais [-51, 24, -15]
+  pavePad(storage, -54, -36, -26, -13, 23, VoxelId.PATH_STONE, 'core_spire');
   // Distant Skybridge toward Data Valley (appears once Core Shard restores!)
   buildSteppedBridge(storage, -58, 24, -22, -74, 28, -36, 3, VoxelId.SKYBRIDGE_CYAN, 'core_spire');
   props.push(

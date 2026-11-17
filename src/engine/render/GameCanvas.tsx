@@ -354,7 +354,7 @@ function AwakeningScene({
         position: [...ctrl.state.position],
       });
 
-      // Proximity check for interactables (3.2u horizontal radius, 3.0u vertical tolerance)
+      // Proximity check for interactables (3.6u horizontal radius, 3.6u vertical tolerance)
       let nearestPrompt: {
         targetId: string;
         label: string;
@@ -373,7 +373,7 @@ function AwakeningScene({
         const dy = item.position[1] - py;
         const dz = item.position[2] - pz;
         const horizSq = dx * dx + dz * dz;
-        if (horizSq <= 3.2 * 3.2 && Math.abs(dy) <= 3.2) {
+        if (horizSq <= 3.6 * 3.6 && Math.abs(dy) <= 3.6) {
           const score = horizSq + dy * dy * 0.25;
           if (score < bestScore) {
             bestScore = score;

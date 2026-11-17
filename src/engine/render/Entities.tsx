@@ -912,6 +912,9 @@ export function isInteractableQuestTarget(
     if (questInfo.targetId === 'core_spire' && item.id === 'core_altar') return true;
     if (questInfo.targetId === 'shrine_ledge' && item.id === 'neo_pedestal') return true;
     if (questInfo.targetId === 'supply_grove' && (item.id === 'bit_robot' || item.id === 'bit_terminal')) return true;
+    if (questInfo.targetId === 'gatehouse_rock' && (item.id === 'old_tamo' || item.id === 'gate_console')) return true;
+    if (questInfo.targetId === 'terrace_farm' && (item.id === 'mira' || item.id === 'farm_console')) return true;
+    if (questInfo.targetId === 'bolts_workshop' && (item.id === 'bolt' || item.id === 'workshop_console')) return true;
   }
 
   return false;
@@ -1199,7 +1202,7 @@ function InteractableHighlightNode({
     const d = Math.sqrt(dSq);
     distRef.current = d;
 
-    const near = d < 2.6 || isPromptActive;
+    const near = d < 3.2 || isPromptActive;
     if (near !== showBadge) {
       setShowBadge(near);
     }
