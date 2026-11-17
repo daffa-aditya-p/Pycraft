@@ -400,8 +400,8 @@ export const CinematicIntroOverlay: React.FC<CinematicIntroOverlayProps> = ({ on
           width: '100%',
           minHeight: '80px',
           height: '11vh',
-          background: '#0B0F17',
-          borderBottom: '2px solid rgba(61, 80, 88, 0.45)',
+          background: 'linear-gradient(180deg, #0E2D44 0%, #143D59 100%)',
+          borderBottom: '2px solid #F59E0B',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -416,12 +416,13 @@ export const CinematicIntroOverlay: React.FC<CinematicIntroOverlayProps> = ({ on
             style={{
               width: '28px',
               height: '28px',
-              backgroundColor: '#1C2427',
-              border: '1px solid #F2B544',
+              backgroundColor: '#0891B2',
+              border: '1.5px solid #FBBF24',
+              borderRadius: '6px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#F2B544',
+              color: '#FDE68A',
             }}
           >
             <IconSpark size={16} />
@@ -433,13 +434,13 @@ export const CinematicIntroOverlay: React.FC<CinematicIntroOverlayProps> = ({ on
                 fontSize: '0.95rem',
                 fontWeight: 700,
                 letterSpacing: '0.08em',
-                color: '#F2B544',
+                color: '#FDE68A',
                 textTransform: 'uppercase',
               }}
             >
               Aetheria: Chronicles
             </div>
-            <div style={{ fontSize: '0.75rem', color: '#8C9E9E', letterSpacing: '0.04em' }}>
+            <div style={{ fontSize: '0.75rem', color: '#BAE6FD', letterSpacing: '0.04em' }}>
               {currentAct.badge[locale]}
             </div>
           </div>
@@ -465,7 +466,9 @@ export const CinematicIntroOverlay: React.FC<CinematicIntroOverlayProps> = ({ on
                 style={{
                   width: isActive ? '36px' : '20px',
                   height: '6px',
-                  backgroundColor: isActive ? '#F2B544' : isDone ? '#5FA32A' : '#2A363B',
+                  backgroundColor: isActive ? '#FBBF24' : isDone ? '#4ADE80' : '#38BDF8',
+                  opacity: isActive || isDone ? 1 : 0.4,
+                  borderRadius: '999px',
                   border: 'none',
                   padding: 0,
                   cursor: 'pointer',
@@ -569,8 +572,9 @@ export const CinematicIntroOverlay: React.FC<CinematicIntroOverlayProps> = ({ on
             maxWidth: '820px',
             width: '100%',
             padding: '20px 28px',
-            boxShadow: '0 16px 40px rgba(0, 0, 0, 0.75)',
-            borderLeft: '4px solid #F2B544',
+            boxShadow: '0 16px 40px rgba(14, 50, 78, 0.35)',
+            borderLeft: '5px solid #F59E0B',
+            borderRadius: '14px',
             display: 'flex',
             flexDirection: 'column',
             gap: '8px',
@@ -583,7 +587,7 @@ export const CinematicIntroOverlay: React.FC<CinematicIntroOverlayProps> = ({ on
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              borderBottom: '1px solid rgba(61, 80, 88, 0.4)',
+              borderBottom: '1px solid #D4E7F1',
               paddingBottom: '8px',
             }}
           >
@@ -594,8 +598,8 @@ export const CinematicIntroOverlay: React.FC<CinematicIntroOverlayProps> = ({ on
                   width: '8px',
                   height: '8px',
                   borderRadius: '50%',
-                  backgroundColor: isSpeaking ? '#5FA32A' : '#F2B544',
-                  boxShadow: isSpeaking ? '0 0 8px #5FA32A' : 'none',
+                  backgroundColor: isSpeaking ? '#16A34A' : '#F59E0B',
+                  boxShadow: isSpeaking ? '0 0 8px #16A34A' : 'none',
                   transition: 'background-color 0.2s',
                 }}
               />
@@ -604,21 +608,21 @@ export const CinematicIntroOverlay: React.FC<CinematicIntroOverlayProps> = ({ on
                   fontFamily: 'var(--font-display)',
                   fontSize: '0.8125rem',
                   fontWeight: 700,
-                  color: '#F2B544',
+                  color: '#0E7490',
                   letterSpacing: '0.06em',
                   textTransform: 'uppercase',
                 }}
               >
                 {currentAct.speaker[locale]}
               </span>
-              <span style={{ color: '#6E757A', fontSize: '0.75rem' }}>•</span>
-              <span style={{ color: '#A9B8BD', fontSize: '0.75rem', fontWeight: 600 }}>
+              <span style={{ color: '#94A3B8', fontSize: '0.75rem' }}>•</span>
+              <span style={{ color: '#335267', fontSize: '0.75rem', fontWeight: 600 }}>
                 {currentAct.title[locale]}
               </span>
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ fontSize: '0.75rem', color: '#8C9E9E', fontFamily: 'monospace' }}>
+              <span style={{ fontSize: '0.75rem', color: '#4C697C', fontFamily: 'monospace' }}>
                 {actIndex + 1} / {CINEMATIC_ACTS.length}
               </span>
               <button
@@ -638,10 +642,9 @@ export const CinematicIntroOverlay: React.FC<CinematicIntroOverlayProps> = ({ on
             style={{
               fontSize: '1.18rem',
               lineHeight: 1.55,
-              color: '#F8FAFC',
+              color: '#172B3A',
               fontFamily: 'var(--font-body)',
               minHeight: '3.4em',
-              textShadow: '0 1px 3px rgba(0, 0, 0, 0.8)',
             }}
           >
             {displayedText}
@@ -652,7 +655,7 @@ export const CinematicIntroOverlay: React.FC<CinematicIntroOverlayProps> = ({ on
                   width: '2px',
                   height: '1.1em',
                   verticalAlign: 'text-bottom',
-                  backgroundColor: '#F2B544',
+                  backgroundColor: '#F59E0B',
                   marginLeft: '4px',
                   animation: 'blink 0.8s infinite',
                 }}
@@ -668,8 +671,8 @@ export const CinematicIntroOverlay: React.FC<CinematicIntroOverlayProps> = ({ on
           width: '100%',
           minHeight: '80px',
           height: '11vh',
-          background: '#0B0F17',
-          borderTop: '2px solid rgba(61, 80, 88, 0.45)',
+          background: 'linear-gradient(180deg, #143D59 0%, #0E2D44 100%)',
+          borderTop: '2px solid #F59E0B',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -678,23 +681,23 @@ export const CinematicIntroOverlay: React.FC<CinematicIntroOverlayProps> = ({ on
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <span style={{ fontSize: '0.75rem', color: '#6E757A' }}>
+          <span style={{ fontSize: '0.75rem', color: '#BAE6FD' }}>
             PyCraft Engine v0.1 • WebAssembly Python 3.12
           </span>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontSize: '0.75rem', color: '#8C9E9E' }}>
+          <span style={{ fontSize: '0.75rem', color: '#BAE6FD' }}>
             {locale === 'id' ? 'Navigasi Bab:' : 'Chapter Nav:'}
           </span>
           <span
             style={{
               fontSize: '0.7rem',
-              color: '#F2B544',
-              backgroundColor: '#1C2427',
-              border: '1px solid #3D5058',
+              color: '#FDE68A',
+              backgroundColor: '#164E63',
+              border: '1px solid #38BDF8',
               padding: '2px 6px',
-              borderRadius: '2px',
+              borderRadius: '4px',
               fontFamily: 'monospace',
             }}
           >
@@ -703,11 +706,11 @@ export const CinematicIntroOverlay: React.FC<CinematicIntroOverlayProps> = ({ on
           <span
             style={{
               fontSize: '0.7rem',
-              color: '#F2B544',
-              backgroundColor: '#1C2427',
-              border: '1px solid #3D5058',
+              color: '#FDE68A',
+              backgroundColor: '#164E63',
+              border: '1px solid #38BDF8',
               padding: '2px 6px',
-              borderRadius: '2px',
+              borderRadius: '4px',
               fontFamily: 'monospace',
             }}
           >

@@ -121,12 +121,12 @@ export const GameplayHud: React.FC<GameplayHudProps> = ({
 
   const saveColor =
     saveStatus === 'error'
-      ? '#E0603F'
+      ? '#DC2626'
       : saveStatus === 'readonly'
-        ? '#E9A23B'
+        ? '#B45309'
         : saveStatus === 'saved'
-          ? '#6DBE4B'
-          : '#A9B8BD';
+          ? '#15803D'
+          : '#0E7490';
 
   const isCompact = layoutClass === 'P' || layoutClass === 'L';
 
@@ -189,21 +189,22 @@ export const GameplayHud: React.FC<GameplayHudProps> = ({
               className="surface-slate"
               style={{
                 pointerEvents: 'auto',
-                padding: isCompact ? '8px 10px' : '10px 14px',
-                maxWidth: isCompact ? '210px' : '320px',
+                padding: isCompact ? '8px 12px' : '10px 14px',
+                maxWidth: isCompact ? '220px' : '330px',
                 textAlign: 'left',
                 cursor: 'pointer',
                 display: 'block',
-                background: 'var(--slate-base-96, #1C2427)',
-                border: '1px solid var(--slate-border, #33434A)',
-                borderRadius: 'var(--radius-2, 2px)',
-                transition: 'border-color 0.15s ease, background-color 0.15s ease',
+                background: 'linear-gradient(180deg, #FFFDF7 0%, #F4FAFD 100%)',
+                border: '2px solid #F59E0B',
+                borderRadius: '14px',
+                boxShadow: '0 4px 0 rgba(217, 119, 6, 0.28), 0 10px 22px rgba(15, 52, 76, 0.16)',
+                transition: 'transform 0.15s ease, border-color 0.15s ease',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = '#F2B544';
+                e.currentTarget.style.borderColor = '#0891B2';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'var(--slate-border, #33434A)';
+                e.currentTarget.style.borderColor = '#F59E0B';
               }}
             >
               <div
@@ -217,10 +218,10 @@ export const GameplayHud: React.FC<GameplayHudProps> = ({
                 <div
                   style={{
                     fontSize: '0.75rem',
-                    fontWeight: 700,
+                    fontWeight: 800,
                     textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                    color: '#3CC4C0',
+                    letterSpacing: '0.04em',
+                    color: '#0E7490',
                   }}
                 >
                   {activeMissionId ?? (locale === 'id' ? 'Eksplorasi' : 'Exploration')} · {xp} XP
@@ -228,11 +229,12 @@ export const GameplayHud: React.FC<GameplayHudProps> = ({
                 <span
                   style={{
                     fontSize: '0.6875rem',
-                    color: '#F2B544',
-                    fontWeight: 700,
-                    backgroundColor: 'rgba(242, 181, 68, 0.15)',
-                    padding: '1px 5px',
-                    borderRadius: '2px',
+                    color: '#92400E',
+                    fontWeight: 800,
+                    backgroundColor: '#FEF3C7',
+                    border: '1px solid #FCD34D',
+                    padding: '1px 7px',
+                    borderRadius: '999px',
                     letterSpacing: '0.03em',
                   }}
                 >
@@ -241,10 +243,10 @@ export const GameplayHud: React.FC<GameplayHudProps> = ({
               </div>
               <div
                 style={{
-                  marginTop: '3px',
-                  fontSize: '0.875rem',
-                  fontWeight: 700,
-                  color: '#E8EEF0',
+                  marginTop: '4px',
+                  fontSize: '0.9rem',
+                  fontWeight: 800,
+                  color: '#172B3A',
                   lineHeight: 1.35,
                 }}
               >
@@ -257,13 +259,14 @@ export const GameplayHud: React.FC<GameplayHudProps> = ({
                 style={{
                   marginTop: '4px',
                   fontSize: '0.6875rem',
-                  color: '#8FA3A9',
+                  fontWeight: 600,
+                  color: '#4C697C',
                 }}
               >
                 {locale === 'id' ? 'Klik untuk daftar objektif' : 'Click for objectives list'}
               </div>
               {showFps && fps !== null && (
-                <div style={{ marginTop: '4px', fontSize: '0.75rem', color: '#8FA3A9' }}>
+                <div style={{ marginTop: '4px', fontSize: '0.75rem', color: '#0E7490', fontWeight: 700 }}>
                   {Math.round(fps)} FPS · {runtimeStatus}
                 </div>
               )}
@@ -294,9 +297,20 @@ export const GameplayHud: React.FC<GameplayHudProps> = ({
                 className="btn-slate"
                 aria-label={`${locale === 'id' ? 'Status simpan' : 'Save status'}: ${saveLabel}`}
                 style={{
-                  minHeight: '48px',
-                  padding: '6px 10px',
-                  borderColor: saveStatus === 'error' ? '#E0603F' : '#33434A',
+                  minHeight: '44px',
+                  padding: '6px 12px',
+                  background:
+                    saveStatus === 'error'
+                      ? '#FEF2F2'
+                      : saveStatus === 'readonly'
+                        ? '#FFFBEB'
+                        : '#ECFDF5',
+                  borderColor:
+                    saveStatus === 'error'
+                      ? '#FCA5A5'
+                      : saveStatus === 'readonly'
+                        ? '#FCD34D'
+                        : '#6EE7B7',
                   color: saveColor,
                   fontSize: '0.8125rem',
                 }}
@@ -322,6 +336,12 @@ export const GameplayHud: React.FC<GameplayHudProps> = ({
                       : 'Toggle Camera'
                   }
                   onClick={() => onToggleCamera?.()}
+                  style={{
+                    minHeight: '44px',
+                    background: '#EFF6FF',
+                    borderColor: '#93C5FD',
+                    color: '#1D4ED8',
+                  }}
                 >
                   <IconCamera size={18} />
                 </button>
@@ -335,6 +355,12 @@ export const GameplayHud: React.FC<GameplayHudProps> = ({
                 onClick={() => {
                   setJournalTab('quests');
                   setInGameOverlay('journal');
+                }}
+                style={{
+                  minHeight: '44px',
+                  background: 'linear-gradient(180deg, #FFFBEB 0%, #FEF3C7 100%)',
+                  borderColor: '#F59E0B',
+                  color: '#92400E',
                 }}
               >
                 <IconJournal size={18} />
@@ -350,8 +376,13 @@ export const GameplayHud: React.FC<GameplayHudProps> = ({
                   aria-pressed={inGameOverlay === 'editor'}
                   onClick={() => setEditorDockOpen(inGameOverlay !== 'editor')}
                   style={{
-                    borderColor: inGameOverlay === 'editor' ? '#3CC4C0' : '#33434A',
-                    color: inGameOverlay === 'editor' ? '#3CC4C0' : '#E8EEF0',
+                    minHeight: '44px',
+                    background:
+                      inGameOverlay === 'editor'
+                        ? 'linear-gradient(180deg, #06B6D4 0%, #0891B2 100%)'
+                        : 'linear-gradient(180deg, #ECFEFF 0%, #CFFAFE 100%)',
+                    borderColor: '#0891B2',
+                    color: inGameOverlay === 'editor' ? '#FFFFFF' : '#0E7490',
                   }}
                 >
                   <IconCode size={18} />
@@ -365,6 +396,12 @@ export const GameplayHud: React.FC<GameplayHudProps> = ({
                 className="btn-slate touch-target-48"
                 aria-label={locale === 'id' ? 'Menu Jeda' : 'Pause Menu'}
                 onClick={() => setInGameOverlay('paused')}
+                style={{
+                  minHeight: '44px',
+                  background: 'linear-gradient(180deg, #FFFDF7 0%, #F1F5F9 100%)',
+                  borderColor: '#94A3B8',
+                  color: '#1E293B',
+                }}
               >
                 <IconMenu size={20} />
               </button>
@@ -429,12 +466,12 @@ export const GameplayHud: React.FC<GameplayHudProps> = ({
           {toasts.map((toast) => {
             const borderColor =
               toast.kind === 'error'
-                ? '#E0603F'
+                ? '#DC2626'
                 : toast.kind === 'warning'
-                  ? '#E9A23B'
+                  ? '#F59E0B'
                   : toast.kind === 'success'
-                    ? '#6DBE4B'
-                    : '#3CC4C0';
+                    ? '#16A34A'
+                    : '#0891B2';
             return (
               <div
                 key={toast.id}
@@ -442,9 +479,11 @@ export const GameplayHud: React.FC<GameplayHudProps> = ({
                 className="surface-slate"
                 style={{
                   pointerEvents: 'auto',
-                  padding: '10px 12px',
-                  borderLeft: `3px solid ${borderColor}`,
+                  padding: '10px 14px',
+                  borderLeft: `5px solid ${borderColor}`,
                   fontSize: '0.875rem',
+                  fontWeight: 600,
+                  color: '#172B3A',
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
@@ -459,7 +498,7 @@ export const GameplayHud: React.FC<GameplayHudProps> = ({
                   style={{
                     background: 'transparent',
                     border: 'none',
-                    color: '#A9B8BD',
+                    color: '#4C697C',
                     cursor: 'pointer',
                     fontWeight: 700,
                     minWidth: '28px',

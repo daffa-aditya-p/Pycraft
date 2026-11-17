@@ -118,7 +118,8 @@ export const NewAdventureScreen: React.FC<NewAdventureScreenProps> = ({
         inset: 0,
         overflowY: 'auto',
         padding: '24px',
-        backgroundColor: 'rgba(28, 36, 39, 0.72)',
+        backgroundColor: 'rgba(14, 50, 78, 0.42)',
+        backdropFilter: 'blur(4px)',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'flex-start',
@@ -134,6 +135,7 @@ export const NewAdventureScreen: React.FC<NewAdventureScreenProps> = ({
           display: 'flex',
           flexDirection: 'column',
           gap: '20px',
+          borderRadius: '14px',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -146,7 +148,7 @@ export const NewAdventureScreen: React.FC<NewAdventureScreenProps> = ({
               margin: 0,
               fontFamily: 'var(--font-display)',
               fontSize: '1.75rem',
-              color: '#F2B544',
+              color: '#0E7490',
             }}
           >
             {locale === 'id' ? 'Petualangan Baru' : 'New Adventure'}
@@ -162,10 +164,10 @@ export const NewAdventureScreen: React.FC<NewAdventureScreenProps> = ({
               alignItems: 'center',
               gap: '10px',
               padding: '10px 14px',
-              backgroundColor: '#3B2C1B',
-              border: '1px solid #E9A23B',
-              borderRadius: '2px',
-              color: '#E8EEF0',
+              backgroundColor: '#FEF3C7',
+              border: '1.5px solid #F59E0B',
+              borderRadius: '8px',
+              color: '#92400E',
               fontSize: '0.875rem',
             }}
           >
@@ -185,7 +187,7 @@ export const NewAdventureScreen: React.FC<NewAdventureScreenProps> = ({
               margin: '0 0 10px',
               fontFamily: 'var(--font-display)',
               fontSize: '1.125rem',
-              color: '#E8EEF0',
+              color: '#172B3A',
             }}
           >
             {locale === 'id' ? '1. Pilih Prasasti Simpanan' : '1. Choose Save Tablet'}
@@ -216,10 +218,10 @@ export const NewAdventureScreen: React.FC<NewAdventureScreenProps> = ({
                   style={{
                     textAlign: 'left',
                     padding: '14px',
-                    backgroundColor: isSelected ? '#2C3A3F' : '#1C2427',
-                    border: isSelected ? '2px solid #F2B544' : '1px solid #33434A',
-                    borderRadius: '4px',
-                    color: '#E8EEF0',
+                    backgroundColor: isSelected ? '#FEF3C7' : '#F0F9FF',
+                    border: isSelected ? '2px solid #F59E0B' : '1.5px solid #B6DCEB',
+                    borderRadius: '10px',
+                    color: '#172B3A',
                     cursor: 'pointer',
                     display: 'flex',
                     flexDirection: 'column',
@@ -234,7 +236,7 @@ export const NewAdventureScreen: React.FC<NewAdventureScreenProps> = ({
                       alignItems: 'center',
                       fontFamily: 'var(--font-display)',
                       fontWeight: 700,
-                      color: isSelected ? '#F2B544' : '#A9B8BD',
+                      color: isSelected ? '#B45309' : '#0E7490',
                     }}
                   >
                     <span>Slot {slotId}</span>
@@ -243,15 +245,15 @@ export const NewAdventureScreen: React.FC<NewAdventureScreenProps> = ({
                   {isOccupied && summary ? (
                     <>
                       <div style={{ fontWeight: 700, fontSize: '1rem' }}>{summary.playerName}</div>
-                      <div style={{ fontSize: '0.8125rem', color: '#A9B8BD' }}>
+                      <div style={{ fontSize: '0.8125rem', color: '#335267' }}>
                         {rankName} · {summary.xp} XP
                       </div>
-                      <div style={{ fontSize: '0.75rem', color: '#8FA3A9' }}>
+                      <div style={{ fontSize: '0.75rem', color: '#4C697C' }}>
                         {formatRelativeTime(summary.updatedAt, locale)}
                       </div>
                     </>
                   ) : (
-                    <div style={{ fontSize: '0.875rem', color: '#8FA3A9', marginTop: '4px' }}>
+                    <div style={{ fontSize: '0.875rem', color: '#4C697C', marginTop: '4px' }}>
                       {locale === 'id' ? 'Slot Kosong' : 'Empty Slot'}
                     </div>
                   )}
@@ -286,11 +288,11 @@ export const NewAdventureScreen: React.FC<NewAdventureScreenProps> = ({
             style={{
               width: '100%',
               minHeight: '44px',
-              padding: '10px 12px',
-              backgroundColor: '#1A2225',
-              color: '#E8EEF0',
-              border: '1px solid #33434A',
-              borderRadius: '2px',
+              padding: '10px 14px',
+              backgroundColor: '#FFFFFF',
+              color: '#172B3A',
+              border: '2px solid #7CC4DF',
+              borderRadius: '8px',
               fontSize: '1rem',
               fontFamily: 'var(--font-body)',
             }}
@@ -311,7 +313,7 @@ export const NewAdventureScreen: React.FC<NewAdventureScreenProps> = ({
 
           {/* Skin Tones */}
           <div>
-            <div style={{ fontSize: '0.875rem', color: '#A9B8BD', marginBottom: '6px' }}>
+            <div style={{ fontSize: '0.875rem', color: '#335267', fontWeight: 600, marginBottom: '6px' }}>
               {locale === 'id' ? 'Warna Kulit' : 'Skin Tone'}
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
@@ -328,9 +330,9 @@ export const NewAdventureScreen: React.FC<NewAdventureScreenProps> = ({
                     backgroundColor: tone.hex,
                     border:
                       appearance.skinTone === tone.id
-                        ? '3px solid #F2B544'
-                        : '1px solid #33434A',
-                    borderRadius: '2px',
+                        ? '3px solid #F59E0B'
+                        : '1.5px solid #94B8CA',
+                    borderRadius: '8px',
                     cursor: 'pointer',
                   }}
                 />
@@ -340,7 +342,7 @@ export const NewAdventureScreen: React.FC<NewAdventureScreenProps> = ({
 
           {/* Hair Styles */}
           <div>
-            <div style={{ fontSize: '0.875rem', color: '#A9B8BD', marginBottom: '6px' }}>
+            <div style={{ fontSize: '0.875rem', color: '#335267', fontWeight: 600, marginBottom: '6px' }}>
               {locale === 'id' ? 'Gaya Rambut' : 'Hair Style'}
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
@@ -352,8 +354,9 @@ export const NewAdventureScreen: React.FC<NewAdventureScreenProps> = ({
                   className="btn-slate"
                   onClick={() => updateAppearance({ hairStyle: idx })}
                   style={{
-                    borderColor: appearance.hairStyle === idx ? '#F2B544' : '#33434A',
-                    color: appearance.hairStyle === idx ? '#F2B544' : '#E8EEF0',
+                    backgroundColor: appearance.hairStyle === idx ? '#FEF3C7' : '#FFFFFF',
+                    borderColor: appearance.hairStyle === idx ? '#F59E0B' : '#94B8CA',
+                    color: appearance.hairStyle === idx ? '#B45309' : '#172B3A',
                   }}
                 >
                   {styleName}
@@ -364,7 +367,7 @@ export const NewAdventureScreen: React.FC<NewAdventureScreenProps> = ({
 
           {/* Hair Colors */}
           <div>
-            <div style={{ fontSize: '0.875rem', color: '#A9B8BD', marginBottom: '6px' }}>
+            <div style={{ fontSize: '0.875rem', color: '#335267', fontWeight: 600, marginBottom: '6px' }}>
               {locale === 'id' ? 'Warna Rambut' : 'Hair Color'}
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
@@ -381,9 +384,9 @@ export const NewAdventureScreen: React.FC<NewAdventureScreenProps> = ({
                     backgroundColor: hc.hex,
                     border:
                       appearance.hairColor === hc.id
-                        ? '3px solid #F2B544'
-                        : '1px solid #33434A',
-                    borderRadius: '2px',
+                        ? '3px solid #F59E0B'
+                        : '1.5px solid #94B8CA',
+                    borderRadius: '8px',
                     cursor: 'pointer',
                   }}
                 />
@@ -393,7 +396,7 @@ export const NewAdventureScreen: React.FC<NewAdventureScreenProps> = ({
 
           {/* Scarf Colors */}
           <div>
-            <div style={{ fontSize: '0.875rem', color: '#A9B8BD', marginBottom: '6px' }}>
+            <div style={{ fontSize: '0.875rem', color: '#335267', fontWeight: 600, marginBottom: '6px' }}>
               {locale === 'id' ? 'Warna Syal' : 'Scarf Color'}
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
@@ -410,9 +413,9 @@ export const NewAdventureScreen: React.FC<NewAdventureScreenProps> = ({
                     backgroundColor: sc.hex,
                     border:
                       appearance.scarfColor === sc.id
-                        ? '3px solid #F2B544'
-                        : '1px solid #33434A',
-                    borderRadius: '2px',
+                        ? '3px solid #F59E0B'
+                        : '1.5px solid #94B8CA',
+                    borderRadius: '8px',
                     cursor: 'pointer',
                   }}
                 />

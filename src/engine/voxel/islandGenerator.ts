@@ -120,6 +120,50 @@ function hash2d(x: number, z: number, seed: number): number {
   return n - Math.floor(n);
 }
 
+/** Returns world Y surface elevation (top face of topmost non-air solid/water voxel). */
+function getGroundSurfaceY(
+  storage: ChunkStorage,
+  wx: number,
+  wz: number,
+  fallbackY: number,
+  minY = 0,
+  maxY = 36,
+): number {
+  const gx = Math.floor(wx);
+  const gz = Math.floor(wz);
+  for (let y = maxY; y >= minY; y--) {
+    const id = storage.getVoxel(gx, y, gz);
+    if (id !== VoxelId.AIR && id !== VoxelId.CLOUD_WHITE) {
+      return y + 1;
+    }
+  }
+  return fallbackY;
+}
+
+/** Flattens a rectangular stone/path pad and fills soil beneath so nothing floats. */
+function pavePad(
+  storage: ChunkStorage,
+  x0: number,
+  x1: number,
+  z0: number,
+  z1: number,
+  surfaceVoxelY: number,
+  voxelId: number,
+  zoneId: string,
+): void {
+  for (let x = x0; x <= x1; x++) {
+    for (let z = z0; z <= z1; z++) {
+      // Clear any overhang voxels above
+      for (let y = surfaceVoxelY + 1; y <= surfaceVoxelY + 6; y++) {
+        storage.setVoxel(x, y, z, VoxelId.AIR, zoneId);
+      }
+      storage.setVoxel(x, surfaceVoxelY, z, voxelId, zoneId);
+      storage.setVoxel(x, surfaceVoxelY - 1, z, VoxelId.SOIL_WARM, zoneId);
+      storage.setVoxel(x, surfaceVoxelY - 2, z, VoxelId.STONE_MID, zoneId);
+    }
+  }
+}
+
 /**
  * Tier 1: Generates an art-directed floating island foundation matching reference.png:
  * - Vibrant lime-green grass cap (1 voxel, #8ED438 / #76BF31 / #5FA32A side lip)
@@ -233,21 +277,22 @@ function buildSteppedBridge(
   }
 }
 
-function buildCampfire(storage: ChunkStorage, cx: number, y: number, cz: number, zoneId: string): void {
+function buildCampfire(storage: ChunkStorage, cx: number, cz: number, zoneId: string, fallbackY = 3): void {
+  const topY = getGroundSurfaceY(storage, cx, cz, fallbackY + 1);
+  const y = topY - 1;
   const ring = [
     [-1, 0], [1, 0], [0, -1], [0, 1],
     [-1, -1], [1, -1], [-1, 1], [1, 1],
   ];
   for (const [ox, oz] of ring) {
-    storage.setVoxel(cx + ox!, y, cz + oz!, VoxelId.STONE_MID, zoneId);
+    storage.setVoxel(cx + ox!, y + 1, cz + oz!, VoxelId.STONE_MID, zoneId);
   }
-  storage.setVoxel(cx, y, cz, VoxelId.WOOD_DARK, zoneId);
-  storage.setVoxel(cx, y + 1, cz, VoxelId.FIRE_ORANGE, zoneId);
-  storage.setVoxel(cx, y + 2, cz, VoxelId.LAMP_AMBER, zoneId);
+  storage.setVoxel(cx, y + 1, cz, VoxelId.WOOD_DARK, zoneId);
+  storage.setVoxel(cx, y + 2, cz, VoxelId.FIRE_ORANGE, zoneId);
 }
 
 /**
- * Tier 3 Hero Landmark: Cozy Cottage + Dual Waterfalls matching docs/art/reference.png top island.
+ * Tier 3 Hero Landmark: Cozy Timber Cottage, Paved Beacon Courtyard & Dual Waterfalls.
  */
 function buildBeaconCottageAndWaterfall(
   storage: ChunkStorage,
@@ -256,7 +301,11 @@ function buildBeaconCottageAndWaterfall(
   cz: number,
   zoneId: string,
 ): void {
-  // Cottage base at (cx - 2..cx + 3, cz - 5..cz - 1)
+  // Level cozy grass yard + paved stone garden courtyard around cottage, terminal, and beacon
+  pavePad(storage, cx - 3, cx + 7, cz - 6, cz + 1, y, VoxelId.GRASS_TOP, zoneId);
+  pavePad(storage, cx, cx + 6, cz - 3, cz + 1, y, VoxelId.PATH_STONE, zoneId);
+
+  // Cottage plinth (cx - 2..cx + 3, cz - 5..cz - 1)
   for (let x = cx - 2; x <= cx + 3; x++) {
     for (let z = cz - 5; z <= cz - 1; z++) {
       storage.setVoxel(x, y, z, VoxelId.STONE_LIGHT, zoneId);
@@ -273,56 +322,67 @@ function buildBeaconCottageAndWaterfall(
           );
         }
       }
-      // Pitched slate roof
-      storage.setVoxel(x, y + 4, z, VoxelId.SLATE_ROOF, zoneId);
-      if (z >= cz - 4 && z <= cz - 2) {
-        storage.setVoxel(x, y + 5, z, VoxelId.SLATE_ROOF, zoneId);
-      }
     }
   }
-  // Door & glowing amber window
+  // Overhanging pitched slate roof (wider eaves & peaked ridge)
+  for (let x = cx - 3; x <= cx + 4; x++) {
+    for (let z = cz - 6; z <= cz; z++) {
+      storage.setVoxel(x, y + 4, z, VoxelId.SLATE_ROOF, zoneId);
+    }
+    for (let z = cz - 5; z <= cz - 1; z++) {
+      storage.setVoxel(x, y + 5, z, VoxelId.SLATE_ROOF, zoneId);
+    }
+    for (let z = cz - 4; z <= cz - 2; z++) {
+      storage.setVoxel(x, y + 6, z, VoxelId.WOOD_DARK, zoneId);
+    }
+  }
+  // Stone chimney on left roof slope
+  storage.setVoxel(cx - 1, y + 5, cz - 4, VoxelId.STONE_MID, zoneId);
+  storage.setVoxel(cx - 1, y + 6, cz - 4, VoxelId.STONE_MID, zoneId);
+  storage.setVoxel(cx - 1, y + 7, cz - 4, VoxelId.STONE_LIGHT, zoneId);
+
+  // Warm recessed oak door, cozy amber window & porch flower box
   storage.setVoxel(cx + 1, y + 1, cz - 1, VoxelId.WOOD_PLANK, zoneId);
   storage.setVoxel(cx + 1, y + 2, cz - 1, VoxelId.WOOD_PLANK, zoneId);
   storage.setVoxel(cx - 1, y + 2, cz - 1, VoxelId.LAMP_AMBER, zoneId);
-  // Stone stairs in front
+  storage.setVoxel(cx - 1, y + 1, cz, VoxelId.FOLIAGE_BLOSSOM, zoneId);
+
+  // Stone doorstep & garden border
   storage.setVoxel(cx + 1, y, cz, VoxelId.STONE_LIGHT, zoneId);
   storage.setVoxel(cx + 2, y, cz, VoxelId.STONE_LIGHT, zoneId);
 
-  // Turquoise pond & dual cascading waterfalls (front/right cliff edge)
-  for (let x = cx - 4; x <= cx + 4; x++) {
-    for (let z = cz + 2; z <= cz + 6; z++) {
+  // Turquoise pond & dual cascading waterfalls (front/right cliff edge, leaving -18, 36 dry)
+  for (let x = cx - 2; x <= cx + 4; x++) {
+    for (let z = cz + 2; z <= cz + 5; z++) {
       storage.setVoxel(x, y - 1, z, VoxelId.STONE_DARK, zoneId);
       storage.setVoxel(x, y, z, VoxelId.WATER_SHALLOW, zoneId);
     }
   }
-  // Wooden dock jutting into pond
+  // Wooden dock jutting cleanly into pond
   storage.setVoxel(cx - 2, y + 1, cz + 2, VoxelId.WOOD_PLANK, zoneId);
   storage.setVoxel(cx - 2, y + 1, cz + 3, VoxelId.WOOD_PLANK, zoneId);
   storage.setVoxel(cx - 1, y + 1, cz + 3, VoxelId.WOOD_PLANK, zoneId);
+  storage.setVoxel(cx - 2, y, cz + 3, VoxelId.WOOD_DARK, zoneId);
 
   // Waterfall cascade down cliff
   for (let drop = 0; drop <= 6; drop++) {
     const col = drop === 6 ? VoxelId.WATER_FOAM : drop % 2 === 0 ? VoxelId.WATER_CASCADE : VoxelId.WATER_SHALLOW;
-    storage.setVoxel(cx + 3, y - drop, cz + 7, col, zoneId);
-    storage.setVoxel(cx + 4, y - drop, cz + 7, col, zoneId);
+    storage.setVoxel(cx + 3, y - drop, cz + 6, col, zoneId);
+    storage.setVoxel(cx + 4, y - drop, cz + 6, col, zoneId);
   }
 
-  // Stone Beacon Tower + Terminal + Signpost
-  const bx = cx + 6;
-  const bz = cz - 2;
-  for (let h = 1; h <= 5; h++) {
-    storage.setVoxel(bx, y + h, bz, h === 4 ? VoxelId.LAMP_AMBER : h === 5 ? VoxelId.BRONZE : VoxelId.STONE_MID, zoneId);
-  }
-  // Terminal console
-  storage.setVoxel(bx - 2, y + 1, bz + 2, VoxelId.CHAR_SLATE, zoneId);
-  storage.setVoxel(bx - 2, y + 2, bz + 2, VoxelId.CORE_VEIN, zoneId);
-  // Signpost
+  // Dedicated stone dais pads for Beacon Tower ([-10, 28]) & Terminal Suar ([-12, 30])
+  // (Rendered with sculpted 3D detail geometry in WorldLandmarks.tsx — no raw floating blocks!)
+  storage.setVoxel(cx + 6, y, cz - 2, VoxelId.STONE_LIGHT, zoneId);
+  storage.setVoxel(cx + 4, y, cz, VoxelId.STONE_LIGHT, zoneId);
+
+  // Cozy wooden signpost by pond dock
   storage.setVoxel(cx - 5, y + 1, cz + 1, VoxelId.WOOD_DARK, zoneId);
   storage.setVoxel(cx - 5, y + 2, cz + 1, VoxelId.WOOD_PLANK, zoneId);
 }
 
 /**
- * Tier 3 Hero Landmark: Red-and-White Striped Lighthouse matching docs/art/reference.png right island.
+ * Tier 3 Hero Landmark: Red-and-White Striped Lighthouse & Core Altar Dais.
  */
 function buildLighthouseAndCoreSpire(
   storage: ChunkStorage,
@@ -331,7 +391,8 @@ function buildLighthouseAndCoreSpire(
   cz: number,
   zoneId: string,
 ): void {
-  // Stepped rocky plinth
+  pavePad(storage, cx - 7, cx + 3, cz - 3, cz + 4, y, VoxelId.GRASS_TOP, zoneId);
+  // Stepped rocky lighthouse plinth
   for (let dx = -3; dx <= 3; dx++) {
     for (let dz = -3; dz <= 3; dz++) {
       if (Math.abs(dx) + Math.abs(dz) <= 4) {
@@ -342,40 +403,36 @@ function buildLighthouseAndCoreSpire(
       }
     }
   }
-  // Red & white striped tower (y+3 .. y+12)
+  // Red & white striped tower (y+3 .. y+11)
   for (let h = 3; h <= 11; h++) {
-    const rad = h < 7 ? 1 : 1;
     const isRed = h % 2 === 1;
     const col = isRed ? VoxelId.LIGHTHOUSE_RED : VoxelId.CERAMIC_WHITE;
-    for (let dx = -rad; dx <= rad; dx++) {
-      for (let dz = -rad; dz <= rad; dz++) {
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dz = -1; dz <= 1; dz++) {
         if (Math.abs(dx) + Math.abs(dz) <= 2) {
           storage.setVoxel(cx + dx, y + h, cz + dz, col, zoneId);
         }
       }
     }
   }
-  // Lantern gallery + warm beacon lamp + slate dome cap
+  // Lantern gallery + warm beacon lamp + slate peaked dome cap
   for (let dx = -1; dx <= 1; dx++) {
     for (let dz = -1; dz <= 1; dz++) {
-      storage.setVoxel(cx + dx, y + 12, cz + dz, VoxelId.WOOD_DARK, zoneId);
-      storage.setVoxel(cx + dx, y + 14, cz + dz, VoxelId.STONE_DARK, zoneId);
+      storage.setVoxel(cx + dx, y + 12, cz + dz, VoxelId.BRONZE, zoneId);
+      storage.setVoxel(cx + dx, y + 14, cz + dz, VoxelId.SLATE_ROOF, zoneId);
     }
   }
   storage.setVoxel(cx, y + 13, cz, VoxelId.LAMP_AMBER, zoneId);
-  storage.setVoxel(cx, y + 15, cz, VoxelId.STONE_LIGHT, zoneId);
+  storage.setVoxel(cx, y + 15, cz, VoxelId.LAMP_AMBER, zoneId);
 
-  // Core Shard Altar beside the lighthouse
+  // Core Shard Altar stone courtyard beside the lighthouse ([-51, 24, -15])
   const ax = cx - 5;
   const az = cz + 3;
   for (let dx = -1; dx <= 1; dx++) {
     for (let dz = -1; dz <= 1; dz++) {
-      storage.setVoxel(ax + dx, y + 1, az + dz, VoxelId.STONE_BASE, zoneId);
+      storage.setVoxel(ax + dx, y, az + dz, VoxelId.STONE_LIGHT, zoneId);
     }
   }
-  storage.setVoxel(ax, y + 2, az, VoxelId.BRONZE, zoneId);
-  storage.setVoxel(ax, y + 3, az, VoxelId.CORE_VEIN, zoneId);
-  storage.setVoxel(ax, y + 4, az, VoxelId.CORE_VEIN, zoneId);
 }
 
 /**
@@ -390,35 +447,35 @@ export function generateAwakeningWorld(options: { singleIslandOnly?: boolean } =
 
   // --- Island A: Stasis Shrine (-48, 2, 48) ---
   carveIslandFoundation(storage, -48, 2, 48, 10, 10, 11, 'stasis_shrine');
-  // Stasis Pod & NEO Pedestal
-  for (let dx = -1; dx <= 1; dx++) {
-    for (let dz = -1; dz <= 1; dz++) {
-      storage.setVoxel(-48 + dx, 3, 46 + dz, VoxelId.PATH_STONE, 'stasis_shrine');
-    }
-  }
+  // Paved Shrine Courtyard & Awakening Altar Pad
+  pavePad(storage, -49, -43, 44, 48, 3, VoxelId.PATH_STONE, 'stasis_shrine');
+  // Stasis Monolith Arch behind spawn
+  storage.setVoxel(-49, 4, 45, VoxelId.STONE_MID, 'stasis_shrine');
+  storage.setVoxel(-49, 5, 45, VoxelId.STONE_LIGHT, 'stasis_shrine');
   storage.setVoxel(-48, 4, 45, VoxelId.STONE_MID, 'stasis_shrine');
   storage.setVoxel(-48, 5, 45, VoxelId.CORE_VEIN, 'stasis_shrine');
-  storage.setVoxel(-44, 4, 47, VoxelId.STONE_LIGHT, 'stasis_shrine');
-  storage.setVoxel(-44, 5, 47, VoxelId.BRONZE, 'stasis_shrine');
-  buildCampfire(storage, -52, 3, 50, 'stasis_shrine');
+  storage.setVoxel(-48, 6, 45, VoxelId.STONE_LIGHT, 'stasis_shrine');
+  storage.setVoxel(-47, 4, 45, VoxelId.STONE_MID, 'stasis_shrine');
+  storage.setVoxel(-47, 5, 45, VoxelId.STONE_LIGHT, 'stasis_shrine');
+  buildCampfire(storage, -52, 50, 'stasis_shrine', 3);
 
   props.push(
-    { type: 'pine_tall', position: [-53, 4, 43], rotationY: 0.2, scale: 1, zoneId: 'stasis_shrine' },
+    { type: 'pine_tall', position: [-53, 3, 43], rotationY: 0.2, scale: 1, zoneId: 'stasis_shrine' },
     { type: 'pine_small', position: [-42, 3, 42], rotationY: 1.1, scale: 1, zoneId: 'stasis_shrine' },
     { type: 'shrub', position: [-51, 3, 54], rotationY: 0, scale: 1, zoneId: 'stasis_shrine' },
+    { type: 'shrub', position: [-44, 3, 52], rotationY: 1.4, scale: 0.9, zoneId: 'stasis_shrine' },
     { type: 'rock', position: [-43, 3, 53], rotationY: 0.7, scale: 1, zoneId: 'stasis_shrine' },
     { type: 'lore_note', position: [-53, 4, 46], rotationY: 0.4, scale: 1, zoneId: 'stasis_shrine', itemId: 'lore_note_1' },
   );
 
   interactables.push(
-    { id: 'neo_pedestal', kind: 'device', label: 'Nyalakan NEO', position: [-44, 5, 47], zoneId: 'stasis_shrine', missionId: 'prologue' },
+    { id: 'neo_pedestal', kind: 'device', label: 'Nyalakan NEO', position: [-44, 4.0, 47], zoneId: 'stasis_shrine', missionId: 'prologue' },
     { id: 'lore_note_1', kind: 'lore', label: 'Catatan Kuno: Apa itu Python?', position: [-53, 4, 46], zoneId: 'stasis_shrine' },
   );
 
   if (options.singleIslandOnly) {
-    // Add a practice 1-voxel step and 2-voxel wall for M0 tests
-    storage.setVoxel(-45, 3, 50, VoxelId.STONE_MID, 'stasis_shrine'); // 1-voxel step
-    storage.setVoxel(-45, 3, 52, VoxelId.STONE_DARK, 'stasis_shrine'); // 2-voxel wall
+    storage.setVoxel(-45, 3, 50, VoxelId.STONE_MID, 'stasis_shrine');
+    storage.setVoxel(-45, 3, 52, VoxelId.STONE_DARK, 'stasis_shrine');
     storage.setVoxel(-45, 4, 52, VoxelId.STONE_DARK, 'stasis_shrine');
     const shrineZone = AWAKENING_ZONES[0]!;
     return {
@@ -427,7 +484,7 @@ export function generateAwakeningWorld(options: { singleIslandOnly?: boolean } =
       anchors: [shrineZone.spawnAnchor],
       props,
       interactables,
-      npcPositions: { neo_pedestal: [-44, 5.5, 47] },
+      npcPositions: { neo_pedestal: [-44, 4.5, 47] },
       bitInitialPos: [-46, 3, 49],
       playerSpawnPos: [-48, 4, 52],
     };
@@ -443,6 +500,7 @@ export function generateAwakeningWorld(options: { singleIslandOnly?: boolean } =
     { type: 'pine_tall', position: [-23, 6, 26], rotationY: 0.5, scale: 1, zoneId: 'beacon_point' },
     { type: 'oak', position: [-9, 5, 37], rotationY: 1.4, scale: 1, zoneId: 'beacon_point' },
     { type: 'shrub', position: [-22, 5, 35], rotationY: 0, scale: 1, zoneId: 'beacon_point' },
+    { type: 'shrub', position: [-13, 6, 25], rotationY: 0.8, scale: 0.9, zoneId: 'beacon_point' },
     { type: 'lore_note', position: [-23, 5, 32], rotationY: 0, scale: 1, zoneId: 'beacon_point', itemId: 'lore_note_2' },
   );
   interactables.push(
@@ -455,7 +513,9 @@ export function generateAwakeningWorld(options: { singleIslandOnly?: boolean } =
 
   // --- Island C: Supply Grove (16, 4, 16) ---
   carveIslandFoundation(storage, 16, 4, 16, 12, 11, 37, 'supply_grove');
-  buildCampfire(storage, 14, 5, 19, 'supply_grove');
+  pavePad(storage, 17, 21, 11, 15, 4, VoxelId.GRASS_TOP, 'supply_grove');
+  pavePad(storage, 20, 20, 12, 12, 4, VoxelId.PATH_STONE, 'supply_grove');
+  buildCampfire(storage, 14, 19, 'supply_grove', 5);
   props.push(
     { type: 'pine_tall', position: [10, 6, 11], rotationY: 0.3, scale: 1, zoneId: 'supply_grove' },
     { type: 'pine_tall', position: [15, 6, 9], rotationY: 1.8, scale: 1.1, zoneId: 'supply_grove' },
@@ -472,7 +532,7 @@ export function generateAwakeningWorld(options: { singleIslandOnly?: boolean } =
     { id: 'awakening_crystal_2', kind: 'item', label: 'Ambil Kristal Biru', position: [19, 5.5, 9], zoneId: 'supply_grove' },
     { id: 'awakening_crystal_3', kind: 'item', label: 'Ambil Kristal Biru', position: [24, 5.5, 18], zoneId: 'supply_grove' },
     { id: 'bit_robot', kind: 'npc', label: 'Aktifkan BIT', position: [18, 5.5, 14], zoneId: 'supply_grove' },
-    { id: 'bit_terminal', kind: 'puzzle', label: 'Program BIT (M2)', position: [20, 5.5, 12], zoneId: 'supply_grove', missionId: 'm2_data_collector' },
+    { id: 'bit_terminal', kind: 'puzzle', label: 'Program BIT (M2)', position: [20, 5.0, 12], zoneId: 'supply_grove', missionId: 'm2_data_collector' },
   );
 
   // --- Rustic Wooden Plank Bridge C -> D (M2, #B07D4F) ---
@@ -480,7 +540,8 @@ export function generateAwakeningWorld(options: { singleIslandOnly?: boolean } =
 
   // --- Island D: Gatehouse Rock (48, 6, 0) ---
   carveIslandFoundation(storage, 48, 6, 0, 11, 11, 49, 'gatehouse_rock');
-  // Fortified gatehouse wall & rune pillars
+  pavePad(storage, 42, 49, -4, 6, 7, VoxelId.PATH_STONE, 'gatehouse_rock');
+  // Fortified gatehouse arch & rune plinths (sculpted crystals mounted cleanly in WorldLandmarks)
   for (let dz = -4; dz <= 4; dz++) {
     for (let h = 1; h <= 4; h++) {
       if (Math.abs(dz) > 1 || h === 4) {
@@ -490,18 +551,15 @@ export function generateAwakeningWorld(options: { singleIslandOnly?: boolean } =
       }
     }
   }
-  // 3 Rune pillars
+  // 3 Carved Rune Plinth pedestals (floating rotating gems rendered in WorldLandmarks)
   storage.setVoxel(44, 8, -3, VoxelId.STONE_LIGHT, 'gatehouse_rock');
-  storage.setVoxel(44, 9, -3, VoxelId.CRYSTAL_BLUE, 'gatehouse_rock');
   storage.setVoxel(44, 8, 0, VoxelId.STONE_LIGHT, 'gatehouse_rock');
-  storage.setVoxel(44, 9, 0, VoxelId.CRYSTAL_GREEN, 'gatehouse_rock');
   storage.setVoxel(44, 8, 3, VoxelId.STONE_LIGHT, 'gatehouse_rock');
-  storage.setVoxel(44, 9, 3, VoxelId.CRYSTAL_RED, 'gatehouse_rock');
 
-  npcPositions.old_tamo = [43, 7, 5];
+  npcPositions.old_tamo = [43, 8, 5];
   interactables.push(
-    { id: 'old_tamo', kind: 'npc', label: 'Bicara dengan Pak Tamo', position: [43, 7.5, 5], zoneId: 'gatehouse_rock' },
-    { id: 'gate_console', kind: 'puzzle', label: 'Konsol Gerbang (M3)', position: [46, 7.5, -2], zoneId: 'gatehouse_rock', missionId: 'm3_locked_gate' },
+    { id: 'old_tamo', kind: 'npc', label: 'Bicara dengan Pak Tamo', position: [43, 8, 5], zoneId: 'gatehouse_rock' },
+    { id: 'gate_console', kind: 'puzzle', label: 'Konsol Gerbang (M3)', position: [46, 8, -2], zoneId: 'gatehouse_rock', missionId: 'm3_locked_gate' },
   );
 
   // --- Stepped Skybridge D -> E ---
@@ -509,6 +567,8 @@ export function generateAwakeningWorld(options: { singleIslandOnly?: boolean } =
 
   // --- Island E: Terrace Farm & Dual Waterfalls (16, 10, -32) ---
   carveIslandFoundation(storage, 16, 10, -32, 13, 13, 61, 'terrace_farm');
+  pavePad(storage, 6, 17, -36, -24, 11, VoxelId.GRASS_TOP, 'terrace_farm');
+  pavePad(storage, 10, 11, -34, -25, 11, VoxelId.PATH_STONE, 'terrace_farm');
   // Tilled farm rows & dual waterfall
   for (let row = 0; row < 3; row++) {
     for (let col = 0; col < 5; col++) {
@@ -522,7 +582,7 @@ export function generateAwakeningWorld(options: { singleIslandOnly?: boolean } =
       });
     }
   }
-  // Upper pond + waterfall + water wheel
+  // Upper pond + waterfall
   for (let x = 20; x <= 25; x++) {
     for (let z = -39; z <= -34; z++) {
       storage.setVoxel(x, 11, z, VoxelId.WATER_SHALLOW, 'terrace_farm');
@@ -533,18 +593,31 @@ export function generateAwakeningWorld(options: { singleIslandOnly?: boolean } =
     storage.setVoxel(24, 11 - drop, -33, col, 'terrace_farm');
     storage.setVoxel(25, 11 - drop, -33, col, 'terrace_farm');
   }
-  // Mira's clay-roof farmhouse
+  // Mira's clay-roof farmhouse with overhanging terracotta roof & cozy trim
   for (let x = 6; x <= 10; x++) {
     for (let z = -29; z <= -25; z++) {
+      storage.setVoxel(x, 11, z, VoxelId.STONE_LIGHT, 'terrace_farm');
       for (let h = 1; h <= 3; h++) {
-        storage.setVoxel(x, 11 + h, z, VoxelId.COTTAGE_WALL, 'terrace_farm');
+        const isCorner = (x === 6 || x === 10) && (z === -29 || z === -25);
+        storage.setVoxel(x, 11 + h, z, isCorner ? VoxelId.WOOD_DARK : VoxelId.COTTAGE_WALL, 'terrace_farm');
       }
-      storage.setVoxel(x, 15, z, VoxelId.CLAY_ROOF, 'terrace_farm');
     }
   }
+  for (let x = 5; x <= 11; x++) {
+    for (let z = -30; z <= -24; z++) {
+      storage.setVoxel(x, 15, z, VoxelId.CLAY_ROOF, 'terrace_farm');
+      if (x >= 6 && x <= 10 && z >= -29 && z <= -25) {
+        storage.setVoxel(x, 16, z, VoxelId.CLAY_ROOF, 'terrace_farm');
+      }
+    }
+  }
+  storage.setVoxel(10, 12, -27, VoxelId.WOOD_PLANK, 'terrace_farm');
+  storage.setVoxel(10, 13, -27, VoxelId.WOOD_PLANK, 'terrace_farm');
+  storage.setVoxel(10, 13, -26, VoxelId.LAMP_AMBER, 'terrace_farm');
+
   npcPositions.mira = [11, 12, -26];
   interactables.push(
-    { id: 'mira', kind: 'npc', label: 'Bicara dengan Mira', position: [11, 12.5, -26], zoneId: 'terrace_farm' },
+    { id: 'mira', kind: 'npc', label: 'Bicara dengan Mira', position: [11, 12, -26], zoneId: 'terrace_farm' },
     { id: 'farm_console', kind: 'puzzle', label: 'Otomasi Ladang (M4)', position: [11, 12, -33], zoneId: 'terrace_farm', missionId: 'm4_automated_farm' },
   );
 
@@ -553,6 +626,8 @@ export function generateAwakeningWorld(options: { singleIslandOnly?: boolean } =
 
   // --- Island F: BOLT's Workshop & Watchtower (-16, 16, -48) ---
   carveIslandFoundation(storage, -16, 16, -48, 12, 11, 73, 'bolts_workshop');
+  pavePad(storage, -22, -8, -53, -45, 17, VoxelId.GRASS_TOP, 'bolts_workshop');
+  pavePad(storage, -18, -13, -50, -46, 17, VoxelId.PATH_STONE, 'bolts_workshop');
   // Depot & crane
   for (let x = -12; x <= -8; x++) {
     for (let z = -52; z <= -48; z++) {
@@ -573,10 +648,10 @@ export function generateAwakeningWorld(options: { singleIslandOnly?: boolean } =
     { type: 'crate', position: [-11, 18, -47], rotationY: 0.2, scale: 1, zoneId: 'bolts_workshop' },
     { type: 'pine_small', position: [-23, 17, -43], rotationY: 0.8, scale: 1, zoneId: 'bolts_workshop' },
   );
-  npcPositions.bolt = [-13, 17, -46];
+  npcPositions.bolt = [-13, 18, -46];
   interactables.push(
-    { id: 'bolt', kind: 'npc', label: 'Bicara dengan BOLT', position: [-13, 17.5, -46], zoneId: 'bolts_workshop' },
-    { id: 'workshop_console', kind: 'puzzle', label: 'Cetak Biru Menara (M5)', position: [-17, 17.5, -49], zoneId: 'bolts_workshop', missionId: 'm5_blueprint' },
+    { id: 'bolt', kind: 'npc', label: 'Bicara dengan BOLT', position: [-13, 18, -46], zoneId: 'bolts_workshop' },
+    { id: 'workshop_console', kind: 'puzzle', label: 'Cetak Biru Menara (M5)', position: [-17, 18, -49], zoneId: 'bolts_workshop', missionId: 'm5_blueprint' },
   );
 
   // --- Stepped Skybridge F -> G ---
@@ -593,15 +668,29 @@ export function generateAwakeningWorld(options: { singleIslandOnly?: boolean } =
     { type: 'rock', position: [-54, 23, -11], rotationY: 0.9, scale: 1, zoneId: 'core_spire' },
   );
   interactables.push(
-    { id: 'core_altar', kind: 'puzzle', label: 'Altar Pecahan Inti (Final)', position: [-51, 24.5, -15], zoneId: 'core_spire', missionId: 'final_core_shard' },
+    { id: 'core_altar', kind: 'puzzle', label: 'Altar Pecahan Inti (Final)', position: [-51, 24, -15], zoneId: 'core_spire', missionId: 'final_core_shard' },
   );
 
-  // Decorative floating voxel clouds (high above / flanking the diorama like reference.png)
+  // Ground-snap all non-cloud / non-crop props flush onto actual terrain surface
+  for (const prop of props) {
+    if (prop.type === 'cloud' || prop.type === 'crop_wheat') continue;
+    const groundedY = getGroundSurfaceY(storage, prop.position[0], prop.position[2], prop.position[1]);
+    prop.position = [prop.position[0], groundedY, prop.position[2]];
+  }
+  for (const item of interactables) {
+    if (item.id === 'bit_robot') continue; // keep canonical supply grove position [18, 5.5, 14]
+    const groundedY = getGroundSurfaceY(storage, item.position[0], item.position[2], item.position[1]);
+    item.position = [item.position[0], item.kind === 'lore' ? groundedY : groundedY, item.position[2]];
+  }
+
+  // Decorative floating voxel clouds
   props.push(
     { type: 'cloud', position: [-62, 26, 26], rotationY: 0, scale: 1.4, zoneId: 'stasis_shrine' },
     { type: 'cloud', position: [34, 24, 34], rotationY: 0.8, scale: 1.2, zoneId: 'supply_grove' },
     { type: 'cloud', position: [0, 32, -62], rotationY: 0.3, scale: 1.5, zoneId: 'terrace_farm' },
     { type: 'cloud', position: [-66, 34, -40], rotationY: 1.2, scale: 1.3, zoneId: 'core_spire' },
+    { type: 'cloud', position: [-28, 28, 56], rotationY: 0.6, scale: 1.35, zoneId: 'beacon_point' },
+    { type: 'cloud', position: [62, 25, -18], rotationY: 2.1, scale: 1.25, zoneId: 'gatehouse_rock' },
   );
 
   return {

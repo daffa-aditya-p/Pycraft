@@ -384,7 +384,11 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
       zIndex: 45,
       display: 'flex',
       flexDirection: 'column',
-      backgroundColor: '#1C2427',
+      backgroundColor: '#FBF8F1',
+      border: '2px solid #76B8CF',
+      borderRadius: '16px',
+      overflow: 'hidden',
+      boxShadow: '0 6px 0 rgba(70, 130, 160, 0.25), 0 18px 36px rgba(15, 50, 75, 0.22)',
     };
   }
 
@@ -439,7 +443,8 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
             alignItems: 'center',
             justifyContent: 'space-between',
             padding: '6px 12px',
-            borderBottom: '1px solid #33434A',
+            backgroundColor: '#EDF6FA',
+            borderBottom: '1px solid #C8E2EE',
             gap: '8px',
           }}
         >
@@ -460,7 +465,9 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
                   padding: '2px 10px',
                   fontSize: '0.75rem',
                   borderColor:
-                    mobileSheetSnap === snap && !editorAutoCollapsed ? '#F2B544' : '#33434A',
+                    mobileSheetSnap === snap && !editorAutoCollapsed ? '#F59E0B' : '#96C4D8',
+                  backgroundColor:
+                    mobileSheetSnap === snap && !editorAutoCollapsed ? '#FEF3C7' : '#FFFFFF',
                 }}
               >
                 {snap === 'peek' ? 'Intip' : snap === 'half' ? '50%' : 'Penuh'}
@@ -483,8 +490,9 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
       {/* Mission Header */}
       <header
         style={{
-          padding: '10px 12px',
-          borderBottom: '1px solid #33434A',
+          padding: '12px 14px',
+          background: 'linear-gradient(135deg, #0E7490 0%, #0D9488 100%)',
+          borderBottom: '2px solid #0F766E',
           display: 'flex',
           flexDirection: 'column',
           gap: '8px',
@@ -503,24 +511,29 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
             <span
               data-testid="runtime-status-chip"
               style={{
-                padding: '2px 8px',
+                padding: '3px 10px',
                 fontSize: '0.75rem',
-                fontWeight: 700,
-                backgroundColor: '#243034',
-                border: `1px solid ${
+                fontWeight: 800,
+                backgroundColor:
                   runtimeStatus === 'error'
-                    ? '#E0603F'
+                    ? '#FFE4E6'
                     : runtimeStatus === 'completed'
-                      ? '#6DBE4B'
-                      : '#3CC4C0'
+                      ? '#DCFCE7'
+                      : '#FEF3C7',
+                border: `1.5px solid ${
+                  runtimeStatus === 'error'
+                    ? '#E11D48'
+                    : runtimeStatus === 'completed'
+                      ? '#16A34A'
+                      : '#F59E0B'
                 }`,
                 color:
                   runtimeStatus === 'error'
-                    ? '#E0603F'
+                    ? '#9F1239'
                     : runtimeStatus === 'completed'
-                      ? '#6DBE4B'
-                      : '#3CC4C0',
-                borderRadius: '2px',
+                      ? '#166534'
+                      : '#92400E',
+                borderRadius: '999px',
                 whiteSpace: 'nowrap',
               }}
             >
@@ -530,8 +543,10 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
               style={{
                 margin: 0,
                 fontFamily: 'var(--font-display)',
-                fontSize: '1.0625rem',
-                color: '#E8EEF0',
+                fontSize: '1.125rem',
+                fontWeight: 800,
+                color: '#FFFFFF',
+                textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 whiteSpace: 'nowrap',
@@ -584,7 +599,14 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
                 className="btn-slate"
                 aria-label={locale === 'id' ? 'Tutup Editor' : 'Close Editor'}
                 onClick={() => setEditorDockOpen(false)}
-                style={{ minHeight: '36px', minWidth: '36px', padding: '0 8px' }}
+                style={{
+                  minHeight: '36px',
+                  minWidth: '36px',
+                  padding: '0 8px',
+                  background: 'rgba(255, 255, 255, 0.92)',
+                  borderColor: '#BAE6FD',
+                  color: '#0E7490',
+                }}
               >
                 <IconClose size={16} />
               </button>
@@ -592,7 +614,7 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
           </div>
         </div>
 
-        {/* Requirement chips & 4-tier switcher (hidden in compact peek/auto-collapse) */}
+        {/* Requirement chips & 4-tier switcher */}
         {!isPeekSheet && !editorAutoCollapsed && !isKeyboardFullOverlay && (
           <div
             style={{
@@ -603,17 +625,18 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
               flexWrap: 'wrap',
             }}
           >
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
               {requirementChips.map((chip) => (
                 <span
                   key={chip}
                   style={{
-                    padding: '2px 6px',
-                    backgroundColor: '#1C2427',
-                    border: '1px solid #33434A',
-                    borderRadius: '2px',
+                    padding: '2px 8px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                    border: '1px solid rgba(255, 255, 255, 0.45)',
+                    borderRadius: '999px',
                     fontSize: '0.75rem',
-                    color: '#A9B8BD',
+                    fontWeight: 700,
+                    color: '#FFFFFF',
                   }}
                 >
                   {chip}
@@ -626,35 +649,37 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
               aria-label={locale === 'id' ? 'Tingkat Bantuan' : 'Assistance Tier'}
               style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}
             >
-              {TIERS.map((tItem) => (
-                <button
-                  key={tItem.id}
-                  type="button"
-                  data-testid={`tier-btn-${tItem.id}`}
-                  aria-pressed={tier === tItem.id}
-                  onClick={() => {
-                    if (onChangeTier) {
-                      onChangeTier(tItem.id);
-                    } else {
-                      setTier(tItem.id);
-                    }
-                  }}
-                  style={{
-                    minHeight: '32px',
-                    padding: '2px 8px',
-                    backgroundColor: tier === tItem.id ? '#2C3A3F' : '#1C2427',
-                    color: tier === tItem.id ? '#F2B544' : '#A9B8BD',
-                    border:
-                      tier === tItem.id ? '1px solid #F2B544' : '1px solid #33434A',
-                    borderRadius: '2px',
-                    fontSize: '0.75rem',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                  }}
-                >
-                  {locale === 'id' ? tItem.idLabel : tItem.enLabel}
-                </button>
-              ))}
+              {TIERS.map((tItem) => {
+                const active = tier === tItem.id;
+                return (
+                  <button
+                    key={tItem.id}
+                    type="button"
+                    data-testid={`tier-btn-${tItem.id}`}
+                    aria-pressed={active}
+                    onClick={() => {
+                      if (onChangeTier) {
+                        onChangeTier(tItem.id);
+                      } else {
+                        setTier(tItem.id);
+                      }
+                    }}
+                    style={{
+                      minHeight: '30px',
+                      padding: '2px 10px',
+                      backgroundColor: active ? '#FBBF24' : 'rgba(255, 255, 255, 0.16)',
+                      color: active ? '#422006' : '#FFFFFF',
+                      border: active ? '1.5px solid #FEF3C7' : '1px solid rgba(255, 255, 255, 0.35)',
+                      borderRadius: '999px',
+                      fontSize: '0.75rem',
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {locale === 'id' ? tItem.idLabel : tItem.enLabel}
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}
@@ -664,24 +689,34 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
           <div
             data-testid="editor-step-goal"
             style={{
-              padding: '8px 10px',
-              backgroundColor: '#243034',
-              borderLeft: '3px solid #F2B544',
-              borderRadius: '2px',
+              padding: '8px 12px',
+              backgroundColor: '#FFFBEB',
+              border: '1.5px solid #FCD34D',
+              borderLeft: '5px solid #F59E0B',
+              borderRadius: '10px',
               fontSize: '0.84rem',
               lineHeight: 1.45,
-              color: '#E8EEF0',
+              color: '#3E1F05',
             }}
           >
-            <strong style={{ color: '#F2B544', marginRight: '6px' }}>
-              {locale === 'id' ? 'Tugas:' : 'Task:'}
+            <strong
+              style={{
+                backgroundColor: '#FDE68A',
+                color: '#78350F',
+                padding: '1px 7px',
+                borderRadius: '999px',
+                marginRight: '8px',
+                fontSize: '0.75rem',
+              }}
+            >
+              {locale === 'id' ? 'Tugas' : 'Task'}
             </strong>
-            <span>{stepGoal}</span>
+            <span style={{ fontWeight: 600 }}>{stepGoal}</span>
           </div>
         )}
       </header>
 
-      {/* Main Editor + Toolbar + Bottom Tabs (hidden during peek/auto-collapse) */}
+      {/* Main Editor + Toolbar + Bottom Tabs */}
       {!isPeekSheet && !editorAutoCollapsed && (
         <div
           style={{
@@ -689,18 +724,19 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
             minHeight: 0,
             display: 'flex',
             flexDirection: 'column',
+            backgroundColor: '#FBF8F1',
           }}
         >
           {/* Toolbar */}
           <div
             style={{
-              padding: '6px 12px',
-              borderBottom: '1px solid #33434A',
+              padding: '8px 12px',
+              borderBottom: '1px solid #DFD5C0',
               display: 'flex',
               alignItems: 'center',
-              gap: '6px',
+              gap: '8px',
               flexWrap: 'wrap',
-              backgroundColor: '#243034',
+              backgroundColor: '#F4EFE4',
             }}
           >
             {!isRunning ? (
@@ -710,7 +746,7 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
                 className="btn-primary-chamfer"
                 disabled={isPreparing}
                 onClick={handleRun}
-                style={{ minHeight: '38px', padding: '4px 12px', fontSize: '0.875rem' }}
+                style={{ minHeight: '38px', padding: '4px 14px', fontSize: '0.875rem' }}
               >
                 <IconPlay size={16} />
                 <span>{locale === 'id' ? 'Jalankan' : 'Run'}</span>
@@ -724,8 +760,9 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
                 style={{
                   minHeight: '38px',
                   padding: '4px 12px',
-                  borderColor: '#E0603F',
-                  color: '#E0603F',
+                  background: '#FFE4E6',
+                  borderColor: '#E11D48',
+                  color: '#9F1239',
                   fontSize: '0.875rem',
                 }}
               >
@@ -752,10 +789,11 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
               onClick={handleHintStep}
               style={{
                 minHeight: '38px',
-                padding: '4px 10px',
+                padding: '4px 12px',
                 fontSize: '0.8125rem',
-                borderColor: '#3CC4C0',
-                color: '#3CC4C0',
+                background: 'linear-gradient(180deg, #ECFEFF 0%, #CFFAFE 100%)',
+                borderColor: '#06B6D4',
+                color: '#0E7490',
               }}
             >
               <IconHint size={16} />
@@ -770,9 +808,13 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
                 onClick={onNextStep}
                 style={{
                   minHeight: '38px',
-                  padding: '4px 12px',
+                  padding: '4px 14px',
                   fontSize: '0.8125rem',
                   marginLeft: 'auto',
+                  background: 'linear-gradient(180deg, #4ADE80 0%, #16A34A 100%)',
+                  borderColor: '#15803D',
+                  color: '#FFFFFF',
+                  boxShadow: '0 3px 0 #166534',
                 }}
               >
                 <span>
@@ -823,19 +865,22 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
           {mentorPanel.open && !isKeyboardFullOverlay && (
             <div
               data-testid="mentor-panel"
-              className="surface-slate-raised"
               style={{
-                margin: '0 8px 6px',
-                padding: '10px 12px',
-                borderLeft: '3px solid #3CC4C0',
+                margin: '0 8px 8px',
+                padding: '10px 14px',
+                backgroundColor: '#ECFEFF',
+                border: '2px solid #06B6D4',
+                borderLeft: '6px solid #0891B2',
+                borderRadius: '12px',
                 fontSize: '0.8125rem',
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '6px',
+                boxShadow: '0 4px 12px rgba(8, 145, 178, 0.14)',
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <strong style={{ color: '#3CC4C0' }}>
+                <strong style={{ color: '#0E7490', fontSize: '0.85rem' }}>
                   NEO ({mentorPanel.visorMood})
                   {mentorPanel.activeRung > 0 ? ` · Petunjuk ${mentorPanel.activeRung}/4` : ''}
                 </strong>
@@ -844,26 +889,29 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
                   aria-label="Tutup panel NEO"
                   onClick={() => setMentorPanel({ open: false })}
                   style={{
-                    background: 'transparent',
-                    border: 'none',
-                    color: '#A9B8BD',
+                    background: '#CFFAFE',
+                    border: '1px solid #06B6D4',
+                    borderRadius: '999px',
+                    width: '24px',
+                    height: '24px',
+                    color: '#0E7490',
                     cursor: 'pointer',
-                    fontWeight: 700,
+                    fontWeight: 800,
                   }}
                 >
                   ×
                 </button>
               </div>
               {mentorPanel.errorHeadline && (
-                <div style={{ fontWeight: 700, color: '#F2B544' }}>
+                <div style={{ fontWeight: 800, color: '#B45309' }}>
                   {mentorPanel.errorHeadline}
                 </div>
               )}
               {mentorPanel.errorBody && (
-                <div style={{ color: '#E8EEF0', lineHeight: 1.4 }}>{mentorPanel.errorBody}</div>
+                <div style={{ color: '#172B3A', lineHeight: 1.45, fontWeight: 500 }}>{mentorPanel.errorBody}</div>
               )}
               {mentorPanel.socraticQuestion && (
-                <div style={{ color: '#A9B8BD', fontStyle: 'italic' }}>
+                <div style={{ color: '#0E7490', fontStyle: 'italic', fontWeight: 600 }}>
                   {mentorPanel.socraticQuestion}
                 </div>
               )}
@@ -871,9 +919,11 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
                 <pre
                   style={{
                     margin: 0,
-                    padding: '6px 8px',
-                    backgroundColor: '#1A2225',
-                    color: '#9CCB6B',
+                    padding: '8px 10px',
+                    backgroundColor: '#FFFFFF',
+                    border: '1.5px solid #A5F3FC',
+                    borderRadius: '8px',
+                    color: '#15803D',
                     fontFamily: 'var(--font-code)',
                     fontSize: '0.75rem',
                     overflowX: 'auto',
@@ -891,9 +941,10 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
                       background: 'transparent',
                       border: 'none',
                       padding: 0,
-                      color: '#8FA3A9',
+                      color: '#0E7490',
                       cursor: 'pointer',
                       fontSize: '0.75rem',
+                      fontWeight: 700,
                       textDecoration: 'underline',
                     }}
                   >
@@ -905,9 +956,11 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
                     <pre
                       style={{
                         margin: '4px 0 0',
-                        padding: '6px',
-                        backgroundColor: '#1A2225',
-                        color: '#E0603F',
+                        padding: '8px',
+                        backgroundColor: '#FFF1F2',
+                        border: '1px solid #FECDD3',
+                        borderRadius: '8px',
+                        color: '#BE123C',
                         fontFamily: 'var(--font-code)',
                         fontSize: '0.75rem',
                         overflowX: 'auto',
@@ -921,7 +974,7 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
             </div>
           )}
 
-          {/* Bottom Tabs: Console / Variables / Timeline (hidden during L-mode keyboard overlay) */}
+          {/* Bottom Tabs: Console / Variables / Timeline */}
           {!isKeyboardFullOverlay && (
             <div
               style={{
@@ -929,7 +982,8 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
                 minHeight: '140px',
                 display: 'flex',
                 flexDirection: 'column',
-                borderTop: '1px solid #33434A',
+                borderTop: '2px solid #C8E2EE',
+                backgroundColor: '#FFFFFF',
               }}
             >
               <div
@@ -937,10 +991,10 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
                 aria-label="Panel Eksekusi"
                 style={{
                   display: 'flex',
-                  gap: '2px',
-                  padding: '4px 8px 0',
-                  backgroundColor: '#1F292C',
-                  borderBottom: '1px solid #33434A',
+                  gap: '4px',
+                  padding: '6px 10px 0',
+                  backgroundColor: '#EDF6FA',
+                  borderBottom: '1px solid #C8E2EE',
                 }}
               >
                 {(
@@ -957,16 +1011,17 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
                     aria-selected={bottomTab === tab.id}
                     onClick={() => setBottomTab(tab.id)}
                     style={{
-                      minHeight: '36px',
-                      padding: '4px 12px',
-                      backgroundColor: bottomTab === tab.id ? '#243034' : 'transparent',
-                      color: bottomTab === tab.id ? '#F2B544' : '#A9B8BD',
-                      border: 'none',
+                      minHeight: '34px',
+                      padding: '4px 14px',
+                      backgroundColor: bottomTab === tab.id ? '#FFFFFF' : 'transparent',
+                      color: bottomTab === tab.id ? '#0E7490' : '#4C697C',
+                      border: bottomTab === tab.id ? '1px solid #C8E2EE' : '1px solid transparent',
                       borderBottom:
                         bottomTab === tab.id
-                          ? '2px solid #F2B544'
-                          : '2px solid transparent',
-                      fontWeight: 700,
+                          ? '3px solid #F59E0B'
+                          : '3px solid transparent',
+                      borderRadius: '8px 8px 0 0',
+                      fontWeight: 800,
                       fontSize: '0.8125rem',
                       cursor: 'pointer',
                     }}
@@ -981,8 +1036,8 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
                   flex: 1,
                   minHeight: 0,
                   overflowY: 'auto',
-                  padding: '8px 10px',
-                  backgroundColor: '#1A2225',
+                  padding: '10px 12px',
+                  backgroundColor: '#FFFFFF',
                 }}
               >
                 {bottomTab === 'console' && (
@@ -992,12 +1047,13 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
                         type="button"
                         onClick={clearConsole}
                         style={{
-                          background: 'transparent',
-                          border: '1px solid #33434A',
-                          color: '#8FA3A9',
-                          borderRadius: '2px',
-                          padding: '2px 8px',
+                          background: '#F1F5F9',
+                          border: '1px solid #CBD5E1',
+                          color: '#475569',
+                          borderRadius: '999px',
+                          padding: '2px 10px',
                           fontSize: '0.75rem',
+                          fontWeight: 700,
                           cursor: 'pointer',
                         }}
                       >
@@ -1006,7 +1062,7 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
                     </div>
 
                     {consoleEntries.length === 0 ? (
-                      <div style={{ color: '#8FA3A9', fontSize: '0.8125rem' }}>
+                      <div style={{ color: '#4C697C', fontSize: '0.8125rem' }}>
                         {locale === 'id'
                           ? 'Tekan Jalankan untuk melihat keluaran Python dan aksi BIT.'
                           : 'Press Run to see Python output and BIT actions.'}
@@ -1024,16 +1080,34 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
                         {consoleEntries.map((entry) => {
                           const color =
                             entry.kind === 'error'
-                              ? '#E0603F'
+                              ? '#DC2626'
                               : entry.kind === 'warning'
-                                ? '#E9A23B'
+                                ? '#B45309'
                                 : entry.kind === 'action'
-                                  ? '#8FA3A9'
+                                  ? '#0E7490'
                                   : entry.kind === 'system'
-                                    ? '#3CC4C0'
-                                    : '#E8EEF0';
+                                    ? '#15803D'
+                                    : '#0F172A';
+                          const bg =
+                            entry.kind === 'error'
+                              ? '#FEF2F2'
+                              : entry.kind === 'warning'
+                                ? '#FFFBEB'
+                                : entry.kind === 'system'
+                                  ? '#F0FDF4'
+                                  : 'transparent';
                           return (
-                            <div key={entry.id} style={{ color, whiteSpace: 'pre-wrap' }}>
+                            <div
+                              key={entry.id}
+                              style={{
+                                color,
+                                backgroundColor: bg,
+                                padding: bg !== 'transparent' ? '4px 8px' : '2px 0',
+                                borderRadius: '6px',
+                                fontWeight: entry.kind === 'error' ? 700 : 500,
+                                whiteSpace: 'pre-wrap',
+                              }}
+                            >
                               {entry.line !== undefined ? `[L${entry.line}] ` : ''}
                               {entry.text}
                             </div>
@@ -1049,7 +1123,7 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
                         style={{
                           marginTop: '6px',
                           paddingTop: '8px',
-                          borderTop: '1px solid #33434A',
+                          borderTop: '1px solid #E2E8F0',
                           display: 'flex',
                           flexDirection: 'column',
                           gap: '6px',
@@ -1063,11 +1137,12 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
                               alignItems: 'center',
                               justifyContent: 'space-between',
                               gap: '8px',
-                              padding: '4px 8px',
-                              backgroundColor: '#243034',
-                              border: `1px solid ${sc.passed ? '#6DBE4B' : '#E0603F'}`,
-                              borderRadius: '2px',
+                              padding: '6px 10px',
+                              backgroundColor: sc.passed ? '#F0FDF4' : '#FEF2F2',
+                              border: `1.5px solid ${sc.passed ? '#4ADE80' : '#FCA5A5'}`,
+                              borderRadius: '8px',
                               fontSize: '0.8125rem',
+                              fontWeight: 700,
                             }}
                           >
                             <span
@@ -1075,7 +1150,7 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
                                 display: 'inline-flex',
                                 alignItems: 'center',
                                 gap: '6px',
-                                color: sc.passed ? '#6DBE4B' : '#E0603F',
+                                color: sc.passed ? '#15803D' : '#DC2626',
                               }}
                             >
                               {sc.passed ? <IconCheck size={14} /> : <IconWarning size={14} />}
@@ -1091,7 +1166,7 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
                                 onClick={() => onPreviewScenario(sc.scenarioId)}
                                 style={{
                                   minHeight: '30px',
-                                  padding: '2px 8px',
+                                  padding: '2px 10px',
                                   fontSize: '0.75rem',
                                 }}
                               >
@@ -1108,7 +1183,7 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
                 {bottomTab === 'variables' && (
                   <div data-testid="variables-panel">
                     {variables.length === 0 ? (
-                      <div style={{ color: '#8FA3A9', fontSize: '0.8125rem' }}>
+                      <div style={{ color: '#4C697C', fontSize: '0.8125rem' }}>
                         {locale === 'id'
                           ? 'Belum ada variabel yang terekam.'
                           : 'No variables recorded yet.'}
@@ -1123,10 +1198,10 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
                         }}
                       >
                         <thead>
-                          <tr style={{ color: '#8FA3A9', textAlign: 'left' }}>
-                            <th style={{ padding: '4px' }}>Nama</th>
-                            <th style={{ padding: '4px' }}>Tipe</th>
-                            <th style={{ padding: '4px' }}>Nilai</th>
+                          <tr style={{ color: '#4C697C', textAlign: 'left', borderBottom: '2px solid #E2E8F0' }}>
+                            <th style={{ padding: '6px' }}>Nama</th>
+                            <th style={{ padding: '6px' }}>Tipe</th>
+                            <th style={{ padding: '6px' }}>Nilai</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -1138,16 +1213,16 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
                                 key={`${v.scope}.${v.name}`}
                                 style={{
                                   backgroundColor: justChanged
-                                    ? 'rgba(242, 181, 68, 0.2)'
+                                    ? '#FEF3C7'
                                     : 'transparent',
-                                  borderTop: '1px solid #243034',
+                                  borderTop: '1px solid #F1F5F9',
                                 }}
                               >
-                                <td style={{ padding: '4px', color: '#E8EEF0' }}>{v.name}</td>
-                                <td style={{ padding: '4px', color: '#3CC4C0' }}>
+                                <td style={{ padding: '6px', color: '#0F172A', fontWeight: 700 }}>{v.name}</td>
+                                <td style={{ padding: '6px', color: '#0E7490', fontWeight: 600 }}>
                                   {v.typeName}
                                 </td>
-                                <td style={{ padding: '4px', color: '#9CCB6B' }}>{v.repr}</td>
+                                <td style={{ padding: '6px', color: '#15803D', fontWeight: 600 }}>{v.repr}</td>
                               </tr>
                             );
                           })}
@@ -1165,12 +1240,13 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
                     {timeline.isDirtyAfterEdit && (
                       <div
                         style={{
-                          padding: '4px 8px',
-                          backgroundColor: '#3B2C1B',
-                          border: '1px solid #E9A23B',
-                          borderRadius: '2px',
+                          padding: '6px 10px',
+                          backgroundColor: '#FFFBEB',
+                          border: '1px solid #F59E0B',
+                          borderRadius: '8px',
                           fontSize: '0.75rem',
-                          color: '#E8EEF0',
+                          fontWeight: 700,
+                          color: '#92400E',
                         }}
                       >
                         {locale === 'id'
@@ -1188,9 +1264,9 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
                         value={timeline.currentSeq}
                         disabled={timeline.totalEvents === 0}
                         onChange={(e) => onTimelineSeek?.(Number(e.target.value))}
-                        style={{ flex: 1 }}
+                        style={{ flex: 1, accentColor: '#0891B2' }}
                       />
-                      <span style={{ fontSize: '0.75rem', color: '#A9B8BD', minWidth: '58px' }}>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#335267', minWidth: '58px' }}>
                         {timeline.currentSeq}/{timeline.totalEvents}
                       </span>
                     </div>
@@ -1278,17 +1354,18 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
                             onClick={() => setPlaybackSpeed(sp.value)}
                             style={{
                               minHeight: '30px',
-                              padding: '2px 6px',
+                              padding: '2px 8px',
                               backgroundColor:
-                                playbackSpeed === sp.value ? '#2C3A3F' : '#1C2427',
+                                playbackSpeed === sp.value ? '#FEF3C7' : '#F1F5F9',
                               color:
-                                playbackSpeed === sp.value ? '#F2B544' : '#A9B8BD',
+                                playbackSpeed === sp.value ? '#92400E' : '#475569',
                               border:
                                 playbackSpeed === sp.value
-                                  ? '1px solid #F2B544'
-                                  : '1px solid #33434A',
-                              borderRadius: '2px',
+                                  ? '1.5px solid #F59E0B'
+                                  : '1px solid #CBD5E1',
+                              borderRadius: '999px',
                               fontSize: '0.75rem',
+                              fontWeight: 700,
                               cursor: 'pointer',
                             }}
                           >
@@ -1301,7 +1378,8 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
                             alignItems: 'center',
                             gap: '4px',
                             fontSize: '0.75rem',
-                            color: '#A9B8BD',
+                            fontWeight: 700,
+                            color: '#335267',
                             marginLeft: '4px',
                           }}
                         >
@@ -1350,7 +1428,7 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
             position: 'fixed',
             inset: 0,
             zIndex: 105,
-            backgroundColor: 'rgba(28, 36, 39, 0.82)',
+            backgroundColor: 'rgba(15, 50, 75, 0.45)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -1367,7 +1445,7 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
             style={{
               width: '100%',
               maxWidth: '420px',
-              padding: '20px',
+              padding: '24px',
               display: 'flex',
               flexDirection: 'column',
               gap: '12px',
@@ -1379,13 +1457,13 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
                 margin: 0,
                 fontFamily: 'var(--font-display)',
                 fontSize: '1.25rem',
-                color: '#F2B544',
+                color: '#0E7490',
               }}
             >
               {locale === 'id' ? 'Jawaban untuk input()' : 'Answers for input()'}
             </h2>
             {inputModal.prompt && (
-              <p style={{ margin: 0, color: '#E8EEF0', fontSize: '0.9375rem' }}>
+              <p style={{ margin: 0, color: '#172B3A', fontSize: '0.9375rem', fontWeight: 600 }}>
                 {inputModal.prompt}
               </p>
             )}
@@ -1403,10 +1481,11 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
                 style={{
                   minHeight: '44px',
                   padding: '8px 12px',
-                  backgroundColor: '#1A2225',
-                  color: '#E8EEF0',
-                  border: '1px solid #33434A',
-                  borderRadius: '2px',
+                  backgroundColor: '#FFFFFF',
+                  color: '#0F172A',
+                  border: '2px solid #9ECCDF',
+                  borderRadius: '10px',
+                  fontSize: '0.9375rem',
                 }}
               />
             ))}

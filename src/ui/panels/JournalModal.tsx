@@ -248,7 +248,8 @@ export const JournalModal: React.FC<JournalModalProps> = ({ onPracticeKC }) => {
         position: 'fixed',
         inset: 0,
         zIndex: 85,
-        backgroundColor: 'rgba(28, 36, 39, 0.78)',
+        backgroundColor: 'rgba(14, 50, 78, 0.42)',
+        backdropFilter: 'blur(4px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -907,7 +908,7 @@ export const JournalModal: React.FC<JournalModalProps> = ({ onPracticeKC }) => {
                                             color: isCompleted
                                               ? '#FFFFFF'
                                               : isActive
-                                                ? '#1C2427'
+                                                ? '#172B3A'
                                                 : 'transparent',
                                           }}
                                         >
@@ -919,7 +920,7 @@ export const JournalModal: React.FC<JournalModalProps> = ({ onPracticeKC }) => {
                                                 width: '6px',
                                                 height: '6px',
                                                 borderRadius: '50%',
-                                                backgroundColor: '#1C2427',
+                                                backgroundColor: '#172B3A',
                                               }}
                                             />
                                           ) : null}
@@ -932,10 +933,10 @@ export const JournalModal: React.FC<JournalModalProps> = ({ onPracticeKC }) => {
                                               fontSize: '0.875rem',
                                               fontWeight: isActive ? 700 : 500,
                                               color: isActive
-                                                ? '#1C2427'
+                                                ? '#172B3A'
                                                 : isCompleted
-                                                  ? '#4A5B4F'
-                                                  : '#6B5E55',
+                                                  ? '#166534'
+                                                  : '#5C4D42',
                                               textDecoration: isCompleted
                                                 ? 'none'
                                                 : 'none',

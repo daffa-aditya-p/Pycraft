@@ -237,8 +237,8 @@ export const TouchControls: React.FC<TouchControlsProps> = ({
               width: `${baseSize}px`,
               height: `${baseSize}px`,
               borderRadius: '50%',
-              border: `2px solid ${joyState.sprint ? '#F2B544' : '#3CC4C0'}`,
-              backgroundColor: 'rgba(28, 36, 39, 0.45)',
+              border: `2.5px solid ${joyState.sprint ? '#F59E0B' : '#0891B2'}`,
+              backgroundColor: 'rgba(255, 253, 247, 0.55)',
               pointerEvents: 'none',
               display: 'flex',
               alignItems: 'center',
@@ -250,7 +250,9 @@ export const TouchControls: React.FC<TouchControlsProps> = ({
                 width: '40px',
                 height: '40px',
                 borderRadius: '50%',
-                backgroundColor: joyState.sprint ? '#F2B544' : '#E8EEF0',
+                backgroundColor: joyState.sprint ? '#F59E0B' : '#0891B2',
+                border: '2px solid #FFFFFF',
+                boxShadow: '0 2px 6px rgba(15, 52, 76, 0.25)',
                 transform: `translate(${joyState.knobX}px, ${joyState.knobY}px)`,
               }}
             />
@@ -338,8 +340,9 @@ export const TouchControls: React.FC<TouchControlsProps> = ({
               minWidth: '48px',
               height: '48px',
               padding: '0 10px',
-              borderColor: '#3CC4C0',
-              color: '#3CC4C0',
+              backgroundColor: '#ECFEFF',
+              borderColor: '#0891B2',
+              color: '#0E7490',
             }}
           >
             <IconCode size={18} />

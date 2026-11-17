@@ -62,7 +62,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         inset: 0,
         overflowY: 'auto',
         padding: '24px',
-        backgroundColor: 'rgba(28, 36, 39, 0.84)',
+        backgroundColor: 'rgba(14, 50, 78, 0.42)',
+        backdropFilter: 'blur(4px)',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'flex-start',
@@ -77,6 +78,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           display: 'flex',
           flexDirection: 'column',
           gap: '20px',
+          borderRadius: '14px',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -89,7 +91,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               margin: 0,
               fontFamily: 'var(--font-display)',
               fontSize: '1.75rem',
-              color: '#F2B544',
+              color: '#0E7490',
             }}
           >
             {locale === 'id' ? 'Pengaturan' : 'Settings'}
@@ -122,9 +124,9 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                   className="btn-slate"
                   style={{
                     justifyContent: 'flex-start',
-                    borderColor: active ? '#F2B544' : '#33434A',
-                    color: active ? '#F2B544' : '#E8EEF0',
-                    backgroundColor: active ? '#2C3A3F' : '#243034',
+                    borderColor: active ? '#0891B2' : '#CFE3EE',
+                    color: active ? '#0E7490' : '#172B3A',
+                    backgroundColor: active ? '#E0F2FE' : '#FFFFFF',
                   }}
                 >
                   {locale === 'id' ? tab.idLabel : tab.enLabel}
@@ -236,7 +238,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                 </div>
 
                 <div>
-                  <div style={{ marginBottom: '8px', color: '#A9B8BD' }}>
+                  <div style={{ marginBottom: '8px', color: '#335267', fontWeight: 600 }}>
                     {locale === 'id' ? 'Kualitas Render' : 'Render Quality'}
                   </div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
@@ -248,10 +250,12 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                         className="btn-slate"
                         onClick={() => settings.updateGraphics({ quality: q }, 'manual')}
                         style={{
+                          backgroundColor:
+                            settings.graphics.quality === q ? '#FEF3C7' : '#FFFFFF',
                           borderColor:
-                            settings.graphics.quality === q ? '#F2B544' : '#33434A',
+                            settings.graphics.quality === q ? '#F59E0B' : '#CFE3EE',
                           color:
-                            settings.graphics.quality === q ? '#F2B544' : '#E8EEF0',
+                            settings.graphics.quality === q ? '#B45309' : '#172B3A',
                         }}
                       >
                         {q === 'high'
@@ -300,11 +304,11 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                   <div
                     style={{
                       padding: '10px 12px',
-                      backgroundColor: '#1C2427',
-                      border: '1px solid #33434A',
-                      borderRadius: '2px',
+                      backgroundColor: '#E0F2FE',
+                      border: '1.5px solid #7DD3FC',
+                      borderRadius: '8px',
                       fontSize: '0.875rem',
-                      color: '#A9B8BD',
+                      color: '#075985',
                     }}
                   >
                     {locale === 'id'
@@ -392,17 +396,17 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
 
                 <div
                   style={{
-                    padding: '12px',
-                    backgroundColor: '#1C2427',
-                    border: '1px solid #33434A',
-                    borderRadius: '2px',
+                    padding: '14px',
+                    backgroundColor: '#F0F9FF',
+                    border: '1.5px solid #7DD3FC',
+                    borderRadius: '10px',
                     fontSize: '0.875rem',
                   }}
                 >
-                  <strong style={{ color: '#F2B544' }}>
+                  <strong style={{ color: '#0E7490' }}>
                     {locale === 'id' ? 'Panduan Tombol' : 'Control Reference'}
                   </strong>
-                  <ul style={{ margin: '8px 0 0', paddingLeft: '18px', color: '#A9B8BD' }}>
+                  <ul style={{ margin: '8px 0 0', paddingLeft: '18px', color: '#335267' }}>
                     <li>WASD / Panah: Bergerak · Shift: Lari cepat · Spasi: Lompat</li>
                     <li>E: Interaksi · V: Ganti Kamera · Z/C: Putar Isometrik 90°</li>
                     <li>Tab: Buka Editor · Ctrl/Cmd+Enter: Jalankan · Ctrl+.: Hentikan</li>
@@ -426,15 +430,16 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                       className="btn-slate"
                       onClick={() => settings.setLocale(code)}
                       style={{
-                        borderColor: settings.locale === code ? '#F2B544' : '#33434A',
-                        color: settings.locale === code ? '#F2B544' : '#E8EEF0',
+                        backgroundColor: settings.locale === code ? '#FEF3C7' : '#FFFFFF',
+                        borderColor: settings.locale === code ? '#F59E0B' : '#CFE3EE',
+                        color: settings.locale === code ? '#B45309' : '#172B3A',
                       }}
                     >
                       {code === 'id' ? 'Bahasa Indonesia (Default)' : 'English'}
                     </button>
                   ))}
                 </div>
-                <p style={{ margin: 0, fontSize: '0.875rem', color: '#A9B8BD' }}>
+                <p style={{ margin: 0, fontSize: '0.875rem', color: '#335267' }}>
                   {locale === 'id'
                     ? 'Pengenal Python dan API robot tetap menggunakan bahasa Inggris standar.'
                     : 'Python keywords and robot API identifiers remain in standard English.'}
@@ -459,7 +464,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                 </div>
 
                 <div>
-                  <div style={{ marginBottom: '8px', color: '#A9B8BD' }}>
+                  <div style={{ marginBottom: '8px', color: '#335267', fontWeight: 600 }}>
                     {locale === 'id' ? 'Skala Teks' : 'Text Scale'}
                   </div>
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -474,14 +479,18 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                           settings.updateAccessibility({ textScale: scale })
                         }
                         style={{
+                          backgroundColor:
+                            settings.accessibility.textScale === scale
+                              ? '#FEF3C7'
+                              : '#FFFFFF',
                           borderColor:
                             settings.accessibility.textScale === scale
-                              ? '#F2B544'
-                              : '#33434A',
+                              ? '#F59E0B'
+                              : '#CFE3EE',
                           color:
                             settings.accessibility.textScale === scale
-                              ? '#F2B544'
-                              : '#E8EEF0',
+                              ? '#B45309'
+                              : '#172B3A',
                         }}
                       >
                         {scale}%
@@ -529,7 +538,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                 <h2 style={{ margin: 0, fontFamily: 'var(--font-display)', fontSize: '1.25rem' }}>
                   {locale === 'id' ? 'Penyimpanan & Sistem' : 'Storage & System'}
                 </h2>
-                <p style={{ margin: 0, color: '#A9B8BD', fontSize: '0.9375rem' }}>
+                <p style={{ margin: 0, color: '#335267', fontSize: '0.9375rem' }}>
                   {locale === 'id'
                     ? 'Semua progres, kode, dan pengaturan disimpan lokal di IndexedDB perangkat ini.'
                     : 'All progress, code drafts, and settings are stored locally in IndexedDB on this device.'}
@@ -554,7 +563,11 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                     data-testid="btn-reset-python-worker"
                     className="btn-slate"
                     onClick={handleResetWorker}
-                    style={{ borderColor: '#3CC4C0', color: '#3CC4C0' }}
+                    style={{
+                      backgroundColor: '#ECFEFF',
+                      borderColor: '#0891B2',
+                      color: '#0E7490',
+                    }}
                   >
                     <IconReset size={16} />
                     <span>

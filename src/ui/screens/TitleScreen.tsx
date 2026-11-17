@@ -265,7 +265,7 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
           aria-live="polite"
           className="fullscreen-hud-toast"
           style={{
-            borderColor: showFullscreenToast.mode === 'exit' ? '#F2B544' : '#3CC4C0',
+            borderColor: showFullscreenToast.mode === 'exit' ? '#F59E0B' : '#0891B2',
           }}
         >
           <span
@@ -273,11 +273,11 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
               display: 'inline-block',
               width: 8,
               height: 8,
-              backgroundColor: showFullscreenToast.mode === 'exit' ? '#F2B544' : '#3CC4C0',
-              boxShadow: `0 0 6px ${showFullscreenToast.mode === 'exit' ? '#F2B544' : '#3CC4C0'}`,
+              borderRadius: '999px',
+              backgroundColor: showFullscreenToast.mode === 'exit' ? '#F59E0B' : '#0891B2',
             }}
           />
-          <span style={{ color: '#E8EEF0', fontWeight: 700 }}>
+          <span style={{ color: '#172B3A', fontWeight: 800 }}>
             {showFullscreenToast.text}
           </span>
         </div>
@@ -363,11 +363,13 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
             style={{
               padding: '6px 14px',
               fontSize: '0.8125rem',
-              color: '#A9B8BD',
+              color: '#172B3A',
+              fontWeight: 700,
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
-              borderLeft: '3px solid #F2B544',
+              borderLeft: '4px solid #F59E0B',
+              borderRadius: '999px',
             }}
           >
             <span
@@ -375,8 +377,8 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
                 display: 'inline-block',
                 width: 8,
                 height: 8,
-                borderRadius: '1px',
-                backgroundColor: '#F2B544',
+                borderRadius: '999px',
+                backgroundColor: '#F59E0B',
               }}
             />
             <span>
@@ -391,23 +393,26 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
               padding: '6px 14px',
               fontSize: '0.75rem',
               fontFamily: 'var(--font-code)',
-              letterSpacing: '0.06em',
-              color: '#8FA3A9',
+              letterSpacing: '0.05em',
+              color: '#0E7490',
+              fontWeight: 700,
               display: isCompact ? 'none' : 'inline-flex',
               alignItems: 'center',
               gap: '10px',
+              borderRadius: '999px',
             }}
           >
             <span
               style={{
                 display: 'inline-block',
-                width: 7,
-                height: 7,
-                backgroundColor: '#3CC4C0',
-                boxShadow: '0 0 0 2px rgba(60, 196, 192, 0.25)',
+                width: 8,
+                height: 8,
+                borderRadius: '999px',
+                backgroundColor: '#16A34A',
+                boxShadow: '0 0 0 3px rgba(22, 163, 74, 0.2)',
               }}
             />
-            <span>AETHERIA ORBIT // POS: [14.0, 5.5, 4.0]</span>
+            <span>AETHERIA ORBIT // [14.0, 5.5, 4.0]</span>
           </div>
         )}
 
@@ -434,12 +439,13 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
               minWidth: '44px',
               minHeight: '44px',
               padding: '6px 12px',
-              color: '#F2B544',
-              borderColor: '#D99B29',
+              background: 'linear-gradient(180deg, #FFFBEB 0%, #FEF3C7 100%)',
+              color: '#92400E',
+              borderColor: '#F59E0B',
               display: 'inline-flex',
               alignItems: 'center',
               gap: '8px',
-              fontWeight: 700,
+              fontWeight: 800,
             }}
           >
             <IconJournal size={18} />
@@ -460,15 +466,15 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
             style={{
               minWidth: '44px',
               minHeight: '44px',
-              padding: '6px 10px',
+              padding: '6px 12px',
               fontFamily: 'var(--font-code)',
               fontSize: '0.8125rem',
-              fontWeight: 700,
+              fontWeight: 800,
             }}
           >
-            <span style={{ color: locale === 'id' ? '#F2B544' : '#8FA3A9' }}>ID</span>
-            <span style={{ color: '#33434A' }}>|</span>
-            <span style={{ color: locale === 'en' ? '#F2B544' : '#8FA3A9' }}>EN</span>
+            <span style={{ color: locale === 'id' ? '#D97706' : '#64748B' }}>ID</span>
+            <span style={{ color: '#CBD5E1' }}>|</span>
+            <span style={{ color: locale === 'en' ? '#0891B2' : '#64748B' }}>EN</span>
           </button>
 
           {/* Quick Audio Mute Toggle */}
@@ -483,7 +489,8 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
               minWidth: '44px',
               minHeight: '44px',
               padding: '6px 10px',
-              color: audio.muted ? '#E0603F' : '#3CC4C0',
+              color: audio.muted ? '#DC2626' : '#0891B2',
+              borderColor: audio.muted ? '#FCA5A5' : '#96C4D8',
             }}
           >
             {audio.muted ? <IconVolumeMute size={18} /> : <IconVolumeOn size={18} />}
@@ -510,8 +517,8 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
                 minWidth: '44px',
                 minHeight: '44px',
                 padding: '6px 12px',
-                borderColor: isFullscreen ? '#3CC4C0' : undefined,
-                color: isFullscreen ? '#3CC4C0' : '#E8EEF0',
+                borderColor: isFullscreen ? '#0891B2' : undefined,
+                color: isFullscreen ? '#0E7490' : '#172B3A',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '8px',
@@ -548,8 +555,8 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
         style={{
           display: 'flex',
           flexDirection: 'column',
-          gap: isCompact ? '12px' : '18px',
-          maxWidth: isCompact ? '100%' : '420px',
+          gap: isCompact ? '10px' : '14px',
+          maxWidth: isCompact ? '100%' : '430px',
           width: '100%',
           pointerEvents: 'auto',
           zIndex: 5,
@@ -558,25 +565,25 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
         {/* Brand Banner with 3D Isometric Voxel Cube Logo */}
         <section
           aria-label="PyCraft Brand"
+          className="surface-slate"
           style={{
             display: 'flex',
             flexDirection: 'column',
-            gap: '8px',
+            gap: '10px',
             alignSelf: 'flex-start',
             width: '100%',
-            backgroundColor: 'rgba(28, 36, 39, 0.94)',
-            border: '2px solid #33434A',
-            borderTop: '3px solid #F2B544',
-            boxShadow: '4px 4px 0 #161D1F, 0 12px 24px rgba(0,0,0,0.4)',
-            padding: isCompact ? '12px 16px' : '18px 24px',
-            borderRadius: '2px',
+            background: 'linear-gradient(135deg, #0E7490 0%, #0D9488 100%)',
+            border: '2px solid #A5F3FC',
+            boxShadow: '0 6px 0 #0F766E, 0 16px 32px rgba(15, 50, 75, 0.25)',
+            padding: isCompact ? '14px 16px' : '18px 22px',
+            borderRadius: '16px',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
             {/* 3D Isometric Voxel Cube SVG */}
             <svg
-              width="44"
-              height="44"
+              width="48"
+              height="48"
               viewBox="0 0 48 48"
               className="title-floating-logo"
               aria-hidden="true"
@@ -584,38 +591,38 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
             >
               <polygon
                 points="24,4 44,14 24,24 4,14"
-                fill="#F2B544"
-                stroke="#161D1F"
+                fill="#FBBF24"
+                stroke="#422006"
                 strokeWidth="2"
                 strokeLinejoin="round"
               />
-              <line x1="14" y1="9" x2="34" y2="19" stroke="#F5C467" strokeWidth="1.5" />
-              <line x1="34" y1="9" x2="14" y2="19" stroke="#F5C467" strokeWidth="1.5" />
+              <line x1="14" y1="9" x2="34" y2="19" stroke="#FDE68A" strokeWidth="1.5" />
+              <line x1="34" y1="9" x2="14" y2="19" stroke="#FDE68A" strokeWidth="1.5" />
 
               <polygon
                 points="4,14 24,24 24,44 4,34"
-                fill="#C7881D"
-                stroke="#161D1F"
+                fill="#D97706"
+                stroke="#422006"
                 strokeWidth="2"
                 strokeLinejoin="round"
               />
-              <line x1="4" y1="24" x2="24" y2="34" stroke="#D99B29" strokeWidth="1.5" />
+              <line x1="4" y1="24" x2="24" y2="34" stroke="#F59E0B" strokeWidth="1.5" />
 
               <polygon
                 points="24,24 44,14 44,34 24,44"
-                fill="#243034"
-                stroke="#161D1F"
+                fill="#06B6D4"
+                stroke="#0F172A"
                 strokeWidth="2"
                 strokeLinejoin="round"
               />
               <polyline
                 points="28,26 36,30 36,39"
                 fill="none"
-                stroke="#3CC4C0"
+                stroke="#FFFBEB"
                 strokeWidth="2"
                 strokeLinecap="square"
               />
-              <polygon points="21,12 27,14 21,16" fill="#1C2427" />
+              <polygon points="21,12 27,14 21,16" fill="#422006" />
             </svg>
 
             {/* Title & Subtitle */}
@@ -627,25 +634,25 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
                     fontFamily: 'var(--font-display)',
                     fontWeight: 800,
                     fontSize: isCompact ? '2.1rem' : '2.85rem',
-                    letterSpacing: '0.08em',
+                    letterSpacing: '0.06em',
                     lineHeight: 1,
-                    textShadow: '3px 3px 0 #161D1F',
+                    textShadow: '0 3px 0 rgba(15, 45, 70, 0.35)',
                   }}
                 >
-                  <span style={{ color: '#F2B544' }}>PY</span>
-                  <span style={{ color: '#E8EEF0' }}>CRAFT</span>
+                  <span style={{ color: '#FDE047' }}>PY</span>
+                  <span style={{ color: '#FFFFFF' }}>CRAFT</span>
                 </h1>
                 <span
                   style={{
                     fontSize: '0.6875rem',
-                    fontWeight: 700,
+                    fontWeight: 800,
                     fontFamily: 'var(--font-code)',
-                    color: '#3CC4C0',
-                    backgroundColor: 'rgba(60, 196, 192, 0.15)',
-                    padding: '2px 6px',
-                    borderRadius: '2px',
-                    border: '1px solid rgba(60, 196, 192, 0.4)',
-                    letterSpacing: '0.06em',
+                    color: '#0F766E',
+                    backgroundColor: '#CCFBF1',
+                    padding: '2px 8px',
+                    borderRadius: '999px',
+                    border: '1px solid #99F6E4',
+                    letterSpacing: '0.04em',
                   }}
                 >
                   v0.1.0
@@ -655,10 +662,10 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
                 style={{
                   margin: '4px 0 0',
                   fontFamily: 'var(--font-display)',
-                  fontWeight: 600,
+                  fontWeight: 700,
                   fontSize: '0.875rem',
                   letterSpacing: '0.14em',
-                  color: '#A9B8BD',
+                  color: '#ECFEFF',
                   textTransform: 'uppercase',
                 }}
               >
@@ -672,24 +679,25 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
             onClick={cycleSnippet}
             title={locale === 'id' ? 'Klik untuk mengganti kode' : 'Click to cycle code snippet'}
             style={{
-              marginTop: '4px',
-              padding: '6px 10px',
-              backgroundColor: '#161D1F',
-              border: '1px solid #28373D',
-              borderRadius: '2px',
+              marginTop: '2px',
+              padding: '7px 12px',
+              backgroundColor: '#FFFFFF',
+              border: '1.5px solid #99F6E4',
+              borderRadius: '10px',
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
               fontFamily: 'var(--font-code)',
               fontSize: '0.75rem',
-              color: '#3CC4C0',
+              fontWeight: 600,
+              color: '#0E7490',
               cursor: 'pointer',
               userSelect: 'none',
             }}
           >
             <IconTerminal size={14} className="title-terminal-icon" />
-            <span style={{ color: '#F2B544', fontWeight: 700 }}>&gt;&gt;&gt;</span>
-            <span style={{ color: '#E8EEF0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <span style={{ color: '#D97706', fontWeight: 800 }}>&gt;&gt;&gt;</span>
+            <span style={{ color: '#0F172A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {TERMINAL_SNIPPETS[snippetIndex]}
             </span>
             <span className="title-cursor" aria-hidden="true" />
@@ -699,12 +707,13 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
         {/* Hero Save Summary / Continue Banner */}
         <section
           aria-label={locale === 'id' ? 'Ringkasan Petualangan' : 'Adventure Summary'}
+          className="surface-slate"
           style={{
-            backgroundColor: 'rgba(28, 36, 39, 0.94)',
-            border: activeSlot ? '1px solid #F2B544' : '1px dashed #3D5058',
-            boxShadow: '4px 4px 0 #161D1F',
+            background: '#FFFDF7',
+            border: activeSlot ? '2px solid #F59E0B' : '2px dashed #76B8CF',
+            boxShadow: '0 4px 0 rgba(70, 130, 160, 0.25), 0 12px 24px rgba(15, 50, 75, 0.16)',
             padding: '12px',
-            borderRadius: '2px',
+            borderRadius: '14px',
             display: 'flex',
             flexDirection: 'column',
             gap: '8px',
@@ -717,7 +726,7 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  borderBottom: '1px solid #28373D',
+                  borderBottom: '1px solid #F3E5C8',
                   paddingBottom: '8px',
                 }}
               >
@@ -725,23 +734,25 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
                   <span
                     style={{
                       display: 'inline-block',
-                      width: 8,
-                      height: 8,
-                      backgroundColor: '#6DBE4B',
-                      boxShadow: '0 0 0 2px rgba(109, 190, 75, 0.3)',
+                      width: 9,
+                      height: 9,
+                      borderRadius: '999px',
+                      backgroundColor: '#16A34A',
+                      boxShadow: '0 0 0 3px rgba(22, 163, 74, 0.2)',
                     }}
                   />
-                  <span style={{ fontWeight: 700, fontSize: '0.875rem', color: '#E8EEF0' }}>
+                  <span style={{ fontWeight: 800, fontSize: '0.9rem', color: '#172B3A' }}>
                     {activeSlot.playerName}
                   </span>
                   <span
                     style={{
                       fontSize: '0.6875rem',
-                      color: '#F2B544',
-                      backgroundColor: 'rgba(242, 181, 68, 0.14)',
-                      padding: '1px 6px',
-                      borderRadius: '2px',
-                      fontWeight: 700,
+                      color: '#92400E',
+                      backgroundColor: '#FEF3C7',
+                      border: '1px solid #FCD34D',
+                      padding: '1px 8px',
+                      borderRadius: '999px',
+                      fontWeight: 800,
                     }}
                   >
                     {rankLabel}
@@ -751,7 +762,8 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
                   style={{
                     fontSize: '0.6875rem',
                     fontFamily: 'var(--font-code)',
-                    color: '#8FA3A9',
+                    color: '#4C697C',
+                    fontWeight: 700,
                   }}
                 >
                   Slot {activeSlot.slotId}
@@ -764,7 +776,8 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   fontSize: '0.75rem',
-                  color: '#A9B8BD',
+                  fontWeight: 600,
+                  color: '#335267',
                 }}
               >
                 <span>{regionLabel}</span>
@@ -781,8 +794,7 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
                   width: '100%',
                   justifyContent: 'space-between',
                   padding: '12px 16px',
-                  marginTop: '4px',
-                  boxShadow: '0 2px 8px rgba(242, 181, 68, 0.2)',
+                  marginTop: '2px',
                 }}
               >
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '10px' }}>
@@ -793,10 +805,10 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
                   style={{
                     fontSize: '0.75rem',
                     fontWeight: 800,
-                    backgroundColor: '#1C2427',
-                    color: '#F2B544',
+                    backgroundColor: '#FFFBEB',
+                    color: '#92400E',
                     padding: '2px 8px',
-                    borderRadius: '2px',
+                    borderRadius: '999px',
                     letterSpacing: '0.04em',
                   }}
                 >
@@ -824,9 +836,10 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
               </button>
               <div
                 style={{
-                  padding: '4px 4px 2px',
+                  padding: '2px',
                   fontSize: '0.8125rem',
-                  color: '#8FA3A9',
+                  fontWeight: 600,
+                  color: '#4C697C',
                   textAlign: 'center',
                 }}
               >
@@ -849,8 +862,7 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
             display: 'flex',
             flexDirection: 'column',
             gap: '6px',
-            backgroundColor: 'rgba(28, 36, 39, 0.94)',
-            boxShadow: '4px 4px 0 #161D1F, 0 16px 32px rgba(0,0,0,0.5)',
+            borderRadius: '16px',
           }}
         >
           {/* 1. Pilih Petualangan / Select Adventure */}
@@ -862,12 +874,12 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
             onMouseEnter={playHoverSfx}
           >
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '12px' }}>
-              <span style={{ color: '#3CC4C0', display: 'inline-flex' }}><IconFolder size={18} /></span>
+              <span style={{ color: '#0891B2', display: 'inline-flex' }}><IconFolder size={18} /></span>
               <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                 <span style={{ lineHeight: 1.2 }}>
                   {locale === 'id' ? 'Pilih Petualangan' : 'Select Adventure'}
                 </span>
-                <span style={{ fontSize: '0.6875rem', fontWeight: 500, color: '#8FA3A9' }}>
+                <span style={{ fontSize: '0.6875rem', fontWeight: 500, color: '#4C697C' }}>
                   {locale === 'id' ? 'Kelola 3 slot penyimpanan lokal' : 'Manage 3 local save slots'}
                 </span>
               </span>
@@ -876,10 +888,10 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
               style={{
                 fontSize: '0.6875rem',
                 fontFamily: 'var(--font-code)',
-                color: '#8FA3A9',
-                backgroundColor: '#161D1F',
-                padding: '2px 6px',
-                borderRadius: '2px',
+                color: '#0E7490',
+                backgroundColor: '#E0F2FE',
+                padding: '2px 7px',
+                borderRadius: '999px',
               }}
             >
               [1]
@@ -893,22 +905,20 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
             className="title-menu-btn"
             onClick={() => handleNavigate('new_adventure')}
             onMouseEnter={playHoverSfx}
-            style={
-              !activeSlot
-                ? {
-                    borderLeftColor: '#F2B544',
-                    backgroundColor: '#273439',
-                  }
-                : undefined
-            }
+            style={{
+              borderLeftColor: '#F59E0B',
+              background: !activeSlot
+                ? 'linear-gradient(180deg, #FFFBEB 0%, #FEF3C7 100%)'
+                : undefined,
+            }}
           >
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '12px' }}>
-              <span style={{ color: '#F2B544', display: 'inline-flex' }}><IconSpark size={18} /></span>
+              <span style={{ color: '#D97706', display: 'inline-flex' }}><IconSpark size={18} /></span>
               <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                 <span style={{ lineHeight: 1.2 }}>
                   {locale === 'id' ? 'Petualangan Baru' : 'New Adventure'}
                 </span>
-                <span style={{ fontSize: '0.6875rem', fontWeight: 500, color: '#8FA3A9' }}>
+                <span style={{ fontSize: '0.6875rem', fontWeight: 500, color: '#4C697C' }}>
                   {locale === 'id' ? 'Mulai perjalanan arsitek baru' : 'Begin a fresh architect journey'}
                 </span>
               </span>
@@ -917,11 +927,11 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
               style={{
                 fontSize: '0.6875rem',
                 fontFamily: 'var(--font-code)',
-                color: !activeSlot ? '#F2B544' : '#8FA3A9',
-                backgroundColor: '#161D1F',
-                padding: '2px 6px',
-                borderRadius: '2px',
-                fontWeight: !activeSlot ? 700 : 500,
+                color: '#92400E',
+                backgroundColor: '#FEF3C7',
+                padding: '2px 7px',
+                borderRadius: '999px',
+                fontWeight: 700,
               }}
             >
               [2]
@@ -935,14 +945,15 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
             className="title-menu-btn"
             onClick={() => handleNavigate('modes')}
             onMouseEnter={playHoverSfx}
+            style={{ borderLeftColor: '#16A34A' }}
           >
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '12px' }}>
-              <span style={{ color: '#3CC4C0', display: 'inline-flex' }}><IconLayers size={18} /></span>
+              <span style={{ color: '#16A34A', display: 'inline-flex' }}><IconLayers size={18} /></span>
               <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                 <span style={{ lineHeight: 1.2 }}>
                   {locale === 'id' ? 'Mode Permainan' : 'Game Modes'}
                 </span>
-                <span style={{ fontSize: '0.6875rem', fontWeight: 500, color: '#8FA3A9' }}>
+                <span style={{ fontSize: '0.6875rem', fontWeight: 500, color: '#4C697C' }}>
                   {locale === 'id' ? 'Petualangan, Otomasi & Sandbox' : 'Adventure, Automation & Sandbox'}
                 </span>
               </span>
@@ -951,10 +962,10 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
               style={{
                 fontSize: '0.6875rem',
                 fontFamily: 'var(--font-code)',
-                color: '#8FA3A9',
-                backgroundColor: '#161D1F',
-                padding: '2px 6px',
-                borderRadius: '2px',
+                color: '#15803D',
+                backgroundColor: '#DCFCE7',
+                padding: '2px 7px',
+                borderRadius: '999px',
               }}
             >
               [3]
@@ -968,14 +979,15 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
             className="title-menu-btn"
             onClick={() => handleNavigate('progress')}
             onMouseEnter={playHoverSfx}
+            style={{ borderLeftColor: '#0284C7' }}
           >
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '12px' }}>
-              <span style={{ color: '#3CC4C0', display: 'inline-flex' }}><IconMap size={18} /></span>
+              <span style={{ color: '#0284C7', display: 'inline-flex' }}><IconMap size={18} /></span>
               <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                 <span style={{ lineHeight: 1.2 }}>
                   {locale === 'id' ? 'Dunia & Progres' : 'World & Progress'}
                 </span>
-                <span style={{ fontSize: '0.6875rem', fontWeight: 500, color: '#8FA3A9' }}>
+                <span style={{ fontSize: '0.6875rem', fontWeight: 500, color: '#4C697C' }}>
                   {locale === 'id' ? 'Peta 8 Wilayah & Monolit' : '8 Region Map & Monoliths'}
                 </span>
               </span>
@@ -984,10 +996,10 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
               style={{
                 fontSize: '0.6875rem',
                 fontFamily: 'var(--font-code)',
-                color: '#8FA3A9',
-                backgroundColor: '#161D1F',
-                padding: '2px 6px',
-                borderRadius: '2px',
+                color: '#0369A1',
+                backgroundColor: '#E0F2FE',
+                padding: '2px 7px',
+                borderRadius: '999px',
               }}
             >
               [4]
@@ -1001,14 +1013,15 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
             className="title-menu-btn"
             onClick={() => handleNavigate('settings')}
             onMouseEnter={playHoverSfx}
+            style={{ borderLeftColor: '#7C3AED' }}
           >
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '12px' }}>
-              <span style={{ color: '#F2B544', display: 'inline-flex' }}><IconSettings size={18} /></span>
+              <span style={{ color: '#7C3AED', display: 'inline-flex' }}><IconSettings size={18} /></span>
               <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                 <span style={{ lineHeight: 1.2 }}>
                   {locale === 'id' ? 'Pengaturan' : 'Settings'}
                 </span>
-                <span style={{ fontSize: '0.6875rem', fontWeight: 500, color: '#8FA3A9' }}>
+                <span style={{ fontSize: '0.6875rem', fontWeight: 500, color: '#4C697C' }}>
                   {locale === 'id' ? 'Audio, Grafis, Bahasa & Kontrol' : 'Audio, Graphics, Language & Controls'}
                 </span>
               </span>
@@ -1017,10 +1030,10 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
               style={{
                 fontSize: '0.6875rem',
                 fontFamily: 'var(--font-code)',
-                color: '#8FA3A9',
-                backgroundColor: '#161D1F',
-                padding: '2px 6px',
-                borderRadius: '2px',
+                color: '#6D28D9',
+                backgroundColor: '#EDE9FE',
+                padding: '2px 7px',
+                borderRadius: '999px',
               }}
             >
               [5]
@@ -1038,17 +1051,17 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
             }}
             onMouseEnter={playHoverSfx}
             style={{
-              borderLeftColor: '#F2B544',
-              backgroundColor: 'rgba(242, 181, 68, 0.08)',
+              borderLeftColor: '#EA580C',
+              background: 'linear-gradient(180deg, #FFFDF7 0%, #FFF7ED 100%)',
             }}
           >
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '12px' }}>
-              <span style={{ color: '#F2B544', display: 'inline-flex' }}><IconJournal size={18} /></span>
+              <span style={{ color: '#EA580C', display: 'inline-flex' }}><IconJournal size={18} /></span>
               <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                <span style={{ lineHeight: 1.2, color: '#F2B544' }}>
+                <span style={{ lineHeight: 1.2, color: '#9A3412' }}>
                   {locale === 'id' ? 'Buku Panduan Arsitek' : 'Architect Guidebook'}
                 </span>
-                <span style={{ fontSize: '0.6875rem', fontWeight: 500, color: '#A9B8BD' }}>
+                <span style={{ fontSize: '0.6875rem', fontWeight: 500, color: '#7C2D12' }}>
                   {locale === 'id' ? 'Kontrol, kenapa ada .json & tutorial Python' : 'Controls, why .json & Python tutorial'}
                 </span>
               </span>
@@ -1057,11 +1070,11 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
               style={{
                 fontSize: '0.6875rem',
                 fontFamily: 'var(--font-code)',
-                color: '#F2B544',
-                backgroundColor: '#161D1F',
-                padding: '2px 6px',
-                borderRadius: '2px',
-                fontWeight: 700,
+                color: '#9A3412',
+                backgroundColor: '#FFEDD5',
+                padding: '2px 7px',
+                borderRadius: '999px',
+                fontWeight: 800,
               }}
             >
               [6]
@@ -1084,13 +1097,13 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
       >
         {/* Left: Device & Save Local Indicator */}
         <div
+          className="surface-slate"
           style={{
             fontSize: '0.75rem',
-            color: '#E8EEF0',
-            backgroundColor: 'rgba(28, 36, 39, 0.92)',
+            fontWeight: 700,
+            color: '#172B3A',
             padding: '6px 14px',
-            borderRadius: '2px',
-            border: '1px solid #33434A',
+            borderRadius: '999px',
             display: 'inline-flex',
             alignItems: 'center',
             gap: '10px',
@@ -1101,8 +1114,8 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
               display: 'inline-block',
               width: 8,
               height: 8,
-              backgroundColor: '#6DBE4B',
-              borderRadius: '1px',
+              backgroundColor: '#16A34A',
+              borderRadius: '999px',
             }}
           />
           <span>
@@ -1110,8 +1123,8 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
               ? 'R1 Kebangkitan · Simpan lokal di perangkat ini'
               : 'R1 The Awakening · Local-first saves on this device'}
           </span>
-          <span style={{ color: '#33434A' }}>|</span>
-          <span style={{ color: '#8FA3A9', fontFamily: 'var(--font-code)' }}>
+          <span style={{ color: '#94A3B8' }}>|</span>
+          <span style={{ color: '#0E7490', fontFamily: 'var(--font-code)' }}>
             PYODIDE WASM
           </span>
         </div>
@@ -1119,33 +1132,32 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
         {/* Right: Keyboard navigation hints */}
         {!isCompact && (
           <div
+            className="surface-slate"
             style={{
               fontSize: '0.75rem',
               fontFamily: 'var(--font-code)',
-              color: '#8FA3A9',
-              backgroundColor: 'rgba(28, 36, 39, 0.92)',
+              color: '#335267',
               padding: '6px 14px',
-              borderRadius: '2px',
-              border: '1px solid #33434A',
+              borderRadius: '999px',
               display: 'inline-flex',
               alignItems: 'center',
               gap: '12px',
             }}
           >
             <span>
-              <strong style={{ color: '#E8EEF0' }}>[↑/↓]</strong>{' '}
+              <strong style={{ color: '#172B3A' }}>[↑/↓]</strong>{' '}
               {locale === 'id' ? 'Navigasi' : 'Navigate'}
             </span>
             <span>
-              <strong style={{ color: '#F2B544' }}>[Enter]</strong>{' '}
+              <strong style={{ color: '#D97706' }}>[Enter]</strong>{' '}
               {locale === 'id' ? 'Pilih' : 'Select'}
             </span>
             <span>
-              <strong style={{ color: '#3CC4C0' }}>[1-6]</strong>{' '}
+              <strong style={{ color: '#0891B2' }}>[1-6]</strong>{' '}
               {locale === 'id' ? 'Menu' : 'Shortcuts'}
             </span>
             <span>
-              <strong style={{ color: '#F2B544' }}>[G]</strong>{' '}
+              <strong style={{ color: '#EA580C' }}>[G]</strong>{' '}
               {locale === 'id' ? 'Panduan' : 'Guide'}
             </span>
           </div>

@@ -100,13 +100,14 @@ export const DialogueBox: React.FC<DialogueBoxProps> = ({
           <span
             style={{
               display: 'inline-block',
-              padding: '4px 10px',
-              backgroundColor: '#243034',
-              color: '#F2B544',
+              padding: '4px 12px',
+              background: 'linear-gradient(135deg, #0891B2, #0284C7)',
+              color: '#FFFFFF',
               fontFamily: 'var(--font-display)',
               fontWeight: 700,
               fontSize: '0.9375rem',
-              borderRadius: '2px',
+              borderRadius: '8px',
+              boxShadow: '0 2px 6px rgba(8, 145, 178, 0.25)',
             }}
           >
             {dialogue.speakerName}

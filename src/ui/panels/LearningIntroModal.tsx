@@ -47,7 +47,8 @@ export const LearningIntroModal: React.FC<LearningIntroModalProps> = ({
         position: 'fixed',
         inset: 0,
         zIndex: 75,
-        backgroundColor: 'rgba(28, 36, 39, 0.78)',
+        backgroundColor: 'rgba(14, 50, 78, 0.42)',
+        backdropFilter: 'blur(4px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -63,17 +64,19 @@ export const LearningIntroModal: React.FC<LearningIntroModalProps> = ({
           display: 'flex',
           flexDirection: 'column',
           gap: '16px',
+          borderRadius: '14px',
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span
             style={{
-              padding: '3px 8px',
-              backgroundColor: '#243034',
-              color: '#3CC4C0',
+              padding: '4px 10px',
+              background: 'linear-gradient(135deg, #0891B2, #0284C7)',
+              color: '#FFFFFF',
               fontWeight: 700,
               fontSize: '0.75rem',
-              borderRadius: '2px',
+              borderRadius: '999px',
+              letterSpacing: '0.02em',
             }}
           >
             NEO · {stepIndex + 1}/3
@@ -128,12 +131,14 @@ export const LearningIntroModal: React.FC<LearningIntroModalProps> = ({
             <pre
               style={{
                 margin: 0,
-                padding: '10px 12px',
-                backgroundColor: '#1A2225',
-                color: '#E8EEF0',
+                padding: '12px 14px',
+                backgroundColor: '#FFFFFF',
+                color: '#0F172A',
+                border: '1.5px solid #B6DCEB',
+                borderLeft: '4px solid #0891B2',
                 fontFamily: 'var(--font-code)',
                 fontSize: '0.875rem',
-                borderRadius: '2px',
+                borderRadius: '8px',
                 overflowX: 'auto',
               }}
             >
@@ -166,15 +171,16 @@ export const LearningIntroModal: React.FC<LearningIntroModalProps> = ({
             {ranPreview && (
               <div
                 style={{
-                  padding: '8px 10px',
-                  backgroundColor: '#1C2427',
-                  color: '#9CCB6B',
+                  padding: '10px 12px',
+                  backgroundColor: '#ECFDF5',
+                  color: '#065F46',
+                  border: '1.5px solid #6EE7B7',
                   fontFamily: 'var(--font-code)',
                   fontSize: '0.8125rem',
-                  borderRadius: '2px',
+                  borderRadius: '8px',
                 }}
               >
-                <div style={{ color: '#8FA3A9', fontSize: '0.75rem', marginBottom: '2px' }}>
+                <div style={{ color: '#047857', fontWeight: 700, fontSize: '0.75rem', marginBottom: '2px' }}>
                   {locale === 'id' ? 'Keluaran contoh:' : 'Example output:'}
                 </div>
                 {exampleOutput}

@@ -141,7 +141,7 @@ export function BootGate({ children }: { children: ReactNode }): React.JSX.Eleme
           alignItems: 'center',
           justifyContent: 'center',
           background: 'linear-gradient(180deg, #8EC5E8 0%, #B4DAF0 50%, #D9EEF6 100%)',
-          color: '#1C2427',
+          color: '#172B3A',
           fontWeight: 700,
         }}
       >
@@ -160,17 +160,29 @@ export function BootGate({ children }: { children: ReactNode }): React.JSX.Eleme
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          background: '#1C2427',
-          color: '#E8EEF0',
+          background: 'linear-gradient(180deg, #8EC5E8 0%, #D9EEF6 100%)',
+          color: '#172B3A',
           padding: '24px',
           textAlign: 'center',
         }}
       >
-        <h1 style={{ color: '#F2B544', marginBottom: '12px' }}>WebGL2 Tidak Tersedia</h1>
-        <p style={{ color: '#A9B8BD', maxWidth: '480px', lineHeight: 1.5 }}>
-          PYCRAFT membutuhkan browser dengan dukungan WebGL2 (Chrome, Edge, Firefox, atau Safari
-          versi terbaru). Aktifkan akselerasi perangkat keras atau perbarui browser kamu.
-        </p>
+        <div
+          style={{
+            background: '#FFFDF7',
+            border: '2px solid #7CC4DF',
+            borderRadius: '14px',
+            padding: '28px',
+            boxShadow: '0 12px 28px rgba(15, 52, 76, 0.16)',
+          }}
+        >
+          <h1 style={{ color: '#0E7490', marginBottom: '12px', marginTop: 0 }}>
+            WebGL2 Tidak Tersedia
+          </h1>
+          <p style={{ color: '#335267', maxWidth: '480px', lineHeight: 1.5, margin: 0 }}>
+            PYCRAFT membutuhkan browser dengan dukungan WebGL2 (Chrome, Edge, Firefox, atau Safari
+            versi terbaru). Aktifkan akselerasi perangkat keras atau perbarui browser kamu.
+          </p>
+        </div>
       </main>
     );
   }

@@ -62,9 +62,11 @@ export function SkyAndLighting({ focusPosRef }: SkyAndLightingProps) {
       depthWrite: false,
       fog: false,
       uniforms: {
-        uZenith: { value: new THREE.Color('#8EC5E8') },
-        uMid: { value: new THREE.Color('#B4DAF0') },
-        uHorizon: { value: new THREE.Color('#D9EEF6') },
+        uZenith: { value: new THREE.Color('#5BB8EB') },
+        uMid: { value: new THREE.Color('#9ED9F5') },
+        uHorizon: { value: new THREE.Color('#E3F4FC') },
+        uSunDir: { value: new THREE.Vector3(0.45, 0.76, 0.45).normalize() },
+        uSunColor: { value: new THREE.Color('#FFF5D6') },
       },
       vertexShader: `
         varying vec3 vWorldDir;
@@ -78,11 +80,17 @@ export function SkyAndLighting({ focusPosRef }: SkyAndLightingProps) {
         uniform vec3 uZenith;
         uniform vec3 uMid;
         uniform vec3 uHorizon;
+        uniform vec3 uSunDir;
+        uniform vec3 uSunColor;
         varying vec3 vWorldDir;
         void main() {
-          float h = clamp(vWorldDir.y, -0.2, 1.0);
-          vec3 col = mix(uHorizon, uMid, smoothstep(-0.05, 0.25, h));
-          col = mix(col, uZenith, smoothstep(0.25, 0.78, h));
+          vec3 dir = normalize(vWorldDir);
+          float h = clamp(dir.y, -0.25, 1.0);
+          vec3 col = mix(uHorizon, uMid, smoothstep(-0.08, 0.25, h));
+          col = mix(col, uZenith, smoothstep(0.25, 0.8, h));
+          float sunDot = max(0.0, dot(dir, uSunDir));
+          float sunHalo = pow(sunDot, 12.0) * 0.25 + pow(sunDot, 160.0) * 0.55;
+          col = mix(col, uSunColor, clamp(sunHalo, 0.0, 0.75));
           gl_FragColor = vec4(col, 1.0);
         }
       `,
@@ -108,21 +116,24 @@ export function SkyAndLighting({ focusPosRef }: SkyAndLightingProps) {
 
   return (
     <>
-      <color attach="background" args={['#D9EEF6']} />
-      <fog attach="fog" args={['#D9EEF6', preset.fogNear, preset.fogFar]} />
+      <color attach="background" args={['#E3F4FC']} />
+      <fog attach="fog" args={['#E3F4FC', preset.fogNear, preset.fogFar]} />
 
       {/* Sky dome */}
       <mesh material={skyMaterial} renderOrder={-10}>
         <sphereGeometry args={[240, 24, 16]} />
       </mesh>
 
-      {/* Hemisphere sky/ground bounce */}
-      <hemisphereLight args={['#B4DAF0', '#8F5D3C', 0.8]} />
+      {/* Hemisphere sky/meadow bounce */}
+      <hemisphereLight args={['#D6F1FF', '#9DC48B', 1.15]} />
 
-      {/* 50-deg SE Warm Directional Sun (#FFF3DE), 48x48 fitted shadow frustum */}
+      {/* Soft cool opposite-sky fill light so shadowed faces stay vibrant */}
+      <directionalLight color="#B7E4FF" intensity={0.45} position={[-25, 22, -25]} />
+
+      {/* 50-deg SE Warm Directional Sun (#FFF6E5), 48x48 fitted shadow frustum */}
       <directionalLight
         ref={sunRef}
-        color="#FFF3DE"
+        color="#FFF6E5"
         intensity={1.75}
         position={[27.3, 46.0, 27.3]}
         castShadow={preset.shadowSize > 0}

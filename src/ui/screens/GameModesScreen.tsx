@@ -51,7 +51,8 @@ export const GameModesScreen: React.FC = () => {
         inset: 0,
         overflowY: 'auto',
         padding: '24px',
-        backgroundColor: 'rgba(28, 36, 39, 0.78)',
+        backgroundColor: 'rgba(14, 50, 78, 0.42)',
+        backdropFilter: 'blur(4px)',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'flex-start',
@@ -66,6 +67,7 @@ export const GameModesScreen: React.FC = () => {
           display: 'flex',
           flexDirection: 'column',
           gap: '16px',
+          borderRadius: '14px',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -78,7 +80,7 @@ export const GameModesScreen: React.FC = () => {
               margin: 0,
               fontFamily: 'var(--font-display)',
               fontSize: '1.75rem',
-              color: '#F2B544',
+              color: '#0E7490',
             }}
           >
             {locale === 'id' ? 'Mode Permainan' : 'Game Modes'}
@@ -98,7 +100,9 @@ export const GameModesScreen: React.FC = () => {
               minHeight: '88px',
               padding: '16px 20px',
               textAlign: 'left',
-              border: '2px solid #F2B544',
+              background: 'linear-gradient(135deg, #FFFDF7 0%, #FEF3C7 100%)',
+              border: '2px solid #F59E0B',
+              borderRadius: '12px',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
@@ -113,12 +117,13 @@ export const GameModesScreen: React.FC = () => {
                 style={{
                   width: '48px',
                   height: '48px',
-                  backgroundColor: '#243034',
-                  border: '2px solid #F2B544',
+                  background: 'linear-gradient(135deg, #FBBF24, #F59E0B)',
+                  border: '2px solid #D97706',
+                  borderRadius: '10px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: '#F2B544',
+                  color: '#FFFFFF',
                   flexShrink: 0,
                 }}
               >
@@ -138,26 +143,26 @@ export const GameModesScreen: React.FC = () => {
                       fontFamily: 'var(--font-display)',
                       fontWeight: 700,
                       fontSize: '1.25rem',
-                      color: '#E8EEF0',
+                      color: '#172B3A',
                     }}
                   >
                     {locale === 'id' ? 'Mode Petualangan' : 'Adventure Mode'}
                   </span>
                   <span
                     style={{
-                      padding: '2px 8px',
+                      padding: '2px 10px',
                       fontSize: '0.75rem',
                       fontWeight: 700,
-                      backgroundColor: '#274025',
-                      color: '#6DBE4B',
-                      border: '1px solid #6DBE4B',
-                      borderRadius: '2px',
+                      backgroundColor: '#DCFCE7',
+                      color: '#15803D',
+                      border: '1px solid #4ADE80',
+                      borderRadius: '999px',
                     }}
                   >
                     {locale === 'id' ? 'Tersedia' : 'Available'}
                   </span>
                 </div>
-                <p style={{ margin: '4px 0 0', fontSize: '0.9375rem', color: '#A9B8BD' }}>
+                <p style={{ margin: '4px 0 0', fontSize: '0.9375rem', color: '#335267' }}>
                   {locale === 'id'
                     ? 'Jelajahi kepulauan Aetheria, program BIT untuk memulihkan mesin kuno, dan pelajari Python dari awal.'
                     : 'Explore Aetheria, program BIT to restore ancient machines, and learn Python from scratch.'}
@@ -183,15 +188,16 @@ export const GameModesScreen: React.FC = () => {
                 width: '100%',
                 minHeight: '84px',
                 padding: '16px 20px',
-                backgroundColor: '#192023',
-                border: '1px solid #2A363B',
-                borderRadius: '4px',
+                backgroundColor: '#F1F7FA',
+                border: '1.5px solid #CFE3EE',
+                borderLeft: `5px solid ${mode.accentColor}`,
+                borderRadius: '10px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 gap: '16px',
                 flexWrap: 'wrap',
-                opacity: 0.72,
+                opacity: 0.9,
                 cursor: 'default',
                 userSelect: 'none',
               }}
@@ -202,12 +208,13 @@ export const GameModesScreen: React.FC = () => {
                   style={{
                     width: '48px',
                     height: '48px',
-                    backgroundColor: '#1F292C',
-                    border: `1px solid ${mode.accentColor}`,
+                    backgroundColor: '#FFFFFF',
+                    border: `2px solid ${mode.accentColor}`,
+                    borderRadius: '10px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    color: '#8FA3A9',
+                    color: '#0E7490',
                     flexShrink: 0,
                   }}
                 >
@@ -220,26 +227,26 @@ export const GameModesScreen: React.FC = () => {
                         fontFamily: 'var(--font-display)',
                         fontWeight: 700,
                         fontSize: '1.125rem',
-                        color: '#A9B8BD',
+                        color: '#172B3A',
                       }}
                     >
                       {locale === 'id' ? mode.titleId : mode.titleEn}
                     </span>
                     <span
                       style={{
-                        padding: '2px 8px',
+                        padding: '2px 10px',
                         fontSize: '0.75rem',
                         fontWeight: 700,
-                        backgroundColor: '#243034',
-                        color: '#8FA3A9',
-                        border: '1px solid #33434A',
-                        borderRadius: '2px',
+                        backgroundColor: '#E0F2FE',
+                        color: '#0369A1',
+                        border: '1px solid #7DD3FC',
+                        borderRadius: '999px',
                       }}
                     >
                       [Segera Hadir]
                     </span>
                   </div>
-                  <p style={{ margin: '4px 0 0', fontSize: '0.875rem', color: '#8FA3A9' }}>
+                  <p style={{ margin: '4px 0 0', fontSize: '0.875rem', color: '#4C697C' }}>
                     {locale === 'id' ? mode.descId : mode.descEn}
                   </p>
                 </div>

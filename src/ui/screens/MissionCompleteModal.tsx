@@ -73,7 +73,8 @@ export const MissionCompleteModal: React.FC<MissionCompleteModalProps> = ({
         position: 'fixed',
         inset: 0,
         zIndex: 90,
-        backgroundColor: 'rgba(28, 36, 39, 0.78)',
+        backgroundColor: 'rgba(14, 50, 78, 0.42)',
+        backdropFilter: 'blur(4px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -121,14 +122,16 @@ export const MissionCompleteModal: React.FC<MissionCompleteModalProps> = ({
 
           <div
             style={{
-              padding: '8px 14px',
-              backgroundColor: '#243034',
-              color: '#F2B544',
-              borderRadius: '2px',
+              padding: '8px 16px',
+              background: 'linear-gradient(135deg, #FBBF24, #F59E0B)',
+              color: '#172B3A',
+              border: '2px solid #D97706',
+              borderRadius: '999px',
               fontFamily: 'var(--font-display)',
               fontWeight: 700,
               fontSize: '1.25rem',
               whiteSpace: 'nowrap',
+              boxShadow: '0 3px 0 #B45309',
             }}
           >
             +{displayedXp} XP
@@ -230,10 +233,12 @@ export const MissionCompleteModal: React.FC<MissionCompleteModalProps> = ({
           <pre
             style={{
               margin: 0,
-              padding: '10px 12px',
-              backgroundColor: '#1A2225',
-              color: '#E8EEF0',
-              borderRadius: '2px',
+              padding: '12px 14px',
+              backgroundColor: '#FFFFFF',
+              color: '#0F172A',
+              border: '1.5px solid #B6DCEB',
+              borderLeft: '4px solid #0891B2',
+              borderRadius: '8px',
               fontFamily: 'var(--font-code)',
               fontSize: '0.8125rem',
               overflowX: 'auto',
@@ -247,11 +252,12 @@ export const MissionCompleteModal: React.FC<MissionCompleteModalProps> = ({
         <blockquote
           style={{
             margin: 0,
-            padding: '10px 12px',
-            backgroundColor: '#EFE2CA',
-            borderLeft: '3px solid #3CC4C0',
+            padding: '10px 14px',
+            backgroundColor: '#ECFEFF',
+            borderLeft: '4px solid #0891B2',
+            borderRadius: '0 8px 8px 0',
             fontSize: '0.9375rem',
-            color: '#2A2420',
+            color: '#155E75',
           }}
         >
           <strong>NEO:</strong> "{neoLine}"

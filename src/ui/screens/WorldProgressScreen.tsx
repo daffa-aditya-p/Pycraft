@@ -33,7 +33,8 @@ export const WorldProgressScreen: React.FC = () => {
         inset: 0,
         overflowY: 'auto',
         padding: '24px',
-        backgroundColor: 'rgba(28, 36, 39, 0.8)',
+        backgroundColor: 'rgba(14, 50, 78, 0.42)',
+        backdropFilter: 'blur(4px)',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'flex-start',
@@ -48,6 +49,7 @@ export const WorldProgressScreen: React.FC = () => {
           display: 'flex',
           flexDirection: 'column',
           gap: '20px',
+          borderRadius: '14px',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -60,7 +62,7 @@ export const WorldProgressScreen: React.FC = () => {
               margin: 0,
               fontFamily: 'var(--font-display)',
               fontSize: '1.75rem',
-              color: '#F2B544',
+              color: '#0E7490',
             }}
           >
             {locale === 'id' ? 'Dunia & Progres Aetheria' : 'Aetheria World & Progress'}
@@ -72,10 +74,10 @@ export const WorldProgressScreen: React.FC = () => {
           <div
             style={{
               padding: '10px 14px',
-              backgroundColor: '#243034',
-              border: '1px solid #33434A',
-              borderRadius: '2px',
-              color: '#A9B8BD',
+              backgroundColor: '#E0F2FE',
+              border: '1.5px solid #7DD3FC',
+              borderRadius: '8px',
+              color: '#075985',
               fontSize: '0.875rem',
             }}
           >
@@ -99,7 +101,7 @@ export const WorldProgressScreen: React.FC = () => {
                 margin: '0 0 10px',
                 fontFamily: 'var(--font-display)',
                 fontSize: '1.125rem',
-                color: '#E8EEF0',
+                color: '#172B3A',
               }}
             >
               {locale === 'id' ? '8 Wilayah Aetheria' : '8 Aetheria Regions'}
@@ -119,10 +121,10 @@ export const WorldProgressScreen: React.FC = () => {
                       width: '100%',
                       padding: '10px 12px',
                       textAlign: 'left',
-                      backgroundColor: isSelected ? '#2C3A3F' : '#1C2427',
-                      border: isSelected ? '2px solid #F2B544' : '1px solid #33434A',
-                      borderRadius: '2px',
-                      color: '#E8EEF0',
+                      backgroundColor: isSelected ? '#FEF3C7' : '#FFFFFF',
+                      border: isSelected ? '2px solid #F59E0B' : '1.5px solid #CFE3EE',
+                      borderRadius: '10px',
+                      color: '#172B3A',
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
@@ -134,7 +136,7 @@ export const WorldProgressScreen: React.FC = () => {
                       <div style={{ fontWeight: 700, fontSize: '0.9375rem' }}>
                         {region.order}. {region.title[locale]}
                       </div>
-                      <div style={{ fontSize: '0.75rem', color: '#8FA3A9' }}>
+                      <div style={{ fontSize: '0.75rem', color: '#4C697C' }}>
                         {isR1
                           ? locale === 'id'
                             ? 'Aktif (R1)'
@@ -142,7 +144,7 @@ export const WorldProgressScreen: React.FC = () => {
                           : `${region.release} · ${locale === 'id' ? 'Terkunci' : 'Locked'}`}
                       </div>
                     </div>
-                    <span style={{ color: isR1 ? '#6DBE4B' : '#8FA3A9' }}>
+                    <span style={{ color: isR1 ? '#16A34A' : '#64748B' }}>
                       {isR1 ? <IconCheck size={16} /> : <IconLock size={16} />}
                     </span>
                   </button>
@@ -155,14 +157,15 @@ export const WorldProgressScreen: React.FC = () => {
           <section
             className="surface-slate-raised"
             style={{
-              padding: '16px',
+              padding: '18px',
               display: 'flex',
               flexDirection: 'column',
               gap: '14px',
+              borderRadius: '12px',
             }}
           >
             <div>
-              <div style={{ fontSize: '0.8125rem', color: '#3CC4C0', fontWeight: 700 }}>
+              <div style={{ fontSize: '0.8125rem', color: '#0891B2', fontWeight: 700 }}>
                 {locale === 'id' ? `Wilayah ${regionMeta.order}` : `Region ${regionMeta.order}`} ·{' '}
                 {regionMeta.release}
               </div>
@@ -171,15 +174,15 @@ export const WorldProgressScreen: React.FC = () => {
                   margin: '4px 0',
                   fontFamily: 'var(--font-display)',
                   fontSize: '1.5rem',
-                  color: '#F2B544',
+                  color: '#B45309',
                 }}
               >
                 {regionMeta.title[locale]}
               </h2>
-              <p style={{ margin: 0, color: '#A9B8BD', fontSize: '0.9375rem', lineHeight: 1.5 }}>
+              <p style={{ margin: 0, color: '#335267', fontSize: '0.9375rem', lineHeight: 1.5 }}>
                 {regionMeta.subtitle[locale]}
               </p>
-              <div style={{ marginTop: '8px', fontSize: '0.8125rem', color: '#8FA3A9' }}>
+              <div style={{ marginTop: '8px', fontSize: '0.8125rem', color: '#4C697C' }}>
                 {locale === 'id' ? 'Syarat Buka: ' : 'Unlock: '}
                 {regionMeta.unlockCondition[locale]}
               </div>
@@ -187,11 +190,11 @@ export const WorldProgressScreen: React.FC = () => {
                 <div
                   style={{
                     marginTop: '8px',
-                    padding: '6px 10px',
-                    backgroundColor: '#1C2427',
-                    border: '1px solid #33434A',
-                    borderRadius: '2px',
-                    color: '#8FA3A9',
+                    padding: '8px 12px',
+                    backgroundColor: '#F1F5F9',
+                    border: '1.5px solid #CBD5E1',
+                    borderRadius: '8px',
+                    color: '#475569',
                     fontSize: '0.8125rem',
                   }}
                 >
@@ -209,7 +212,7 @@ export const WorldProgressScreen: React.FC = () => {
                     margin: '0 0 8px',
                     fontFamily: 'var(--font-display)',
                     fontSize: '1rem',
-                    color: '#E8EEF0',
+                    color: '#172B3A',
                   }}
                 >
                   {locale === 'id' ? 'Misi Kebangkitan' : 'Awakening Missions'}
@@ -236,16 +239,21 @@ export const WorldProgressScreen: React.FC = () => {
                           display: 'flex',
                           justifyContent: 'space-between',
                           alignItems: 'center',
-                          padding: '6px 10px',
-                          backgroundColor: '#1C2427',
-                          border: '1px solid #33434A',
-                          borderRadius: '2px',
+                          padding: '8px 12px',
+                          backgroundColor: '#FFFFFF',
+                          border:
+                            st === 'completed'
+                              ? '1.5px solid #86EFAC'
+                              : st === 'active'
+                                ? '1.5px solid #7DD3FC'
+                                : '1.5px solid #E2E8F0',
+                          borderRadius: '8px',
                           fontSize: '0.875rem',
                         }}
                       >
                         <span>
                           {locale === 'id' ? m.titleId : m.titleEn}{' '}
-                          <span style={{ color: '#8FA3A9', fontSize: '0.75rem' }}>
+                          <span style={{ color: '#4C697C', fontSize: '0.75rem' }}>
                             ({m.island})
                           </span>
                         </span>
@@ -253,10 +261,10 @@ export const WorldProgressScreen: React.FC = () => {
                           style={{
                             color:
                               st === 'completed'
-                                ? '#6DBE4B'
+                                ? '#15803D'
                                 : st === 'active'
-                                  ? '#3CC4C0'
-                                  : '#8FA3A9',
+                                  ? '#0E7490'
+                                  : '#64748B',
                             fontWeight: 700,
                             fontSize: '0.75rem',
                           }}
@@ -276,7 +284,7 @@ export const WorldProgressScreen: React.FC = () => {
                   margin: '0 0 8px',
                   fontFamily: 'var(--font-display)',
                   fontSize: '1rem',
-                  color: '#E8EEF0',
+                  color: '#172B3A',
                 }}
               >
                 {locale === 'id' ? 'Komponen Pengetahuan (KC)' : 'Knowledge Components'}
@@ -289,12 +297,12 @@ export const WorldProgressScreen: React.FC = () => {
                     <div
                       key={kc.id}
                       style={{
-                        padding: '4px 8px',
-                        backgroundColor: '#1C2427',
-                        border: '1px solid #33434A',
-                        borderRadius: '2px',
+                        padding: '5px 10px',
+                        backgroundColor: score >= 85 ? '#DCFCE7' : '#F8FAFC',
+                        border: score >= 85 ? '1.5px solid #4ADE80' : '1.5px solid #CBD5E1',
+                        borderRadius: '999px',
                         fontSize: '0.8125rem',
-                        color: score >= 85 ? '#6DBE4B' : '#E8EEF0',
+                        color: score >= 85 ? '#166534' : '#172B3A',
                       }}
                     >
                       <strong>{kc.id}</strong>: {kc.title[locale]}

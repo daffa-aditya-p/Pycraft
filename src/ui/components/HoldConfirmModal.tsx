@@ -91,7 +91,8 @@ export const HoldConfirmModal: React.FC<HoldConfirmModalProps> = ({
         position: 'fixed',
         inset: 0,
         zIndex: 100,
-        backgroundColor: 'rgba(28, 36, 39, 0.82)',
+        backgroundColor: 'rgba(14, 50, 78, 0.45)',
+        backdropFilter: 'blur(4px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -107,10 +108,11 @@ export const HoldConfirmModal: React.FC<HoldConfirmModalProps> = ({
           display: 'flex',
           flexDirection: 'column',
           gap: '16px',
+          borderRadius: '14px',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <span style={{ color: danger ? '#E0603F' : '#F2B544', display: 'flex' }}>
+          <span style={{ color: danger ? '#DC2626' : '#D97706', display: 'flex' }}>
             <IconWarning size={22} />
           </span>
           <h2
@@ -119,14 +121,14 @@ export const HoldConfirmModal: React.FC<HoldConfirmModalProps> = ({
               margin: 0,
               fontFamily: 'var(--font-display)',
               fontSize: '1.375rem',
-              color: '#E8EEF0',
+              color: '#172B3A',
             }}
           >
             {title}
           </h2>
         </div>
 
-        <p style={{ margin: 0, color: '#A9B8BD', fontSize: '0.9375rem', lineHeight: 1.5 }}>
+        <p style={{ margin: 0, color: '#335267', fontSize: '0.9375rem', lineHeight: 1.5 }}>
           {description}
         </p>
 
@@ -135,7 +137,12 @@ export const HoldConfirmModal: React.FC<HoldConfirmModalProps> = ({
             type="button"
             className="btn-slate"
             onClick={onSecondaryAction}
-            style={{ width: '100%', borderColor: '#3CC4C0', color: '#3CC4C0' }}
+            style={{
+              width: '100%',
+              backgroundColor: '#ECFEFF',
+              borderColor: '#0891B2',
+              color: '#0E7490',
+            }}
           >
             {secondaryActionLabel}
           </button>
@@ -169,10 +176,10 @@ export const HoldConfirmModal: React.FC<HoldConfirmModalProps> = ({
               overflow: 'hidden',
               minHeight: '48px',
               padding: '10px 16px',
-              backgroundColor: danger ? '#4B2520' : '#3C321C',
-              color: '#E8EEF0',
-              border: `2px solid ${danger ? '#E0603F' : '#F2B544'}`,
-              borderRadius: '2px',
+              backgroundColor: danger ? '#FEE2E2' : '#FEF3C7',
+              color: danger ? '#991B1B' : '#92400E',
+              border: `2px solid ${danger ? '#EF4444' : '#F59E0B'}`,
+              borderRadius: '10px',
               fontFamily: 'var(--font-display)',
               fontWeight: 700,
               fontSize: '1rem',
@@ -187,8 +194,8 @@ export const HoldConfirmModal: React.FC<HoldConfirmModalProps> = ({
                 position: 'absolute',
                 inset: 0,
                 width: `${pct}%`,
-                backgroundColor: danger ? '#E0603F' : '#F2B544',
-                opacity: 0.45,
+                backgroundColor: danger ? '#EF4444' : '#F59E0B',
+                opacity: 0.35,
                 pointerEvents: 'none',
               }}
             />

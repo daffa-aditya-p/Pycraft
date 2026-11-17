@@ -52,7 +52,8 @@ export const PauseMenu: React.FC<PauseMenuProps> = ({
         position: 'fixed',
         inset: 0,
         zIndex: 80,
-        backgroundColor: 'rgba(28, 36, 39, 0.78)',
+        backgroundColor: 'rgba(14, 50, 78, 0.42)',
+        backdropFilter: 'blur(4px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -68,6 +69,7 @@ export const PauseMenu: React.FC<PauseMenuProps> = ({
           display: 'flex',
           flexDirection: 'column',
           gap: '12px',
+          borderRadius: '14px',
         }}
       >
         <h1
@@ -76,7 +78,7 @@ export const PauseMenu: React.FC<PauseMenuProps> = ({
             margin: '0 0 4px',
             fontFamily: 'var(--font-display)',
             fontSize: '1.75rem',
-            color: '#F2B544',
+            color: '#0E7490',
             textAlign: 'center',
           }}
         >
@@ -87,7 +89,7 @@ export const PauseMenu: React.FC<PauseMenuProps> = ({
           style={{
             textAlign: 'center',
             fontSize: '0.8125rem',
-            color: '#A9B8BD',
+            color: '#4C697C',
             marginBottom: '6px',
           }}
         >
@@ -176,7 +178,12 @@ export const PauseMenu: React.FC<PauseMenuProps> = ({
           type="button"
           className="btn-slate"
           onClick={() => void handleMainMenu()}
-          style={{ marginTop: '4px', borderColor: '#3D5058' }}
+          style={{
+            marginTop: '4px',
+            borderColor: '#FCA5A5',
+            backgroundColor: '#FEF2F2',
+            color: '#B91C1C',
+          }}
         >
           <span>{locale === 'id' ? 'Menu Utama' : 'Main Menu'}</span>
         </button>

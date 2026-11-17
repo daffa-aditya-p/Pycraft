@@ -26,6 +26,7 @@ import {
 import { InstancedPropsLayer } from './InstancedProps';
 import { QualityController } from './QualityController';
 import { QUALITY_PRESETS, SkyAndLighting } from './SkyAndLighting';
+import { WorldLandmarksLayer } from './WorldLandmarks';
 import {
   createSharedShaderUniforms,
   createSkybridgeMaterial,
@@ -447,6 +448,13 @@ function AwakeningScene({
         material={entityMaterial}
       />
 
+      {/* Sculpted Landmarks: Terminals, Beacon Tower, Pedestals, Rune Gems, Waterwheel */}
+      <WorldLandmarksLayer
+        interactables={world.interactables}
+        restoredZoneIds={restoredZoneIds}
+        material={entityMaterial}
+      />
+
       {/* 3D Interactable and Quest Objective Highlights */}
       <InteractablesHighlightLayer
         interactables={world.interactables}
@@ -456,10 +464,23 @@ function AwakeningScene({
         activePromptTargetId={activePromptTargetId}
       />
 
-      {/* Distant Core Citadel Monolith & Guardian Silhouette (Section 6.2 / 6.4) */}
+      {/* Distant Core Citadel Monolith & Guardian Silhouette (Tiered Spire) */}
       <group position={[-85, 36, -95]} name="distant-core-citadel">
-        <mesh material={entityMaterial}>
-          <boxGeometry args={[12, 34, 12]} />
+        <mesh position={[0, -6, 0]}>
+          <boxGeometry args={[14, 18, 14]} />
+          <meshLambertMaterial color="#5E6E7D" />
+        </mesh>
+        <mesh position={[0, 8, 0]}>
+          <boxGeometry args={[10, 14, 10]} />
+          <meshLambertMaterial color="#7C8E9E" />
+        </mesh>
+        <mesh position={[0, 18, 0]}>
+          <boxGeometry args={[5, 8, 5]} />
+          <meshLambertMaterial color="#A8773D" />
+        </mesh>
+        <mesh position={[0, 24, 0]}>
+          <octahedronGeometry args={[3.2, 0]} />
+          <meshBasicMaterial color="#5CE1E6" />
         </mesh>
       </group>
       <GuardianSilhouette
@@ -606,12 +627,15 @@ export function GameCanvas() {
             top: '12px',
             left: '50%',
             transform: 'translateX(-50%)',
-            background: '#1C2427',
-            color: '#3CC4C0',
-            border: '1px solid #33434A',
-            padding: '2px 8px',
+            background: '#FFFDF7',
+            color: '#0E7490',
+            border: '2px solid #76B8CF',
+            borderRadius: '999px',
+            padding: '2px 12px',
             fontFamily: 'JetBrains Mono, monospace',
             fontSize: '12px',
+            fontWeight: 700,
+            boxShadow: '0 2px 8px rgba(15, 45, 70, 0.16)',
             pointerEvents: 'none',
           }}
         >

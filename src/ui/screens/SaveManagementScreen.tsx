@@ -115,7 +115,8 @@ export const SaveManagementScreen: React.FC<SaveManagementScreenProps> = ({
         inset: 0,
         overflowY: 'auto',
         padding: '24px',
-        backgroundColor: 'rgba(28, 36, 39, 0.85)',
+        backgroundColor: 'rgba(14, 50, 78, 0.42)',
+        backdropFilter: 'blur(4px)',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'flex-start',
@@ -138,6 +139,7 @@ export const SaveManagementScreen: React.FC<SaveManagementScreenProps> = ({
           display: 'flex',
           flexDirection: 'column',
           gap: '20px',
+          borderRadius: '14px',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -150,7 +152,7 @@ export const SaveManagementScreen: React.FC<SaveManagementScreenProps> = ({
               margin: 0,
               fontFamily: 'var(--font-display)',
               fontSize: '1.75rem',
-              color: '#F2B544',
+              color: '#0E7490',
             }}
           >
             {locale === 'id' ? 'Pilih & Kelola Petualangan' : 'Select & Manage Saves'}
@@ -166,10 +168,10 @@ export const SaveManagementScreen: React.FC<SaveManagementScreenProps> = ({
               alignItems: 'center',
               gap: '10px',
               padding: '10px 14px',
-              backgroundColor: '#3B2C1B',
-              border: '1px solid #E9A23B',
-              borderRadius: '2px',
-              color: '#E8EEF0',
+              backgroundColor: '#FEF3C7',
+              border: '1.5px solid #F59E0B',
+              borderRadius: '8px',
+              color: '#92400E',
             }}
           >
             <IconWarning size={18} />
@@ -217,21 +219,21 @@ export const SaveManagementScreen: React.FC<SaveManagementScreenProps> = ({
                         fontFamily: 'var(--font-display)',
                         fontWeight: 700,
                         fontSize: '1.125rem',
-                        color: '#F2B544',
+                        color: '#0E7490',
                       }}
                     >
                       Slot {slotId}
                       {occupied && summary ? ` — ${summary.playerName}` : ''}
                     </div>
                     {occupied && summary ? (
-                      <div style={{ fontSize: '0.875rem', color: '#A9B8BD', marginTop: '4px' }}>
+                      <div style={{ fontSize: '0.875rem', color: '#335267', marginTop: '4px' }}>
                         {rankName} · {summary.xp} XP · {summary.completedMissionCount}{' '}
                         {locale === 'id' ? 'misi' : 'missions'} ·{' '}
                         {formatDuration(summary.playtimeSeconds)} ·{' '}
                         {formatRelativeTime(summary.updatedAt, locale)}
                       </div>
                     ) : (
-                      <div style={{ fontSize: '0.875rem', color: '#8FA3A9', marginTop: '4px' }}>
+                      <div style={{ fontSize: '0.875rem', color: '#4C697C', marginTop: '4px' }}>
                         {locale === 'id' ? 'Slot Kosong' : 'Empty Slot'}
                       </div>
                     )}
@@ -292,7 +294,11 @@ export const SaveManagementScreen: React.FC<SaveManagementScreenProps> = ({
                         type="button"
                         className="btn-slate"
                         onClick={() => setDeleteTargetSlot(slotId)}
-                        style={{ borderColor: '#E0603F', color: '#E0603F' }}
+                        style={{
+                          borderColor: '#FCA5A5',
+                          backgroundColor: '#FEF2F2',
+                          color: '#B91C1C',
+                        }}
                       >
                         <span>{locale === 'id' ? 'Hapus' : 'Delete'}</span>
                       </button>
@@ -309,14 +315,18 @@ export const SaveManagementScreen: React.FC<SaveManagementScreenProps> = ({
             display: 'flex',
             justifyContent: 'flex-end',
             paddingTop: '12px',
-            borderTop: '1px solid #33434A',
+            borderTop: '1px solid #CFE3EE',
           }}
         >
           <button
             type="button"
             className="btn-slate"
             onClick={() => setClearAllModalOpen(true)}
-            style={{ borderColor: '#E0603F', color: '#E0603F' }}
+            style={{
+              borderColor: '#FCA5A5',
+              backgroundColor: '#FEF2F2',
+              color: '#B91C1C',
+            }}
           >
             {locale === 'id' ? 'Hapus Semua Data' : 'Clear All Data'}
           </button>

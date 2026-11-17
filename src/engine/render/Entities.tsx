@@ -133,9 +133,11 @@ export interface ArchitectEntityProps {
   material: THREE.Material;
 }
 
+const FINE_VOXEL = 0.0625;
+
 /**
- * Architect (Player Avatar): 14 detail voxels tall (1.75 u), chunky 4x4x4 head,
- * customizable skin/hair/scarf, articulated limbs.
+ * Architect (Player Avatar): 1.75 u tall high-detail stylized voxel-chibi sculpt (0.0625 u),
+ * symmetrical eyes with catchlights, customizable skin/hair/scarf, adventurer tunic & satchel.
  */
 export function ArchitectEntity({
   positionRef,
@@ -146,6 +148,7 @@ export function ArchitectEntity({
   material,
 }: ArchitectEntityProps) {
   const rootRef = useRef<THREE.Group>(null);
+  const rigRef = useRef<THREE.Group>(null);
   const leftLegRef = useRef<THREE.Mesh>(null);
   const rightLegRef = useRef<THREE.Mesh>(null);
   const leftArmRef = useRef<THREE.Mesh>(null);
@@ -158,48 +161,105 @@ export function ArchitectEntity({
 
   const geos = useMemo(() => {
     const hairBoxes: DetailBoxSpec[] = [
-      { x: -2, y: 13, z: -2, w: 4, h: 1, d: 4, hex: hairHex },
-      { x: -2, y: 10, z: -2, w: 4, h: 3, d: 1, hex: hairHex },
+      // Crown & back hair volume wrapping top/back/sides of 8x8x8 head
+      { x: -4.4, y: 27.2, z: -4.4, w: 8.8, h: 1.6, d: 8.8, hex: hairHex },
+      { x: -4.4, y: 21, z: -4.4, w: 8.8, h: 6.5, d: 3.6, hex: hairHex },
+      { x: -4.4, y: 24, z: -1, w: 1.1, h: 3.5, d: 4.5, hex: hairHex },
+      { x: 3.3, y: 24, z: -1, w: 1.1, h: 3.5, d: 4.5, hex: hairHex },
     ];
-    if (appearance.hairStyle % 4 === 1) {
-      hairBoxes.push({ x: -2, y: 14, z: -1, w: 3, h: 1, d: 3, hex: hairHex });
-    } else if (appearance.hairStyle % 4 === 2) {
-      hairBoxes.push({ x: -2, y: 8, z: -3, w: 4, h: 4, d: 1, hex: hairHex });
-    } else if (appearance.hairStyle % 4 === 3) {
-      hairBoxes.push({ x: -3, y: 12, z: -2, w: 6, h: 1, d: 4, hex: hairHex });
+    const style = appearance.hairStyle % 4;
+    if (style === 0) {
+      // Short Neat Crop with textured bangs
+      hairBoxes.push(
+        { x: -4, y: 26, z: 3.4, w: 5.5, h: 1.4, d: 1.2, hex: hairHex },
+        { x: 1.5, y: 26.5, z: 3.4, w: 2.5, h: 1.0, d: 1.1, hex: hairHex },
+      );
+    } else if (style === 1) {
+      // Center-Parted Swoop
+      hairBoxes.push(
+        { x: -4.4, y: 25, z: 3.2, w: 3.6, h: 2.5, d: 1.2, hex: hairHex },
+        { x: 0.8, y: 25, z: 3.2, w: 3.6, h: 2.5, d: 1.2, hex: hairHex },
+        { x: -3.5, y: 28.5, z: -2, w: 7, h: 1.0, d: 5, hex: hairHex },
+      );
+    } else if (style === 2) {
+      // Adventurer Ponytail & ribbon tie
+      hairBoxes.push(
+        { x: -3.5, y: 26, z: 3.2, w: 7, h: 1.4, d: 1.1, hex: hairHex },
+        { x: -1.5, y: 22.5, z: -5.4, w: 3, h: 2.5, d: 1.2, hex: scarfHex },
+        { x: -2, y: 17.5, z: -6.4, w: 4, h: 6, d: 1.8, hex: hairHex },
+      );
+    } else {
+      // Fluffy Wavy Curls
+      hairBoxes.push(
+        { x: -5, y: 25.5, z: -3.5, w: 10, h: 3, d: 7.5, hex: hairHex },
+        { x: -3.8, y: 28.2, z: -2.5, w: 7.6, h: 1.3, d: 5.5, hex: hairHex },
+        { x: -4.2, y: 25.5, z: 3.2, w: 8.4, h: 1.6, d: 1.3, hex: hairHex },
+      );
     }
 
-    const torsoHead = buildDetailVoxelGeometry([
-      // Torso (canvas tunic + leather belt)
-      { x: -2, y: 5, z: -1, w: 4, h: 4, d: 2, hex: '#D6CCB8' },
-      { x: -2, y: 4, z: -1, w: 4, h: 1, d: 2, hex: '#7A5233' },
-      // Scarf accent
-      { x: -2, y: 9, z: -1, w: 4, h: 1, d: 3, hex: scarfHex },
-      { x: 0, y: 7, z: -2, w: 2, h: 2, d: 1, hex: scarfHex },
-      // Head (4x4x4 detail voxels, y = 10..14)
-      { x: -2, y: 10, z: -2, w: 4, h: 4, d: 4, hex: skinHex },
-      // Eyes
-      { x: -1, y: 11, z: 2, w: 1, h: 1, d: 0.2, hex: '#2A2420' },
-      { x: 1, y: 11, z: 2, w: 1, h: 1, d: 0.2, hex: '#2A2420' },
-      ...hairBoxes,
-    ]);
+    const torsoHead = buildDetailVoxelGeometry(
+      [
+        // Ivory tunic + warm leather explorer vest + belt & gold buckle
+        { x: -4, y: 10, z: -2.2, w: 8, h: 8.8, d: 4.4, hex: '#F3ECE0' },
+        { x: -4.1, y: 11.5, z: -2.3, w: 2.4, h: 7.2, d: 4.6, hex: '#8F5D3C' },
+        { x: 1.7, y: 11.5, z: -2.3, w: 2.4, h: 7.2, d: 4.6, hex: '#8F5D3C' },
+        { x: -4.2, y: 9.8, z: -2.4, w: 8.4, h: 1.8, d: 4.8, hex: '#5D3822' },
+        { x: -1, y: 9.8, z: 2.1, w: 2, h: 1.8, d: 0.6, hex: '#F2B544' },
+        // Adventurer Satchel Backpack + sleeping roll
+        { x: -3.2, y: 11.2, z: -4.4, w: 6.4, h: 6.4, d: 2.2, hex: '#7A5233' },
+        { x: -3.5, y: 17.4, z: -4.6, w: 7, h: 2, d: 2.2, hex: '#E2CE9C' },
+        { x: -1, y: 13.5, z: -4.7, w: 2, h: 1.2, d: 0.5, hex: '#F2B544' },
+        // Symmetrical Scarf Collar + neat front clasp + flowing twin tails
+        { x: -4.4, y: 18.2, z: -2.7, w: 8.8, h: 1.8, d: 5.4, hex: scarfHex },
+        { x: -1.8, y: 16.5, z: 2.1, w: 3.6, h: 2, d: 0.8, hex: scarfHex },
+        { x: -2.5, y: 13, z: -3.6, w: 1.8, h: 5.5, d: 1, hex: scarfHex },
+        { x: 0.7, y: 14, z: -3.6, w: 1.8, h: 4.5, d: 1, hex: scarfHex },
+        // Neck & Symmetrical Sculpted 8x8x8 Head (y = 20..28)
+        { x: -1.5, y: 19.5, z: -1.5, w: 3, h: 1.5, d: 3, hex: skinHex },
+        { x: -4, y: 20, z: -4, w: 8, h: 8, d: 8, hex: skinHex },
+        // Symmetric Eyebrows
+        { x: -3, y: 24.4, z: 3.9, w: 2.1, h: 0.7, d: 0.4, hex: hairHex },
+        { x: 0.9, y: 24.4, z: 3.9, w: 2.1, h: 0.7, d: 0.4, hex: hairHex },
+        // Symmetrical Expressive Eyes + White Sparkles
+        { x: -2.9, y: 22.1, z: 3.9, w: 1.5, h: 1.9, d: 0.35, hex: '#1F2933' },
+        { x: 1.4, y: 22.1, z: 3.9, w: 1.5, h: 1.9, d: 0.35, hex: '#1F2933' },
+        { x: -2.7, y: 23.2, z: 4.08, w: 0.7, h: 0.7, d: 0.25, hex: '#FFFFFF', emissive: 0.25 },
+        { x: 1.6, y: 23.2, z: 4.08, w: 0.7, h: 0.7, d: 0.25, hex: '#FFFFFF', emissive: 0.25 },
+        // Warm rosy cheek blushes
+        { x: -3.4, y: 21.1, z: 3.9, w: 1.2, h: 0.8, d: 0.3, hex: '#E89B82' },
+        { x: 2.2, y: 21.1, z: 3.9, w: 1.2, h: 0.8, d: 0.3, hex: '#E89B82' },
+        ...hairBoxes,
+      ],
+      FINE_VOXEL,
+    );
 
-    const leg = buildDetailVoxelGeometry([
-      { x: -1, y: -4, z: -1, w: 2, h: 3, d: 2, hex: '#3A464C' },
-      { x: -1, y: -5, z: -1, w: 2, h: 1, d: 2, hex: '#6A4A2F' },
-    ]);
+    // Legs pivoted at hip y = 10*0.0625 = 0.625 u (so bottom y = -10 rests cleanly at 0.0)
+    const leg = buildDetailVoxelGeometry(
+      [
+        { x: -1.8, y: -7.2, z: -1.9, w: 3.6, h: 7.2, d: 3.8, hex: '#355C8C' },
+        { x: -2, y: -9.3, z: -2.2, w: 4, h: 2.2, d: 4.6, hex: '#7A5233' },
+        { x: -2, y: -10, z: -2.2, w: 4, h: 0.8, d: 4.6, hex: '#3A2A1E' },
+      ],
+      FINE_VOXEL,
+    );
 
-    const arm = buildDetailVoxelGeometry([
-      { x: -1, y: -4, z: -1, w: 2, h: 4, d: 2, hex: '#D6CCB8' },
-      { x: -1, y: -5, z: -1, w: 2, h: 1, d: 2, hex: skinHex },
-    ]);
+    // Arms pivoted at shoulder y = 18*0.0625 = 1.125 u
+    const arm = buildDetailVoxelGeometry(
+      [
+        { x: -1.4, y: -5.5, z: -1.5, w: 2.8, h: 6.2, d: 3, hex: '#F3ECE0' },
+        { x: -1.5, y: -6.8, z: -1.6, w: 3, h: 1.4, d: 3.2, hex: '#7A5233' },
+        { x: -1.3, y: -8.6, z: -1.4, w: 2.6, h: 2, d: 2.8, hex: skinHex },
+      ],
+      FINE_VOXEL,
+    );
 
     return { torsoHead, leg, arm };
   }, [skinHex, hairHex, scarfHex, appearance.hairStyle]);
 
-  useFrame((_, delta) => {
+  useFrame((state, delta) => {
     const root = rootRef.current;
-    if (!root) return;
+    const rig = rigRef.current;
+    if (!root || !rig) return;
     const [x, y, z] = positionRef.current;
     root.position.set(x, y, z);
     root.rotation.y = yawRef.current;
@@ -213,6 +273,12 @@ export function ArchitectEntity({
     }
 
     const swing = walking ? Math.sin(animPhaseRef.current) * 0.55 : 0;
+    // Gentle bounce during stride + subtle breathing when idle
+    rig.position.y = walking
+      ? Math.abs(Math.sin(animPhaseRef.current)) * 0.045
+      : Math.sin(state.clock.elapsedTime * 2.2) * 0.015;
+    rig.rotation.x = walking && sprinting ? 0.08 : 0;
+
     if (leftLegRef.current) leftLegRef.current.rotation.x = swing;
     if (rightLegRef.current) rightLegRef.current.rotation.x = -swing;
     if (leftArmRef.current) leftArmRef.current.rotation.x = -swing * 0.8;
@@ -222,35 +288,37 @@ export function ArchitectEntity({
   return (
     <group ref={rootRef} name="entity-architect">
       <BlobShadow radius={0.42} />
-      <mesh geometry={geos.torsoHead} material={material} castShadow receiveShadow />
-      <mesh
-        ref={leftLegRef}
-        geometry={geos.leg}
-        material={material}
-        position={[-0.125, 0.625, 0]}
-        castShadow
-      />
-      <mesh
-        ref={rightLegRef}
-        geometry={geos.leg}
-        material={material}
-        position={[0.125, 0.625, 0]}
-        castShadow
-      />
-      <mesh
-        ref={leftArmRef}
-        geometry={geos.arm}
-        material={material}
-        position={[-0.375, 1.125, 0]}
-        castShadow
-      />
-      <mesh
-        ref={rightArmRef}
-        geometry={geos.arm}
-        material={material}
-        position={[0.375, 1.125, 0]}
-        castShadow
-      />
+      <group ref={rigRef}>
+        <mesh geometry={geos.torsoHead} material={material} castShadow receiveShadow />
+        <mesh
+          ref={leftLegRef}
+          geometry={geos.leg}
+          material={material}
+          position={[-0.125, 0.625, 0]}
+          castShadow
+        />
+        <mesh
+          ref={rightLegRef}
+          geometry={geos.leg}
+          material={material}
+          position={[0.125, 0.625, 0]}
+          castShadow
+        />
+        <mesh
+          ref={leftArmRef}
+          geometry={geos.arm}
+          material={material}
+          position={[-0.34, 1.125, 0]}
+          castShadow
+        />
+        <mesh
+          ref={rightArmRef}
+          geometry={geos.arm}
+          material={material}
+          position={[0.34, 1.125, 0]}
+          castShadow
+        />
+      </group>
     </group>
   );
 }
@@ -264,8 +332,8 @@ export interface NeoEntityProps {
 }
 
 /**
- * NEO Companion Drone (~0.6 u): ceramic shell, brass trim, short antenna,
- * 8 visor eye moods, and 4 cm sinusoidal hover over a 2.4 s cycle.
+ * NEO Companion Drone (~0.6 u): sculpted beveled ceramic shell, brass wings/thrusters, antenna halo,
+ * 8 visor eye moods, and smooth 4 cm hover over a 2.4 s cycle.
  */
 export function NeoEntity({
   followPosRef,
@@ -283,75 +351,84 @@ export function NeoEntity({
   const visorHex = visorCosmetic === 'amber' ? '#F2B544' : '#5ED8CB';
 
   const bodyGeo = useMemo(() => {
-    return buildDetailVoxelGeometry([
-      // Ceramic body ~5x4x4 detail voxels (~0.625u)
-      { x: -2, y: 0, z: -2, w: 4, h: 4, d: 4, hex: '#F2F4F5' },
-      // Brass side thrusters & trim
-      { x: -3, y: 1, z: -1, w: 1, h: 2, d: 2, hex: '#A8773D' },
-      { x: 2, y: 1, z: -1, w: 1, h: 2, d: 2, hex: '#A8773D' },
-      // Antenna
-      { x: 0, y: 4, z: 0, w: 1, h: 2, d: 1, hex: '#A8773D' },
-      { x: 0, y: 6, z: 0, w: 1, h: 1, d: 1, hex: visorHex, emissive: 1.05 },
-      // Dark visor recess
-      { x: -2, y: 1, z: 2, w: 4, h: 2, d: 0.4, hex: '#1C2427' },
-    ]);
+    return buildDetailVoxelGeometry(
+      [
+        // Chamfered sleek aero ceramic core (~0.58u wide)
+        { x: -4.2, y: 0.6, z: -3.5, w: 8.4, h: 6.8, d: 7, hex: '#F2F4F5' },
+        { x: -3.2, y: 0, z: -2.8, w: 6.4, h: 8, d: 5.6, hex: '#FFFFFF' },
+        // Turquoise/Amber lower energy thrusters + trim belt
+        { x: -4.4, y: 2.6, z: -3.7, w: 8.8, h: 1.0, d: 7.4, hex: '#A8773D' },
+        { x: -2, y: -0.8, z: -1.5, w: 4, h: 1, d: 3, hex: visorHex, emissive: 0.9 },
+        // Brass aero winglet stabilizers
+        { x: -5.8, y: 2.2, z: -1.5, w: 1.6, h: 3.5, d: 3, hex: '#A8773D' },
+        { x: 4.2, y: 2.2, z: -1.5, w: 1.6, h: 3.5, d: 3, hex: '#A8773D' },
+        { x: -5.6, y: 3.4, z: -0.5, w: 1, h: 1.2, d: 1, hex: visorHex, emissive: 1.05 },
+        { x: 4.6, y: 3.4, z: -0.5, w: 1, h: 1.2, d: 1, hex: visorHex, emissive: 1.05 },
+        // Antenna & luminous orb tip
+        { x: -0.6, y: 8, z: -0.6, w: 1.2, h: 2.8, d: 1.2, hex: '#A8773D' },
+        { x: -1.1, y: 10.6, z: -1.1, w: 2.2, h: 2.0, d: 2.2, hex: visorHex, emissive: 1.15 },
+        // Framed glass visor recess
+        { x: -3.6, y: 2.0, z: 3.3, w: 7.2, h: 3.8, d: 0.6, hex: '#142634' },
+      ],
+      FINE_VOXEL,
+    );
   }, [visorHex]);
 
   const eyesGeo = useMemo(() => {
     const boxes: DetailBoxSpec[] = [];
-    // 8 distinct detail-voxel eye shapes inside the 4x2 visor
+    const ez = 3.85;
     switch (mood) {
       case 'happy':
         boxes.push(
-          { x: -1.6, y: 2.0, z: 2.25, w: 1.0, h: 0.5, d: 0.2, hex: visorHex, emissive: 1.1 },
-          { x: 0.6, y: 2.0, z: 2.25, w: 1.0, h: 0.5, d: 0.2, hex: visorHex, emissive: 1.1 },
+          { x: -2.7, y: 4.0, z: ez, w: 1.8, h: 0.8, d: 0.3, hex: visorHex, emissive: 1.15 },
+          { x: 0.9, y: 4.0, z: ez, w: 1.8, h: 0.8, d: 0.3, hex: visorHex, emissive: 1.15 },
         );
         break;
       case 'thinking':
         boxes.push(
-          { x: -1.5, y: 1.6, z: 2.25, w: 0.9, h: 0.8, d: 0.2, hex: visorHex, emissive: 1.0 },
-          { x: 0.6, y: 2.1, z: 2.25, w: 0.9, h: 0.4, d: 0.2, hex: visorHex, emissive: 1.0 },
+          { x: -2.6, y: 3.3, z: ez, w: 1.6, h: 1.5, d: 0.3, hex: visorHex, emissive: 1.05 },
+          { x: 1.0, y: 4.1, z: ez, w: 1.6, h: 0.8, d: 0.3, hex: visorHex, emissive: 1.05 },
         );
         break;
       case 'surprised':
         boxes.push(
-          { x: -1.5, y: 1.3, z: 2.25, w: 1.0, h: 1.3, d: 0.2, hex: visorHex, emissive: 1.15 },
-          { x: 0.5, y: 1.3, z: 2.25, w: 1.0, h: 1.3, d: 0.2, hex: visorHex, emissive: 1.15 },
+          { x: -2.7, y: 2.7, z: ez, w: 1.8, h: 2.4, d: 0.3, hex: visorHex, emissive: 1.15 },
+          { x: 0.9, y: 2.7, z: ez, w: 1.8, h: 2.4, d: 0.3, hex: visorHex, emissive: 1.15 },
         );
         break;
       case 'concerned':
         boxes.push(
-          { x: -1.5, y: 1.5, z: 2.25, w: 1.0, h: 0.6, d: 0.2, hex: '#F2B544', emissive: 1.0 },
-          { x: 0.5, y: 1.5, z: 2.25, w: 1.0, h: 0.6, d: 0.2, hex: '#F2B544', emissive: 1.0 },
+          { x: -2.7, y: 3.2, z: ez, w: 1.8, h: 1.1, d: 0.3, hex: '#F2B544', emissive: 1.05 },
+          { x: 0.9, y: 3.2, z: ez, w: 1.8, h: 1.1, d: 0.3, hex: '#F2B544', emissive: 1.05 },
         );
         break;
       case 'focused':
         boxes.push(
-          { x: -1.6, y: 1.6, z: 2.25, w: 1.2, h: 0.5, d: 0.2, hex: visorHex, emissive: 1.15 },
-          { x: 0.4, y: 1.6, z: 2.25, w: 1.2, h: 0.5, d: 0.2, hex: visorHex, emissive: 1.15 },
+          { x: -2.8, y: 3.3, z: ez, w: 2.1, h: 0.9, d: 0.3, hex: visorHex, emissive: 1.15 },
+          { x: 0.7, y: 3.3, z: ez, w: 2.1, h: 0.9, d: 0.3, hex: visorHex, emissive: 1.15 },
         );
         break;
       case 'proud':
         boxes.push(
-          { x: -1.5, y: 1.8, z: 2.25, w: 1.1, h: 0.7, d: 0.2, hex: visorHex, emissive: 1.15 },
-          { x: 0.4, y: 1.8, z: 2.25, w: 1.1, h: 0.7, d: 0.2, hex: visorHex, emissive: 1.15 },
+          { x: -2.7, y: 3.6, z: ez, w: 1.9, h: 1.3, d: 0.3, hex: visorHex, emissive: 1.15 },
+          { x: 0.8, y: 3.6, z: ez, w: 1.9, h: 1.3, d: 0.3, hex: visorHex, emissive: 1.15 },
         );
         break;
       case 'sleepy':
         boxes.push(
-          { x: -1.5, y: 1.4, z: 2.25, w: 1.0, h: 0.3, d: 0.2, hex: visorHex, emissive: 0.5 },
-          { x: 0.5, y: 1.4, z: 2.25, w: 1.0, h: 0.3, d: 0.2, hex: visorHex, emissive: 0.5 },
+          { x: -2.6, y: 2.9, z: ez, w: 1.8, h: 0.6, d: 0.3, hex: visorHex, emissive: 0.6 },
+          { x: 0.8, y: 2.9, z: ez, w: 1.8, h: 0.6, d: 0.3, hex: visorHex, emissive: 0.6 },
         );
         break;
       case 'neutral':
       default:
         boxes.push(
-          { x: -1.4, y: 1.5, z: 2.25, w: 0.9, h: 1.0, d: 0.2, hex: visorHex, emissive: 1.1 },
-          { x: 0.5, y: 1.5, z: 2.25, w: 0.9, h: 1.0, d: 0.2, hex: visorHex, emissive: 1.1 },
+          { x: -2.6, y: 3.0, z: ez, w: 1.7, h: 1.9, d: 0.3, hex: visorHex, emissive: 1.1 },
+          { x: 0.9, y: 3.0, z: ez, w: 1.7, h: 1.9, d: 0.3, hex: visorHex, emissive: 1.1 },
         );
         break;
     }
-    return buildDetailVoxelGeometry(boxes);
+    return buildDetailVoxelGeometry(boxes, FINE_VOXEL);
   }, [mood, visorHex]);
 
   useFrame((state, delta) => {
@@ -372,14 +449,12 @@ export function NeoEntity({
 
     root.position.set(posRef.current[0], posRef.current[1], posRef.current[2]);
 
-    // Face player slightly
     if (!fixedWorldPos) {
       const dx = followPosRef.current[0] - posRef.current[0];
       const dz = followPosRef.current[2] - posRef.current[2];
       root.rotation.y = Math.atan2(dx, dz);
     }
 
-    // 4 cm (0.04 u) hover over exact 2.4 s cycle
     const omega = (Math.PI * 2) / 2.4;
     body.position.y = Math.sin(state.clock.elapsedTime * omega) * 0.04;
   });
@@ -408,9 +483,8 @@ export interface BitEntityProps {
 }
 
 /**
- * BIT (Programmable Builder Robot): 1x1 u footprint, ~0.8 u tall, moss-green chassis,
- * brass trim, treads, front scanner lens, crane arm, customizable paint & accessories,
- * bump/shrug animation, and overhead speech bubble.
+ * BIT (Programmable Builder Robot): 1x1 u footprint, articulated treads, beveled chassis,
+ * glowing stereo eyes, builder crane arm, customizable paint & accessories.
  */
 export function BitEntity({
   positionRef,
@@ -427,39 +501,55 @@ export function BitEntity({
   const chassisHex = BIT_PAINT_HEX[cosmetics.bitPaint] ?? BIT_PAINT_HEX.moss!;
 
   const { chassisGeo, craneGeo, accessoryGeo } = useMemo(() => {
-    const chassis = buildDetailVoxelGeometry([
-      // Left & right treads (1x1 u footprint = 8x8 detail voxels)
-      { x: -4, y: 0, z: -4, w: 2, h: 2, d: 8, hex: '#3A464C' },
-      { x: 2, y: 0, z: -4, w: 2, h: 2, d: 8, hex: '#3A464C' },
-      // Brass tread hubs
-      { x: -4, y: 0, z: -2, w: 1, h: 1, d: 4, hex: '#A8773D' },
-      { x: 3, y: 0, z: -2, w: 1, h: 1, d: 4, hex: '#A8773D' },
-      // Main chassis (6x4x6 detail voxels)
-      { x: -3, y: 2, z: -3, w: 6, h: 4, d: 6, hex: chassisHex },
-      // Brass top collar
-      { x: -2, y: 6, z: -2, w: 4, h: 1, d: 4, hex: '#A8773D' },
-      // Front scanner lens
-      { x: -2, y: 3, z: 3, w: 4, h: 2, d: 1, hex: '#3A464C' },
-      { x: -1, y: 3, z: 4, w: 2, h: 1, d: 0.4, hex: '#5CE1E6', emissive: 1.15 },
-    ]);
+    const chassis = buildDetailVoxelGeometry(
+      [
+        // Left & right treads with bronze rollers (0.9u footprint)
+        { x: -7, y: 0, z: -7, w: 3, h: 3.5, d: 14, hex: '#3A464C' },
+        { x: 4, y: 0, z: -7, w: 3, h: 3.5, d: 14, hex: '#3A464C' },
+        { x: -7.4, y: 1, z: -5, w: 1, h: 1.5, d: 2.5, hex: '#A8773D' },
+        { x: -7.4, y: 1, z: 2.5, w: 1, h: 1.5, d: 2.5, hex: '#A8773D' },
+        { x: 6.4, y: 1, z: -5, w: 1, h: 1.5, d: 2.5, hex: '#A8773D' },
+        { x: 6.4, y: 1, z: 2.5, w: 1, h: 1.5, d: 2.5, hex: '#A8773D' },
+        // Beveled Painted Chassis
+        { x: -5, y: 2.5, z: -5.5, w: 10, h: 8, d: 11, hex: chassisHex },
+        { x: -4.2, y: 10.5, z: -4.5, w: 8.4, h: 1.8, d: 9, hex: '#A8773D' },
+        // Amber hazard bumper & rear exhaust grill
+        { x: -5.2, y: 3, z: 4.8, w: 10.4, h: 1.4, d: 1, hex: '#F2B544' },
+        { x: -3.5, y: 4, z: -6, w: 7, h: 4, d: 0.6, hex: '#3A464C' },
+        // Wide front visor + symmetric friendly glowing cyan eyes
+        { x: -4, y: 5.5, z: 5.3, w: 8, h: 3.8, d: 0.8, hex: '#18364A' },
+        { x: -2.8, y: 6.6, z: 6.0, w: 1.8, h: 1.8, d: 0.35, hex: '#5CE1E6', emissive: 1.15 },
+        { x: 1.0, y: 6.6, z: 6.0, w: 1.8, h: 1.8, d: 0.35, hex: '#5CE1E6', emissive: 1.15 },
+      ],
+      FINE_VOXEL,
+    );
 
-    const crane = buildDetailVoxelGeometry([
-      { x: 0, y: 0, z: 0, w: 1, h: 3, d: 1, hex: '#A8773D' },
-      { x: 0, y: 3, z: 0, w: 1, h: 1, d: 3, hex: '#A8773D' },
-      { x: 0, y: 2, z: 2, w: 1, h: 1, d: 1, hex: '#F2B544', emissive: 0.8 },
-    ]);
+    const crane = buildDetailVoxelGeometry(
+      [
+        { x: -0.8, y: 0, z: -0.8, w: 1.6, h: 6, d: 1.6, hex: '#A8773D' },
+        { x: -0.8, y: 5.5, z: -0.8, w: 1.6, h: 1.6, d: 5.5, hex: '#A8773D' },
+        { x: -1, y: 4, z: 3.8, w: 2, h: 2, d: 2, hex: '#F2B544', emissive: 0.9 },
+      ],
+      FINE_VOXEL,
+    );
 
     let acc: THREE.BufferGeometry | null = null;
     if (cosmetics.bitAccessory === 'lantern') {
-      acc = buildDetailVoxelGeometry([
-        { x: -4, y: 5, z: 1, w: 1, h: 2, d: 1, hex: '#A8773D' },
-        { x: -4, y: 4, z: 2, w: 1, h: 1, d: 1, hex: '#F2B544', emissive: 1.15 },
-      ]);
+      acc = buildDetailVoxelGeometry(
+        [
+          { x: -6.5, y: 9, z: 1.5, w: 1.4, h: 4.5, d: 1.4, hex: '#A8773D' },
+          { x: -7, y: 7.5, z: 3, w: 2.2, h: 2.5, d: 2.2, hex: '#F2B544', emissive: 1.15 },
+        ],
+        FINE_VOXEL,
+      );
     } else if (cosmetics.bitAccessory === 'antenna_flag') {
-      acc = buildDetailVoxelGeometry([
-        { x: -3, y: 6, z: -2, w: 1, h: 4, d: 1, hex: '#A8773D' },
-        { x: -3, y: 9, z: -4, w: 1, h: 1, d: 2, hex: '#D9433B' },
-      ]);
+      acc = buildDetailVoxelGeometry(
+        [
+          { x: -4.5, y: 12, z: -3, w: 1.2, h: 7, d: 1.2, hex: '#A8773D' },
+          { x: -4.5, y: 16.5, z: -7, w: 0.8, h: 2.5, d: 4, hex: '#D9433B' },
+        ],
+        FINE_VOXEL,
+      );
     }
 
     return { chassisGeo: chassis, craneGeo: crane, accessoryGeo: acc };
@@ -518,26 +608,26 @@ export function BitEntity({
           ref={craneRef}
           geometry={craneGeo}
           material={material}
-          position={[0.3125, 0.5, -0.125]}
+          position={[0.32, 0.5, -0.1]}
           castShadow
         />
         {accessoryGeo && <mesh geometry={accessoryGeo} material={material} castShadow />}
       </group>
-      <Html position={[0, 1.3, 0]} center distanceFactor={10} style={{ pointerEvents: 'none' }}>
+      <Html position={[0, 1.35, 0]} center distanceFactor={10} zIndexRange={[15, 0]} style={{ pointerEvents: 'none' }}>
         <div
           ref={speechDivRef}
           style={{
             display: 'none',
-            background: '#F3EAD8',
-            color: '#2A2420',
-            border: '2px solid #D9C9A8',
-            borderRadius: '2px',
-            padding: '4px 8px',
+            background: '#FFFDF7',
+            color: '#172B3A',
+            border: '2px solid #0891B2',
+            borderRadius: '10px',
+            padding: '5px 10px',
             fontFamily: 'JetBrains Mono, monospace',
             fontSize: '12px',
             fontWeight: 700,
             whiteSpace: 'nowrap',
-            boxShadow: '2px 2px 0 rgba(0,0,0,0.35)',
+            boxShadow: '0 4px 12px rgba(15, 45, 70, 0.25)',
           }}
         />
       </Html>
@@ -552,24 +642,42 @@ export interface NpcProps {
 }
 
 /**
- * BOLT: 15 detail voxels tall, leather apron, copper goggles, rolled sleeves, beard.
+ * BOLT: Stocky Engineer, leather blacksmith apron, copper goggles with aqua lenses, symmetric eyes & beard.
  */
 export function BoltNpc({ position, yaw = 0, material }: NpcProps) {
   const geo = useMemo(
     () =>
-      buildDetailVoxelGeometry([
-        { x: -2, y: 0, z: -1, w: 2, h: 4, d: 2, hex: '#3A464C' },
-        { x: 0, y: 0, z: -1, w: 2, h: 4, d: 2, hex: '#3A464C' },
-        { x: -3, y: 4, z: -2, w: 6, h: 6, d: 4, hex: '#7A5233' }, // stocky torso + leather apron
-        { x: -3, y: 6, z: -2, w: 6, h: 1, d: 4, hex: '#A8773D' }, // tool belt
-        { x: -4, y: 5, z: -1, w: 1, h: 4, d: 2, hex: '#E0B088' },
-        { x: 3, y: 5, z: -1, w: 1, h: 4, d: 2, hex: '#E0B088' },
-        { x: -2, y: 10, z: -2, w: 4, h: 5, d: 4, hex: '#E0B088' },
-        { x: -2, y: 10, z: 1, w: 4, h: 2, d: 2, hex: '#8C9398' }, // gray-streaked beard
-        { x: -2, y: 13, z: -2, w: 4, h: 1, d: 5, hex: '#A8773D' }, // copper goggles
-        { x: -1, y: 13, z: 2.2, w: 1, h: 1, d: 0.4, hex: '#4CD7E0' },
-        { x: 1, y: 13, z: 2.2, w: 1, h: 1, d: 0.4, hex: '#4CD7E0' },
-      ]),
+      buildDetailVoxelGeometry(
+        [
+          // Sturdy cuffed boots & pants
+          { x: -3.5, y: 0, z: -2, w: 3, h: 3, d: 4, hex: '#4A3423' },
+          { x: 0.5, y: 0, z: -2, w: 3, h: 3, d: 4, hex: '#4A3423' },
+          { x: -3.3, y: 3, z: -1.8, w: 2.8, h: 5, d: 3.6, hex: '#3A464C' },
+          { x: 0.5, y: 3, z: -1.8, w: 2.8, h: 5, d: 3.6, hex: '#3A464C' },
+          // Stocky torso + leather apron + bronze utility belt
+          { x: -5, y: 8, z: -2.8, w: 10, h: 10, d: 5.6, hex: '#7A5233' },
+          { x: -4.2, y: 7, z: 2.4, w: 8.4, h: 10, d: 0.8, hex: '#5D3822' },
+          { x: -5.2, y: 11.5, z: -3, w: 10.4, h: 1.8, d: 6.2, hex: '#A8773D' },
+          { x: -1.2, y: 11.5, z: 3.0, w: 2.4, h: 1.8, d: 0.5, hex: '#F2B544' },
+          // Muscular rolled-sleeve arms
+          { x: -7.2, y: 10, z: -1.5, w: 2.2, h: 7.5, d: 3, hex: '#E0B088' },
+          { x: 5.0, y: 10, z: -1.5, w: 2.2, h: 7.5, d: 3, hex: '#E0B088' },
+          { x: -7.4, y: 15, z: -1.7, w: 2.4, h: 3, d: 3.4, hex: '#D6CCB8' },
+          { x: 5.0, y: 15, z: -1.7, w: 2.4, h: 3, d: 3.4, hex: '#D6CCB8' },
+          // Symmetrical Head + gray beard + copper aviator goggles
+          { x: -4, y: 18, z: -3.8, w: 8, h: 8, d: 7.6, hex: '#E0B088' },
+          { x: -4.1, y: 17.5, z: 1.2, w: 8.2, h: 3.8, d: 3.2, hex: '#8C9398' },
+          { x: -4.1, y: 24, z: -4, w: 8.2, h: 2.2, d: 8, hex: '#6D4630' },
+          // Symmetrical Eyes
+          { x: -2.8, y: 21.5, z: 3.7, w: 1.4, h: 1.5, d: 0.35, hex: '#1F2933' },
+          { x: 1.4, y: 21.5, z: 3.7, w: 1.4, h: 1.5, d: 0.35, hex: '#1F2933' },
+          // Brass goggles cleanly resting on forehead
+          { x: -4.3, y: 23.8, z: -3.9, w: 8.6, h: 2.0, d: 8.4, hex: '#A8773D' },
+          { x: -3.1, y: 24.0, z: 4.3, w: 2.2, h: 1.6, d: 0.5, hex: '#4CD7E0', emissive: 0.65 },
+          { x: 0.9, y: 24.0, z: 4.3, w: 2.2, h: 1.6, d: 0.5, hex: '#4CD7E0', emissive: 0.65 },
+        ],
+        FINE_VOXEL,
+      ),
     [],
   );
 
@@ -582,21 +690,39 @@ export function BoltNpc({ position, yaw = 0, material }: NpcProps) {
 }
 
 /**
- * Mira: 14 detail voxels tall, straw hat, olive dress, woven basket.
+ * Mira: Cheerful Farmer-Botanist, wide straw sun hat with coral ribbon, olive dress & harvest basket.
  */
 export function MiraNpc({ position, yaw = 0, material }: NpcProps) {
   const geo = useMemo(
     () =>
-      buildDetailVoxelGeometry([
-        { x: -2, y: 0, z: -1, w: 4, h: 5, d: 2, hex: '#5F8E4E' }, // olive dress
-        { x: -2, y: 5, z: -1, w: 4, h: 4, d: 2, hex: '#D6CCB8' },
-        { x: -3, y: 5, z: -1, w: 1, h: 4, d: 2, hex: '#C68B5E' },
-        { x: 2, y: 5, z: -1, w: 1, h: 4, d: 2, hex: '#C68B5E' },
-        { x: 2, y: 3, z: 0, w: 2, h: 2, d: 2, hex: '#B07D4F' }, // woven basket
-        { x: -2, y: 9, z: -2, w: 4, h: 4, d: 4, hex: '#C68B5E' },
-        { x: -3, y: 13, z: -3, w: 6, h: 1, d: 6, hex: '#E2CE9C' }, // straw hat brim
-        { x: -2, y: 14, z: -2, w: 4, h: 1, d: 4, hex: '#CDB683' }, // straw hat crown
-      ]),
+      buildDetailVoxelGeometry(
+        [
+          // Boots + Olive sundress + cream apron
+          { x: -3, y: 0, z: -1.5, w: 2.4, h: 2.5, d: 3, hex: '#6A4A2F' },
+          { x: 0.6, y: 0, z: -1.5, w: 2.4, h: 2.5, d: 3, hex: '#6A4A2F' },
+          { x: -4.2, y: 2, z: -2.4, w: 8.4, h: 8, d: 4.8, hex: '#5F8E4E' },
+          { x: -3.5, y: 3, z: -2.6, w: 7, h: 7.5, d: 5.2, hex: '#F3ECE0' },
+          { x: -3.6, y: 10, z: -2.1, w: 7.2, h: 8, d: 4.2, hex: '#F3ECE0' },
+          { x: -3.7, y: 10, z: -2.2, w: 7.4, h: 4, d: 4.4, hex: '#5F8E4E' },
+          // Arms + woven basket with carrot & golden wheat
+          { x: -5.8, y: 10.5, z: -1.2, w: 2, h: 7, d: 2.4, hex: '#C68B5E' },
+          { x: 3.8, y: 10.5, z: -1.2, w: 2, h: 7, d: 2.4, hex: '#C68B5E' },
+          { x: 4.2, y: 7, z: 0, w: 4.2, h: 4.2, d: 4.2, hex: '#B07D4F' },
+          { x: 4.8, y: 11, z: 0.8, w: 1.5, h: 2, d: 1.5, hex: '#E5793A' },
+          { x: 6.4, y: 11, z: 1.2, w: 1.4, h: 2.5, d: 1.4, hex: '#F2B544' },
+          // Symmetrical Head + hair braids + wide woven straw hat & ribbon
+          { x: -3.8, y: 18, z: -3.8, w: 7.6, h: 7.6, d: 7.6, hex: '#C68B5E' },
+          { x: -4.2, y: 19.5, z: -4.1, w: 8.4, h: 5, d: 3.5, hex: '#5B3A27' },
+          { x: -2.6, y: 20.6, z: 3.7, w: 1.3, h: 1.6, d: 0.3, hex: '#1F2933' },
+          { x: 1.3, y: 20.6, z: 3.7, w: 1.3, h: 1.6, d: 0.3, hex: '#1F2933' },
+          { x: -3.1, y: 19.6, z: 3.7, w: 1.1, h: 0.7, d: 0.25, hex: '#E89B82' },
+          { x: 2.0, y: 19.6, z: 3.7, w: 1.1, h: 0.7, d: 0.25, hex: '#E89B82' },
+          { x: -6.5, y: 24.8, z: -6.5, w: 13, h: 1.4, d: 13, hex: '#E2CE9C' },
+          { x: -4.4, y: 26.2, z: -4.4, w: 8.8, h: 1.2, d: 8.8, hex: '#D9433B' },
+          { x: -4.2, y: 27.4, z: -4.2, w: 8.4, h: 2.0, d: 8.4, hex: '#CDB683' },
+        ],
+        FINE_VOXEL,
+      ),
     [],
   );
 
@@ -609,19 +735,34 @@ export function MiraNpc({ position, yaw = 0, material }: NpcProps) {
 }
 
 /**
- * Old Tamo: 13 detail voxels tall, hunched blue-gray robe, wooden staff.
+ * Old Tamo: Gatekeeper Sage in sapphire & ivory robe, gentle symmetrical face, staff with glowing orb.
  */
 export function OldTamoNpc({ position, yaw = 0, material }: NpcProps) {
   const geo = useMemo(
     () =>
-      buildDetailVoxelGeometry([
-        { x: -2, y: 0, z: -1, w: 4, h: 8, d: 3, hex: '#355C8C' }, // blue-gray robe
-        { x: -2, y: 8, z: 0, w: 4, h: 4, d: 4, hex: '#C68B5E' }, // hunched forward head
-        { x: -2, y: 12, z: 0, w: 4, h: 1, d: 4, hex: '#F0EDE6' }, // white hair
-        { x: -2, y: 7, z: 3, w: 4, h: 2, d: 1, hex: '#F0EDE6' }, // white beard
-        { x: 3, y: 0, z: 1, w: 1, h: 11, d: 1, hex: '#6A4A2F' }, // staff
-        { x: 3, y: 11, z: 1, w: 1, h: 1, d: 1, hex: '#5ED8CB', emissive: 0.9 },
-      ]),
+      buildDetailVoxelGeometry(
+        [
+          // Layered storyteller robe + bronze sash + shawl
+          { x: -4.5, y: 0, z: -3.2, w: 9, h: 15, d: 6.4, hex: '#355C8C' },
+          { x: -4.8, y: 8.5, z: -3.4, w: 9.6, h: 1.5, d: 6.8, hex: '#A8773D' },
+          { x: -5, y: 13, z: -3.5, w: 10, h: 3.5, d: 7, hex: '#2F7F86' },
+          // Draped sleeves
+          { x: -6.6, y: 8, z: -1.5, w: 2.2, h: 7, d: 3.5, hex: '#355C8C' },
+          { x: 4.4, y: 8, z: -1.5, w: 2.2, h: 7, d: 3.5, hex: '#355C8C' },
+          // Symmetrical Head + silver hair, bushy brows & flowing white beard
+          { x: -3.8, y: 16.5, z: -2.2, w: 7.6, h: 7.5, d: 7.4, hex: '#C68B5E' },
+          { x: -4, y: 23.5, z: -2.5, w: 8, h: 1.8, d: 8, hex: '#F0EDE6' },
+          { x: -3.5, y: 12.5, z: 4.2, w: 7, h: 5.5, d: 1.4, hex: '#F0EDE6' },
+          { x: -2.6, y: 19.8, z: 5.1, w: 1.2, h: 1.3, d: 0.3, hex: '#1F2933' },
+          { x: 1.4, y: 19.8, z: 5.1, w: 1.2, h: 1.3, d: 0.3, hex: '#1F2933' },
+          { x: -3, y: 21.3, z: 5.1, w: 2.2, h: 0.8, d: 0.4, hex: '#F0EDE6' },
+          { x: 0.8, y: 21.3, z: 5.1, w: 2.2, h: 0.8, d: 0.4, hex: '#F0EDE6' },
+          // Wooden sage staff + glowing cyan Aetheria orb
+          { x: 5.5, y: 0, z: 0.5, w: 1.5, h: 20, d: 1.5, hex: '#6A4A2F' },
+          { x: 5.0, y: 20, z: 0, w: 2.5, h: 2.5, d: 2.5, hex: '#5ED8CB', emissive: 1.05 },
+        ],
+        FINE_VOXEL,
+      ),
     [],
   );
 
@@ -880,52 +1021,59 @@ export function GroundHalo({
 }
 
 export function QuestObjectiveBeacon({
-  heightOffset = 2.0,
-  color = '#F4D03F',
+  heightOffset = 2.4,
+  color = '#F59E0B',
 }: {
   heightOffset?: number;
   color?: string;
 }) {
   const diamondRef = useRef<THREE.Group>(null);
+  const ringRef = useRef<THREE.Mesh>(null);
   const pillarRef = useRef<THREE.Mesh>(null);
 
   useFrame((state) => {
     const t = state.clock.elapsedTime;
     if (diamondRef.current) {
-      diamondRef.current.rotation.y = t * 2.2;
-      diamondRef.current.position.y = heightOffset + Math.sin(t * 3.2) * 0.12;
+      diamondRef.current.rotation.y = t * 2.0;
+      diamondRef.current.position.y = heightOffset + Math.sin(t * 3.0) * 0.1;
+    }
+    if (ringRef.current) {
+      ringRef.current.rotation.z = -t * 1.6;
     }
     if (pillarRef.current) {
-      pillarRef.current.rotation.y = t * 0.5;
       const pMat = pillarRef.current.material as THREE.MeshBasicMaterial;
-      pMat.opacity = 0.24 + Math.sin(t * 2.8) * 0.08;
+      pMat.opacity = 0.14 + Math.sin(t * 2.6) * 0.05;
     }
   });
 
   return (
     <group name="quest-objective-beacon">
-      {/* Vertical light pillar / beacon beam */}
-      <mesh ref={pillarRef} position={[0, 1.8, 0]}>
-        <cylinderGeometry args={[0.18, 0.42, 3.6, 16, 1, true]} />
+      {/* Gossamer soft vertical waypoint aura starting cleanly above ground */}
+      <mesh ref={pillarRef} position={[0, heightOffset * 0.72, 0]}>
+        <cylinderGeometry args={[0.06, 0.24, Math.max(1.2, heightOffset * 0.9), 16, 1, true]} />
         <meshBasicMaterial
           color={color}
           transparent
-          opacity={0.28}
+          opacity={0.16}
           depthWrite={false}
           side={THREE.DoubleSide}
           blending={THREE.AdditiveBlending}
         />
       </mesh>
 
-      {/* Floating RPG waypoint diamond */}
+      {/* Crisp Floating Quest Waypoint Star & Halo Ring */}
       <group ref={diamondRef} position={[0, heightOffset, 0]}>
-        <mesh scale={[0.26, 0.42, 0.26]}>
+        <mesh scale={[0.18, 0.3, 0.18]}>
           <octahedronGeometry args={[1, 0]} />
           <meshBasicMaterial color={color} />
         </mesh>
-        <mesh scale={[0.14, 0.22, 0.14]}>
+        <mesh scale={[0.1, 0.17, 0.1]}>
           <octahedronGeometry args={[1, 0]} />
-          <meshBasicMaterial color="#FFFFFF" blending={THREE.AdditiveBlending} />
+          <meshBasicMaterial color="#FFFBEB" />
+        </mesh>
+        <mesh ref={ringRef} rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[0.28, 0.022, 6, 20]} />
+          <meshBasicMaterial color="#FDE68A" transparent opacity={0.85} />
         </mesh>
       </group>
     </group>
@@ -936,7 +1084,7 @@ export function InteractivePromptBadge({
   label,
   keyHint = 'E',
   isQuest = false,
-  heightOffset = 1.35,
+  heightOffset = 1.65,
 }: {
   label: string;
   keyHint?: string;
@@ -955,37 +1103,41 @@ export function InteractivePromptBadge({
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '6px',
-          padding: '3px 8px',
-          background: 'rgba(28, 36, 39, 0.94)',
-          border: isQuest ? '1.5px solid #F4D03F' : '1.5px solid #3CC4C0',
-          borderRadius: '3px',
+          gap: '7px',
+          padding: '4px 10px 4px 6px',
+          background: '#FFFDF7',
+          border: isQuest ? '2px solid #F59E0B' : '2px solid #0891B2',
+          borderRadius: '999px',
           boxShadow: isQuest
-            ? '0 2px 10px rgba(0,0,0,0.5), 0 0 12px rgba(244, 208, 63, 0.4)'
-            : '0 2px 8px rgba(0,0,0,0.4), 0 0 8px rgba(60, 196, 192, 0.35)',
+            ? '0 4px 14px rgba(15, 45, 70, 0.22), 0 2px 0 #D97706'
+            : '0 4px 12px rgba(15, 45, 70, 0.18), 0 2px 0 #0E7490',
           whiteSpace: 'nowrap',
-          fontFamily: 'JetBrains Mono, monospace',
-          transform: 'translateY(-2px)',
+          fontFamily: "var(--font-body, 'Segoe UI', sans-serif)",
+          transform: 'translateY(-4px)',
         }}
       >
         <span
           style={{
-            background: isQuest ? '#F4D03F' : '#3CC4C0',
-            color: '#1C2427',
+            background: isQuest
+              ? 'linear-gradient(180deg, #FBBF24 0%, #F59E0B 100%)'
+              : 'linear-gradient(180deg, #22D3EE 0%, #0891B2 100%)',
+            color: isQuest ? '#422006' : '#FFFFFF',
+            fontFamily: 'JetBrains Mono, monospace',
             fontWeight: 800,
             fontSize: '11px',
             lineHeight: 1,
-            padding: '2px 5px',
-            borderRadius: '2px',
+            padding: '4px 7px',
+            borderRadius: '999px',
+            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.45)',
           }}
         >
           {keyHint}
         </span>
         <span
           style={{
-            color: isQuest ? '#FFF9E6' : '#E8EEF0',
+            color: '#172B3A',
             fontSize: '12px',
-            fontWeight: 600,
+            fontWeight: 700,
             lineHeight: 1.2,
           }}
         >
@@ -1017,12 +1169,17 @@ function InteractableHighlightNode({
 
   const badgeHeight =
     item.kind === 'npc'
-      ? 2.1
+      ? 2.25
       : item.kind === 'puzzle' || item.kind === 'device'
-        ? 1.6
-        : 1.1;
+        ? 1.95
+        : 1.3;
 
-  const beaconHeight = item.kind === 'npc' ? 2.5 : item.kind === 'puzzle' ? 2.0 : 1.5;
+  const beaconHeight =
+    item.kind === 'npc'
+      ? 2.85
+      : item.kind === 'puzzle' || item.kind === 'device'
+        ? 2.45
+        : 1.75;
 
   useFrame(() => {
     const px = playerPosRef.current[0];

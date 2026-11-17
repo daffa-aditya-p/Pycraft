@@ -1196,12 +1196,24 @@ export function App(): React.JSX.Element {
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                background: 'rgba(28, 36, 39, 0.85)',
-                color: '#E8EEF0',
+                background: 'linear-gradient(135deg, rgba(217, 238, 246, 0.94), rgba(255, 253, 247, 0.94))',
+                backdropFilter: 'blur(6px)',
+                color: '#172B3A',
                 gap: '12px',
               }}
             >
-              <div style={{ fontSize: '20px', fontWeight: 700, color: '#F2B544' }}>
+              <div
+                style={{
+                  padding: '16px 28px',
+                  borderRadius: '14px',
+                  backgroundColor: '#FFFDF7',
+                  border: '2px solid #7CC4DF',
+                  boxShadow: '0 10px 28px rgba(15, 52, 76, 0.16)',
+                  fontSize: '20px',
+                  fontWeight: 700,
+                  color: '#0E7490',
+                }}
+              >
                 {worldLoadPhase || 'Menyiapkan dunia…'} {worldLoadProgress}%
               </div>
             </div>
@@ -1452,12 +1464,12 @@ export function App(): React.JSX.Element {
                     padding: '10px 14px',
                     borderColor:
                       toast.kind === 'error'
-                        ? '#E0603F'
+                        ? '#EF4444'
                         : toast.kind === 'warning'
-                          ? '#E9A23B'
+                          ? '#F59E0B'
                           : toast.kind === 'success'
-                            ? '#6DBE4B'
-                            : '#33434A',
+                            ? '#16A34A'
+                            : '#7CC4DF',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '10px',
@@ -1471,7 +1483,7 @@ export function App(): React.JSX.Element {
                     onClick={() => dismissToast(toast.id)}
                     style={{
                       background: 'transparent',
-                      color: '#8FA3A9',
+                      color: '#4C697C',
                       border: 'none',
                       cursor: 'pointer',
                       fontWeight: 700,
