@@ -471,6 +471,7 @@ export function generateAwakeningWorld(options: { singleIslandOnly?: boolean } =
     { id: 'awakening_crystal_1', kind: 'item', label: 'Ambil Kristal Biru', position: [11, 5.5, 22], zoneId: 'supply_grove' },
     { id: 'awakening_crystal_2', kind: 'item', label: 'Ambil Kristal Biru', position: [19, 5.5, 9], zoneId: 'supply_grove' },
     { id: 'awakening_crystal_3', kind: 'item', label: 'Ambil Kristal Biru', position: [24, 5.5, 18], zoneId: 'supply_grove' },
+    { id: 'bit_robot', kind: 'npc', label: 'Aktifkan BIT', position: [18, 5.5, 14], zoneId: 'supply_grove' },
     { id: 'bit_terminal', kind: 'puzzle', label: 'Program BIT (M2)', position: [20, 5.5, 12], zoneId: 'supply_grove', missionId: 'm2_data_collector' },
   );
 

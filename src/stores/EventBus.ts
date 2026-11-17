@@ -80,6 +80,7 @@ export interface PycraftEventMap {
   };
   'cinematic.shot': { position: [number, number, number]; lookAt: [number, number, number]; fov?: number; driftSpeed?: number } | null;
   'camera.mode.changed': { mode: 'third_person' | 'isometric' };
+  'camera.perspective.suggest': { yaw?: number; pitch?: number; blendSpeed?: number };
   'runtime.status.changed': { status: RuntimeStatus; message?: string };
   'runtime.input.requested': { runId: string; prompt: string };
   'playback.state.changed': {

@@ -12,6 +12,7 @@ import { TitleScreen } from '@/ui/screens/TitleScreen';
 import { CinematicIntroOverlay } from '@/ui/screens/CinematicIntroOverlay';
 import { WorldProgressScreen } from '@/ui/screens/WorldProgressScreen';
 import { GameplayHud } from '@/ui/hud/GameplayHud';
+import { JournalModal } from '@/ui/panels/JournalModal';
 import { TouchControls } from '@/ui/hud/TouchControls';
 import { EditorWorkspace } from '@/ui/panels/EditorWorkspace';
 import {
@@ -24,7 +25,7 @@ import {
   filterAllowedApiSpecs,
   getUnlockedSnippetChips,
 } from '@/editor/autocomplete';
-import { EventBus, useEditorStore, useSettingsStore, useUIStore } from '@/stores';
+import { EventBus, useEditorStore, useGameStore, useSettingsStore, useUIStore } from '@/stores';
 
 // Ensure React 19 act() works cleanly in jsdom
 (globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -344,5 +345,71 @@ describe('Cinematic Intro Overlay & Lore Narration', () => {
     });
 
     expect(onComplete).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('JournalModal & Quest Objectives System (Acts 1-4)', () => {
+  it('renders all 4 Acts in sequence with titles, summaries, and objective checklists', () => {
+    useUIStore.setState({
+      screen: 'in_game',
+      inGameOverlay: 'journal',
+      journalTab: 'quests',
+    });
+
+    const el = mount(React.createElement(JournalModal, {}));
+    const modal = el.querySelector('[data-testid="journal-modal"]');
+    expect(modal).not.toBeNull();
+
+    // Verify Act 1 - Act 4 headers exist
+    expect(modal?.textContent).toContain('Babak 1: Prolog & Menara Suar');
+    expect(modal?.textContent).toContain('Babak 2: Hutan Pasokan & BIT');
+    expect(modal?.textContent).toContain('Babak 3: Gerbang Terkunci & Ladang');
+    expect(modal?.textContent).toContain('Babak 4: Bengkel & Puncak Inti');
+
+    // Verify quests exist
+    expect(modal?.textContent).toContain('Prolog: Bangun');
+    expect(modal?.textContent).toContain('Misi 1: Halo Arsitek');
+    expect(modal?.textContent).toContain('Selingan: Mencari BIT');
+    expect(modal?.textContent).toContain('Misi 2: Pengumpul Data');
+    expect(modal?.textContent).toContain('Misi 3: Gerbang Terkunci');
+    expect(modal?.textContent).toContain('Misi 4: Ladang Otomatis');
+    expect(modal?.textContent).toContain('Misi 5: Cetak Biru');
+    expect(modal?.textContent).toContain('Tantangan Inti: Inti yang Terbangun');
+
+    // Verify objective label exists
+    expect(modal?.textContent).toContain('Lompati undakan batu di Kuil Stasis');
+  });
+
+  it('highlights the active objective with in-progress badge and glowing indicator', () => {
+    useUIStore.setState({
+      screen: 'in_game',
+      inGameOverlay: 'journal',
+      journalTab: 'quests',
+    });
+    useGameStore.setState({
+      objectiveLabel: 'Lompati undakan batu di Kuil Stasis',
+    });
+
+    const el = mount(React.createElement(JournalModal, {}));
+    expect(el.textContent).toContain('SEDANG DIKERJAKAN');
+  });
+
+  it('clicking hud-objective-badge in GameplayHud opens Journal on quests tab', () => {
+    useUIStore.setState({
+      screen: 'in_game',
+      inGameOverlay: 'explore',
+      journalTab: 'inventory',
+    });
+
+    const el = mount(React.createElement(GameplayHud, {}));
+    const badge = el.querySelector<HTMLButtonElement>('[data-testid="hud-objective-badge"]');
+    expect(badge).not.toBeNull();
+
+    act(() => {
+      badge?.click();
+    });
+
+    expect(useUIStore.getState().inGameOverlay).toBe('journal');
+    expect(useUIStore.getState().journalTab).toBe('quests');
   });
 });

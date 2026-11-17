@@ -18,6 +18,7 @@ import {
   BitEntity,
   BoltNpc,
   GuardianSilhouette,
+  InteractablesHighlightLayer,
   MiraNpc,
   NeoEntity,
   OldTamoNpc,
@@ -125,6 +126,7 @@ function AwakeningScene({
   const discoveredLoreNoteIds = useGameStore((s) => s.world.discoveredLoreNoteIds);
   const neoMood = useEditorStore((s) => s.mentorPanel.visorMood);
   const quality = useSettingsStore((s) => s.graphics.quality);
+  const activePromptTargetId = useUIStore((s) => s.activePrompt?.targetId ?? null);
 
   const sharedUniforms = useMemo(() => createSharedShaderUniforms(), []);
 
@@ -394,20 +396,7 @@ function AwakeningScene({
         ui.setActivePrompt(nearestPrompt);
       }
 
-      // Puzzle zone advisory detection
-      let inPuzzleZone: string | null = null;
-      for (const zone of world.zones) {
-        if (!zone.puzzleZoneCenter || !zone.puzzleZoneRadius) continue;
-        const dx = zone.puzzleZoneCenter[0] - px;
-        const dz = zone.puzzleZoneCenter[2] - pz;
-        if (dx * dx + dz * dz <= zone.puzzleZoneRadius * zone.puzzleZoneRadius) {
-          inPuzzleZone = zone.id;
-          break;
-        }
-      }
-      if (game.activePuzzleZoneId !== inPuzzleZone) {
-        game.setActivePuzzleZone(inPuzzleZone);
-      }
+      // Spatial area changes never alter camera mode or trigger zone switches automatically
     }
   });
 
@@ -462,6 +451,15 @@ function AwakeningScene({
         discoveredLoreNoteIds={discoveredLoreNoteIds}
         restoredZoneIds={restoredZoneIds}
         material={entityMaterial}
+      />
+
+      {/* 3D Interactable and Quest Objective Highlights */}
+      <InteractablesHighlightLayer
+        interactables={world.interactables}
+        playerPosRef={playerPosRef}
+        collectedWorldItemIds={collectedWorldItemIds}
+        discoveredLoreNoteIds={discoveredLoreNoteIds}
+        activePromptTargetId={activePromptTargetId}
       />
 
       {/* Distant Core Citadel Monolith & Guardian Silhouette (Section 6.2 / 6.4) */}

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef } from 'react';
+import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { buildDetailVoxelGeometry, type DetailBoxSpec } from './Entities';
 import type { PropPlacement } from '../voxel/islandGenerator';
@@ -122,6 +123,24 @@ function InstancedPropGroup({
     mesh.instanceMatrix.needsUpdate = true;
     mesh.computeBoundingSphere();
   }, [placements]);
+
+  // Subtle hover bob and slow spin for interactable items (crystals, lore notes)
+  useFrame((state) => {
+    if (type !== 'crystal' && type !== 'lore_note') return;
+    const mesh = meshRef.current;
+    if (!mesh || placements.length === 0) return;
+    const t = state.clock.elapsedTime;
+    const dummy = new THREE.Object3D();
+    placements.forEach((p, idx) => {
+      const bob = Math.sin(t * 2.5 + idx * 1.6) * (type === 'crystal' ? 0.08 : 0.03);
+      dummy.position.set(p.position[0], p.position[1] + bob, p.position[2]);
+      dummy.rotation.set(0, p.rotationY + (type === 'crystal' ? t * 0.45 : 0), 0);
+      dummy.scale.setScalar(p.scale);
+      dummy.updateMatrix();
+      mesh.setMatrixAt(idx, dummy.matrix);
+    });
+    mesh.instanceMatrix.needsUpdate = true;
+  });
 
   if (placements.length === 0) return null;
 

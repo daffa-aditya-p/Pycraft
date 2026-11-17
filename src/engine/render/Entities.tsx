@@ -1,10 +1,13 @@
-import { useMemo, useRef } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
 import * as THREE from 'three';
 import type { ArchitectAppearance, CosmeticsState } from '../../stores/useGameStore';
+import { useGameStore } from '../../stores/useGameStore';
 import { useSettingsStore } from '../../stores/useSettingsStore';
 import { hexToLinearRgb } from '../voxel/palette';
+import { AWAKENING_QUESTS } from '../../content/awakening/quests';
+import type { InteractablePlacement } from '../voxel/islandGenerator';
 
 export const DETAIL_VOXEL = 0.125;
 
@@ -663,6 +666,450 @@ export function GuardianSilhouette({
   return (
     <group position={position} name="entity-guardian-silhouette">
       <mesh geometry={geo} material={material} />
+    </group>
+  );
+}
+
+export interface ActiveQuestTargetInfo {
+  activeQuestId: string | null;
+  activeObjectiveId: string | null;
+  targetId: string | null;
+  missionId: string | null;
+  objectiveType: string | null;
+  objectiveLabel: string | null;
+}
+
+export function getActiveQuestTargetInfo(
+  gameQuests: {
+    states: Record<string, string>;
+    completedStepIds: string[];
+    activeMissionId: string | null;
+    activeStepId: string | null;
+  },
+  collectedWorldItemIds: string[] = []
+): ActiveQuestTargetInfo {
+  let quest = AWAKENING_QUESTS.find((q) => gameQuests.states[q.id] === 'active');
+  if (!quest && gameQuests.activeMissionId) {
+    quest = AWAKENING_QUESTS.find((q) => q.id === gameQuests.activeMissionId);
+  }
+  if (!quest) {
+    quest = AWAKENING_QUESTS[0];
+  }
+
+  if (!quest) {
+    return {
+      activeQuestId: null,
+      activeObjectiveId: null,
+      targetId: null,
+      missionId: null,
+      objectiveType: null,
+      objectiveLabel: null,
+    };
+  }
+
+  const activeObj = quest.objectives.find((obj) => {
+    // Objective or step already completed
+    if (gameQuests.completedStepIds.includes(obj.id) || gameQuests.completedStepIds.includes(obj.targetId)) {
+      return false;
+    }
+    if (obj.type === 'collect' && obj.targetId === 'blue_crystal') {
+      const count = collectedWorldItemIds.filter((id) => id.startsWith('awakening_crystal_')).length;
+      return count < (obj.requiredCount ?? 3);
+    }
+    return true;
+  }) ?? quest.objectives[0] ?? null;
+
+  return {
+    activeQuestId: quest.id,
+    activeObjectiveId: activeObj?.id ?? null,
+    targetId: activeObj?.targetId ?? null,
+    missionId: activeObj?.missionId ?? quest.id,
+    objectiveType: activeObj?.type ?? null,
+    objectiveLabel: activeObj?.label?.id ?? null,
+  };
+}
+
+export function isInteractableQuestTarget(
+  item: InteractablePlacement,
+  questInfo: ActiveQuestTargetInfo,
+  collectedWorldItemIds: string[] = []
+): boolean {
+  if (!questInfo.targetId && !questInfo.activeQuestId) return false;
+
+  // Direct targetId match (e.g. 'neo_pedestal', 'old_tamo', 'mira', 'bolt', 'bit_robot')
+  if (questInfo.targetId && item.id === questInfo.targetId) return true;
+
+  // Blue crystal collection match (awakening_crystal_1, 2, 3)
+  if (questInfo.targetId === 'blue_crystal') {
+    if (item.id.startsWith('awakening_crystal_') && !collectedWorldItemIds.includes(item.id)) {
+      return true;
+    }
+  }
+
+  // Code step terminal / console match (only when active objective is code_step)
+  if (item.missionId) {
+    if (questInfo.objectiveType === 'code_step') {
+      if (questInfo.missionId && item.missionId === questInfo.missionId) return true;
+      if (questInfo.activeQuestId && item.missionId === questInfo.activeQuestId) return true;
+    }
+    if (!questInfo.targetId && questInfo.activeQuestId && item.missionId === questInfo.activeQuestId) {
+      return true;
+    }
+  }
+
+  // Island waypoint navigation
+  if (questInfo.objectiveType === 'go_to') {
+    if (questInfo.targetId === 'beacon_point' && item.id === 'beacon_terminal') return true;
+    if (questInfo.targetId === 'core_spire' && item.id === 'core_altar') return true;
+    if (questInfo.targetId === 'shrine_ledge' && item.id === 'neo_pedestal') return true;
+    if (questInfo.targetId === 'supply_grove' && (item.id === 'bit_robot' || item.id === 'bit_terminal')) return true;
+  }
+
+  return false;
+}
+
+export const INTERACTABLE_KIND_COLORS: Record<
+  'npc' | 'puzzle' | 'device' | 'item' | 'lore',
+  { ring: string; glow: string; text: string }
+> = {
+  npc: { ring: '#F5B041', glow: '#F8C471', text: '#FAD7A0' }, // warm amber
+  puzzle: { ring: '#3CC4C0', glow: '#5CE1E6', text: '#D1F2EB' }, // energetic turquoise
+  device: { ring: '#5ED8CB', glow: '#76D7C4', text: '#E8F8F5' }, // beacon cyan
+  item: { ring: '#4BACE8', glow: '#85C1E9', text: '#EBF5FB' }, // bright azure
+  lore: { ring: '#EDE4D0', glow: '#F5EEF8', text: '#FAF0E6' }, // antique parchment
+};
+
+export function GroundHalo({
+  color,
+  isQuest,
+  isFocused,
+  distRef,
+}: {
+  color: string;
+  isQuest: boolean;
+  isFocused: boolean;
+  distRef: React.MutableRefObject<number>;
+}) {
+  const groupRef = useRef<THREE.Group>(null);
+  const ringRef = useRef<THREE.Mesh>(null);
+  const innerRingRef = useRef<THREE.Mesh>(null);
+  const discRef = useRef<THREE.Mesh>(null);
+
+  useFrame((state) => {
+    const t = state.clock.elapsedTime;
+    if (!groupRef.current) return;
+    const distance = distRef.current;
+
+    if (isQuest) {
+      if (ringRef.current) ringRef.current.rotation.z = -t * 0.8;
+      if (innerRingRef.current) innerRingRef.current.rotation.z = t * 1.2;
+      const pulse = 0.72 + Math.sin(t * 3.5) * 0.22;
+      const targetScale = isFocused ? 1.3 : 1.0 + Math.sin(t * 2.5) * 0.06;
+      groupRef.current.scale.set(targetScale, targetScale, targetScale);
+      if (discRef.current) {
+        (discRef.current.material as THREE.MeshBasicMaterial).opacity = isFocused ? 0.42 : 0.22;
+      }
+      if (ringRef.current) {
+        (ringRef.current.material as THREE.MeshBasicMaterial).opacity = pulse;
+      }
+    } else {
+      const distFade = Math.max(0, Math.min(1, (13.5 - distance) / 3.5));
+      const basePulse = isFocused ? 0.92 : (0.4 + Math.sin(t * 2.2) * 0.14) * distFade;
+      const scale = isFocused ? 1.25 : 1.0;
+      groupRef.current.scale.set(scale, scale, scale);
+      if (ringRef.current) {
+        (ringRef.current.material as THREE.MeshBasicMaterial).opacity = basePulse;
+      }
+      if (discRef.current) {
+        (discRef.current.material as THREE.MeshBasicMaterial).opacity = (isFocused ? 0.32 : 0.12) * distFade;
+      }
+    }
+  });
+
+  return (
+    <group ref={groupRef} position={[0, 0.04, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+      {/* Inner soft ground disc */}
+      <mesh ref={discRef}>
+        <circleGeometry args={[isQuest ? 0.65 : 0.52, 24]} />
+        <meshBasicMaterial
+          color={color}
+          transparent
+          opacity={isQuest ? 0.22 : 0.12}
+          depthWrite={false}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+
+      {/* Primary beacon ring */}
+      <mesh ref={ringRef}>
+        <ringGeometry args={[isQuest ? 0.82 : 0.52, isQuest ? 1.02 : 0.72, 32]} />
+        <meshBasicMaterial
+          color={color}
+          transparent
+          opacity={isQuest ? 0.8 : 0.45}
+          depthWrite={false}
+          side={THREE.DoubleSide}
+          blending={isQuest ? THREE.AdditiveBlending : THREE.NormalBlending}
+        />
+      </mesh>
+
+      {/* Second concentric counter-rotating ring for quest targets */}
+      {isQuest && (
+        <mesh ref={innerRingRef}>
+          <ringGeometry args={[0.48, 0.66, 32]} />
+          <meshBasicMaterial
+            color="#FFF4B8"
+            transparent
+            opacity={0.65}
+            depthWrite={false}
+            side={THREE.DoubleSide}
+            blending={THREE.AdditiveBlending}
+          />
+        </mesh>
+      )}
+    </group>
+  );
+}
+
+export function QuestObjectiveBeacon({
+  heightOffset = 2.0,
+  color = '#F4D03F',
+}: {
+  heightOffset?: number;
+  color?: string;
+}) {
+  const diamondRef = useRef<THREE.Group>(null);
+  const pillarRef = useRef<THREE.Mesh>(null);
+
+  useFrame((state) => {
+    const t = state.clock.elapsedTime;
+    if (diamondRef.current) {
+      diamondRef.current.rotation.y = t * 2.2;
+      diamondRef.current.position.y = heightOffset + Math.sin(t * 3.2) * 0.12;
+    }
+    if (pillarRef.current) {
+      pillarRef.current.rotation.y = t * 0.5;
+      const pMat = pillarRef.current.material as THREE.MeshBasicMaterial;
+      pMat.opacity = 0.24 + Math.sin(t * 2.8) * 0.08;
+    }
+  });
+
+  return (
+    <group name="quest-objective-beacon">
+      {/* Vertical light pillar / beacon beam */}
+      <mesh ref={pillarRef} position={[0, 1.8, 0]}>
+        <cylinderGeometry args={[0.18, 0.42, 3.6, 16, 1, true]} />
+        <meshBasicMaterial
+          color={color}
+          transparent
+          opacity={0.28}
+          depthWrite={false}
+          side={THREE.DoubleSide}
+          blending={THREE.AdditiveBlending}
+        />
+      </mesh>
+
+      {/* Floating RPG waypoint diamond */}
+      <group ref={diamondRef} position={[0, heightOffset, 0]}>
+        <mesh scale={[0.26, 0.42, 0.26]}>
+          <octahedronGeometry args={[1, 0]} />
+          <meshBasicMaterial color={color} />
+        </mesh>
+        <mesh scale={[0.14, 0.22, 0.14]}>
+          <octahedronGeometry args={[1, 0]} />
+          <meshBasicMaterial color="#FFFFFF" blending={THREE.AdditiveBlending} />
+        </mesh>
+      </group>
+    </group>
+  );
+}
+
+export function InteractivePromptBadge({
+  label,
+  keyHint = 'E',
+  isQuest = false,
+  heightOffset = 1.35,
+}: {
+  label: string;
+  keyHint?: string;
+  isQuest?: boolean;
+  heightOffset?: number;
+}) {
+  return (
+    <Html
+      position={[0, heightOffset, 0]}
+      center
+      distanceFactor={9}
+      style={{ pointerEvents: 'none', userSelect: 'none' }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
+          padding: '3px 8px',
+          background: 'rgba(28, 36, 39, 0.94)',
+          border: isQuest ? '1.5px solid #F4D03F' : '1.5px solid #3CC4C0',
+          borderRadius: '3px',
+          boxShadow: isQuest
+            ? '0 2px 10px rgba(0,0,0,0.5), 0 0 12px rgba(244, 208, 63, 0.4)'
+            : '0 2px 8px rgba(0,0,0,0.4), 0 0 8px rgba(60, 196, 192, 0.35)',
+          whiteSpace: 'nowrap',
+          fontFamily: 'JetBrains Mono, monospace',
+          transform: 'translateY(-2px)',
+        }}
+      >
+        <span
+          style={{
+            background: isQuest ? '#F4D03F' : '#3CC4C0',
+            color: '#1C2427',
+            fontWeight: 800,
+            fontSize: '11px',
+            lineHeight: 1,
+            padding: '2px 5px',
+            borderRadius: '2px',
+          }}
+        >
+          {keyHint}
+        </span>
+        <span
+          style={{
+            color: isQuest ? '#FFF9E6' : '#E8EEF0',
+            fontSize: '12px',
+            fontWeight: 600,
+            lineHeight: 1.2,
+          }}
+        >
+          {label}
+        </span>
+      </div>
+    </Html>
+  );
+}
+
+function InteractableHighlightNode({
+  item,
+  playerPosRef,
+  isQuest,
+  isPromptActive,
+}: {
+  item: InteractablePlacement;
+  playerPosRef: React.MutableRefObject<[number, number, number]>;
+  isQuest: boolean;
+  isPromptActive: boolean;
+}) {
+  const rootRef = useRef<THREE.Group>(null);
+  const [showBadge, setShowBadge] = useState(false);
+  const colorSpec = INTERACTABLE_KIND_COLORS[item.kind] ?? { ring: '#5ED8CB', glow: '#76D7C4', text: '#E8F8F5' };
+  const primaryColor = isQuest ? '#F4D03F' : colorSpec.ring;
+  const distRef = useRef(999);
+
+  const badgeHeight =
+    item.kind === 'npc'
+      ? 2.1
+      : item.kind === 'puzzle' || item.kind === 'device'
+        ? 1.6
+        : 1.1;
+
+  const beaconHeight = item.kind === 'npc' ? 2.5 : item.kind === 'puzzle' ? 2.0 : 1.5;
+
+  useFrame(() => {
+    const px = playerPosRef.current[0];
+    const py = playerPosRef.current[1];
+    const pz = playerPosRef.current[2];
+    const dx = item.position[0] - px;
+    const dy = item.position[1] - py;
+    const dz = item.position[2] - pz;
+    const dSq = dx * dx + dy * dy + dz * dz;
+
+    const maxViewSq = isQuest ? 75 * 75 : 13.5 * 13.5;
+    const isVisible = dSq <= maxViewSq;
+    if (rootRef.current) {
+      rootRef.current.visible = isVisible;
+    }
+
+    const d = Math.sqrt(dSq);
+    distRef.current = d;
+
+    const near = d < 2.6 || isPromptActive;
+    if (near !== showBadge) {
+      setShowBadge(near);
+    }
+  });
+
+  return (
+    <group ref={rootRef} position={item.position} name={`highlight-${item.id}`}>
+      <GroundHalo
+        color={primaryColor}
+        isQuest={isQuest}
+        isFocused={showBadge}
+        distRef={distRef}
+      />
+
+      {isQuest && (
+        <QuestObjectiveBeacon
+          heightOffset={beaconHeight}
+          color="#F4D03F"
+        />
+      )}
+
+      {showBadge && (
+        <InteractivePromptBadge
+          label={item.label}
+          keyHint="E"
+          isQuest={isQuest}
+          heightOffset={badgeHeight}
+        />
+      )}
+    </group>
+  );
+}
+
+export interface InteractablesHighlightLayerProps {
+  interactables: InteractablePlacement[];
+  playerPosRef: React.MutableRefObject<[number, number, number]>;
+  collectedWorldItemIds: string[];
+  discoveredLoreNoteIds: string[];
+  activePromptTargetId: string | null;
+}
+
+export function InteractablesHighlightLayer({
+  interactables,
+  playerPosRef,
+  collectedWorldItemIds,
+  discoveredLoreNoteIds,
+  activePromptTargetId,
+}: InteractablesHighlightLayerProps) {
+  const questsState = useGameStore((s) => s.quests);
+
+  const questInfo = useMemo(
+    () => getActiveQuestTargetInfo(questsState, collectedWorldItemIds),
+    [questsState, collectedWorldItemIds],
+  );
+
+  const activeInteractables = useMemo(() => {
+    return interactables.filter((item) => {
+      if (collectedWorldItemIds.includes(item.id)) return false;
+      if (discoveredLoreNoteIds.includes(item.id)) return false;
+      return true;
+    });
+  }, [interactables, collectedWorldItemIds, discoveredLoreNoteIds]);
+
+  return (
+    <group name="interactables-highlight-layer">
+      {activeInteractables.map((item) => {
+        const isQuest = isInteractableQuestTarget(item, questInfo, collectedWorldItemIds);
+        const isPromptActive = activePromptTargetId === item.id;
+        return (
+          <InteractableHighlightNode
+            key={item.id}
+            item={item}
+            playerPosRef={playerPosRef}
+            isQuest={isQuest}
+            isPromptActive={isPromptActive}
+          />
+        );
+      })}
     </group>
   );
 }

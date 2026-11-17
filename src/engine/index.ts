@@ -61,6 +61,7 @@ export {
   CameraRig,
   CAMERA_CONSTANTS,
   easeOutCubic,
+  lerpAngle,
   computeCameraPose,
   lerpCameraPose,
   computeTargetViewOffset,

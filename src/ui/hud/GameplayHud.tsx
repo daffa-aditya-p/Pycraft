@@ -48,6 +48,7 @@ export const GameplayHud: React.FC<GameplayHudProps> = ({
   const layoutClass = useUIStore((s) => s.layoutClass);
   const inputMode = useUIStore((s) => s.inputMode);
   const setInGameOverlay = useUIStore((s) => s.setInGameOverlay);
+  const setJournalTab = useUIStore((s) => s.setJournalTab);
   const setEditorDockOpen = useUIStore((s) => s.setEditorDockOpen);
   const announce = useUIStore((s) => s.announce);
 
@@ -164,30 +165,75 @@ export const GameplayHud: React.FC<GameplayHudProps> = ({
               gap: '12px',
             }}
           >
-            {/* Top-Left Objective Tracker */}
-            <aside
-              aria-label={locale === 'id' ? 'Pelacak Tujuan' : 'Objective Tracker'}
+            {/* Top-Left Objective Tracker (Clickable to open Quests/Objectives) */}
+            <button
+              type="button"
+              data-testid="hud-objective-badge"
+              aria-label={
+                locale === 'id'
+                  ? 'Buka Jurnal Objektif (Tekan O atau J)'
+                  : 'Open Objectives Journal (Press O or J)'
+              }
+              onClick={() => {
+                setJournalTab('quests');
+                setInGameOverlay('journal');
+              }}
               className="surface-slate"
               style={{
                 pointerEvents: 'auto',
                 padding: isCompact ? '8px 10px' : '10px 14px',
                 maxWidth: isCompact ? '210px' : '320px',
+                textAlign: 'left',
+                cursor: 'pointer',
+                display: 'block',
+                background: 'var(--slate-base-96, #1C2427)',
+                border: '1px solid var(--slate-border, #33434A)',
+                borderRadius: 'var(--radius-2, 2px)',
+                transition: 'border-color 0.15s ease, background-color 0.15s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = '#F2B544';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = 'var(--slate-border, #33434A)';
               }}
             >
               <div
                 style={{
-                  fontSize: '0.75rem',
-                  fontWeight: 700,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                  color: '#3CC4C0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '8px',
                 }}
               >
-                {activeMissionId ?? (locale === 'id' ? 'Eksplorasi' : 'Exploration')} · {xp} XP
+                <div
+                  style={{
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    color: '#3CC4C0',
+                  }}
+                >
+                  {activeMissionId ?? (locale === 'id' ? 'Eksplorasi' : 'Exploration')} · {xp} XP
+                </div>
+                <span
+                  style={{
+                    fontSize: '0.6875rem',
+                    color: '#F2B544',
+                    fontWeight: 700,
+                    backgroundColor: 'rgba(242, 181, 68, 0.15)',
+                    padding: '1px 5px',
+                    borderRadius: '2px',
+                    letterSpacing: '0.03em',
+                  }}
+                >
+                  [O / J]
+                </span>
               </div>
               <div
                 style={{
-                  marginTop: '2px',
+                  marginTop: '3px',
                   fontSize: '0.875rem',
                   fontWeight: 700,
                   color: '#E8EEF0',
@@ -199,12 +245,21 @@ export const GameplayHud: React.FC<GameplayHudProps> = ({
                     ? 'Jelajahi pulau dan temui NEO.'
                     : 'Explore the island and meet NEO.')}
               </div>
+              <div
+                style={{
+                  marginTop: '4px',
+                  fontSize: '0.6875rem',
+                  color: '#8FA3A9',
+                }}
+              >
+                {locale === 'id' ? 'Klik untuk daftar objektif' : 'Click for objectives list'}
+              </div>
               {showFps && fps !== null && (
                 <div style={{ marginTop: '4px', fontSize: '0.75rem', color: '#8FA3A9' }}>
                   {Math.round(fps)} FPS · {runtimeStatus}
                 </div>
               )}
-            </aside>
+            </button>
 
             {/* Top-Right Controls */}
             <div
@@ -269,7 +324,10 @@ export const GameplayHud: React.FC<GameplayHudProps> = ({
                 data-testid="hud-journal-btn"
                 className="btn-slate touch-target-48"
                 aria-label={locale === 'id' ? 'Buka Jurnal' : 'Open Journal'}
-                onClick={() => setInGameOverlay('journal')}
+                onClick={() => {
+                  setJournalTab('quests');
+                  setInGameOverlay('journal');
+                }}
               >
                 <IconJournal size={18} />
                 {!isCompact && <span>{locale === 'id' ? 'Jurnal' : 'Journal'}</span>}

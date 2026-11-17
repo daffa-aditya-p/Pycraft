@@ -31,6 +31,12 @@ export function easeOutCubic(t: number): number {
   return 1 - Math.pow(1 - c, 3);
 }
 
+export function lerpAngle(a: number, b: number, t: number): number {
+  let diff = ((b - a + Math.PI) % (Math.PI * 2)) - Math.PI;
+  if (diff < -Math.PI) diff += Math.PI * 2;
+  return a + diff * t;
+}
+
 export interface CameraPoseInput {
   mode: CameraMode;
   target: [number, number, number];
@@ -165,21 +171,26 @@ export function CameraRig({
 }: CameraRigProps) {
   const { camera, size } = useThree();
 
+  const initialPlayerYaw = useGameStore.getState().world.playerYaw ?? 0.65;
+  const initialMode = useGameStore.getState().world.cameraMode ?? 'third_person';
+
   const stateRef = useRef({
-    tpYaw: 0.65,
+    tpYaw: initialPlayerYaw,
     tpPitch: 0.45,
     tpDistance: CAMERA_CONSTANTS.TP_DEFAULT_DIST as number,
-    isoStep: 0,
-    isoTargetStep: 0,
+    collisionDist: CAMERA_CONSTANTS.TP_DEFAULT_DIST as number,
+    targetPosSmoothed: null as [number, number, number] | null,
+    isoStep: Math.round((initialPlayerYaw - Math.PI * 0.25) / (Math.PI * 0.5)),
+    isoTargetStep: Math.round((initialPlayerYaw - Math.PI * 0.25) / (Math.PI * 0.5)),
     isoZoom: 1.0,
     titleAngle: 0.4,
-    mode: 'third_person' as CameraMode,
+    mode: initialMode as CameraMode,
     transitionActive: false,
     transitionElapsed: 0,
     fromPose: computeCameraPose({
-      mode: 'third_person',
+      mode: initialMode,
       target: [0, 2, 0],
-      tpYaw: 0.65,
+      tpYaw: initialPlayerYaw,
       tpPitch: 0.45,
       tpDistance: CAMERA_CONSTANTS.TP_DEFAULT_DIST,
       isoStep: 0,
@@ -190,9 +201,12 @@ export function CameraRig({
     startOffset: [0, 0] as [number, number],
     targetOffset: [0, 0] as [number, number],
     offsetElapsed: CAMERA_CONSTANTS.VIEW_OFFSET_MS / 1000,
-    // Puzzle zone override tracking
-    lastPuzzleZone: null as string | null,
-    playerOverrodeZoneMode: false,
+    // Quest active camera mode tracking
+    savedModeBeforeQuest: null as CameraMode | null,
+    wasWorkingOnQuest: false,
+    // Suggested perspective (smooth blend without taking control away)
+    suggestedYaw: null as number | null,
+    suggestedPitch: null as number | null,
     // Dialogue framing shot
     dialogueShot: null as {
       targetId: string;
@@ -206,17 +220,18 @@ export function CameraRig({
     cinematicWasActive: false,
   });
 
-  // Subscribe to input actions (V toggle, Z/C iso rotate), dialogue requests & cinematic shots
+  // Subscribe to input actions, mode changes, dialogue requests & cinematic shots
   useEffect(() => {
+    // Notify initial yaw on mount
+    onCameraYawChange?.(stateRef.current.tpYaw);
+
     const unsubInput = inputManager.onAction((action) => {
       const s = stateRef.current;
       const game = useGameStore.getState();
       if (action === 'camera_toggle') {
         const nextMode: CameraMode =
           game.world.cameraMode === 'third_person' ? 'isometric' : 'third_person';
-        if (game.activePuzzleZoneId) {
-          s.playerOverrodeZoneMode = true;
-        }
+        s.savedModeBeforeQuest = null;
         game.setCameraMode(nextMode);
       } else if (action === 'iso_rotate_left') {
         s.isoTargetStep -= 1;
@@ -228,17 +243,30 @@ export function CameraRig({
     const unsubCam = EventBus.on('camera.mode.changed', ({ mode }) => {
       const s = stateRef.current;
       if (s.mode === mode) return;
+
+      // Preserve angular orientation seamlessly across mode switch
+      if (mode === 'isometric') {
+        const matchingIsoStep = Math.round((s.tpYaw - Math.PI * 0.25) / (Math.PI * 0.5));
+        s.isoStep = matchingIsoStep;
+        s.isoTargetStep = matchingIsoStep;
+      } else {
+        s.tpYaw = Math.PI * 0.25 + s.isoStep * (Math.PI * 0.5);
+        onCameraYawChange?.(s.tpYaw);
+      }
+
+      const currentLookAt = s.targetPosSmoothed ?? [
+        playerPosRef.current[0],
+        playerPosRef.current[1] + 1.25,
+        playerPosRef.current[2],
+      ];
+
       s.fromPose = {
         position: [camera.position.x, camera.position.y, camera.position.z],
-        lookAt: [
-          playerPosRef.current[0],
-          playerPosRef.current[1] + 1.2,
-          playerPosRef.current[2],
-        ],
+        lookAt: [currentLookAt[0], currentLookAt[1], currentLookAt[2]],
         fov:
           camera instanceof THREE.PerspectiveCamera
             ? camera.fov
-            : CAMERA_CONSTANTS.TP_FOV,
+            : (mode === 'isometric' ? CAMERA_CONSTANTS.TP_FOV : CAMERA_CONSTANTS.ISO_FOV),
       };
       s.mode = mode;
       s.transitionActive = true;
@@ -261,6 +289,15 @@ export function CameraRig({
           s.cinematicWasActive = false;
           s.cinematicInitialized = false;
           s.cinematicShot = null;
+
+          // Preserve the orientation where the cinematic shot left off
+          const dx = camera.position.x - playerPosRef.current[0];
+          const dz = camera.position.z - playerPosRef.current[2];
+          if (Math.hypot(dx, dz) > 0.1) {
+            s.tpYaw = Math.atan2(dx, dz);
+            onCameraYawChange?.(s.tpYaw);
+          }
+
           s.fromPose = {
             position: [camera.position.x, camera.position.y, camera.position.z],
             lookAt: [
@@ -294,13 +331,29 @@ export function CameraRig({
       }
     });
 
+    const unsubRespawn = EventBus.on('world.player.respawned', (payload) => {
+      const s = stateRef.current;
+      s.targetPosSmoothed = [payload.position[0], payload.position[1] + 1.25, payload.position[2]];
+      s.collisionDist = CAMERA_CONSTANTS.TP_DEFAULT_DIST;
+    });
+
+    const unsubSuggest = EventBus.on('camera.perspective.suggest', (suggestion) => {
+      const s = stateRef.current;
+      if (s.mode === 'third_person') {
+        if (suggestion.yaw !== undefined) s.suggestedYaw = suggestion.yaw;
+        if (suggestion.pitch !== undefined) s.suggestedPitch = suggestion.pitch;
+      }
+    });
+
     return () => {
       unsubInput();
       unsubCam();
       unsubDialogue();
       unsubCinematic();
+      unsubRespawn();
+      unsubSuggest();
     };
-  }, [camera, inputManager, playerPosRef]);
+  }, [camera, inputManager, onCameraYawChange, playerPosRef]);
 
   useFrame((threeState, delta) => {
     const dt = Math.min(0.05, delta);
@@ -367,6 +420,14 @@ export function CameraRig({
       s.cinematicInitialized = false;
       s.cinematicShot = null;
       activeCinematicShot = null;
+
+      const dx = camera.position.x - playerPosRef.current[0];
+      const dz = camera.position.z - playerPosRef.current[2];
+      if (Math.hypot(dx, dz) > 0.1) {
+        s.tpYaw = Math.atan2(dx, dz);
+        onCameraYawChange?.(s.tpYaw);
+      }
+
       s.fromPose = {
         position: [camera.position.x, camera.position.y, camera.position.z],
         lookAt: [
@@ -403,22 +464,40 @@ export function CameraRig({
       return;
     }
 
-    // 2. Auto-advisory isometric camera on entering puzzle zones (respecting player override)
-    const activeZone = game.activePuzzleZoneId;
-    if (activeZone !== s.lastPuzzleZone) {
-      s.lastPuzzleZone = activeZone;
-      s.playerOverrodeZoneMode = false;
-      if (activeZone && settings.controls.autoIsoInPuzzle && game.world.cameraMode !== 'isometric') {
+    // 2. Quest active camera mode transition:
+    // Camera only changes position/mode:
+    //   (A) When pressing 'V' (manual player toggle)
+    //   (B) When actively working on a quest (code editor, learning intro, or BIT playback)
+    // Walking through world areas/islands NEVER changes the camera automatically!
+    const isWorkingOnQuest =
+      ui.inGameOverlay === 'editor' ||
+      ui.inGameOverlay === 'learning_intro' ||
+      game.isObservingPlayback;
+
+    if (isWorkingOnQuest && !s.wasWorkingOnQuest) {
+      s.wasWorkingOnQuest = true;
+      s.savedModeBeforeQuest = game.world.cameraMode;
+      if (game.world.cameraMode !== 'isometric') {
         game.setCameraMode('isometric');
-      } else if (!activeZone && settings.controls.autoIsoInPuzzle && game.world.cameraMode !== 'third_person') {
-        game.setCameraMode('third_person');
       }
+    } else if (!isWorkingOnQuest && s.wasWorkingOnQuest) {
+      s.wasWorkingOnQuest = false;
+      if (s.savedModeBeforeQuest && game.world.cameraMode !== s.savedModeBeforeQuest) {
+        game.setCameraMode(s.savedModeBeforeQuest);
+      }
+      s.savedModeBeforeQuest = null;
     }
 
     // 3. Apply orbit/zoom deltas from InputManager
     const sens = settings.controls.cameraSensitivity;
     const invertSign = settings.controls.invertY ? -1 : 1;
     const snap = inputManager.consumeCameraDeltas();
+
+    // If player manually moves the camera, dismiss any advisory suggested angle
+    if (snap.orbitDeltaX !== 0 || snap.orbitDeltaY !== 0) {
+      s.suggestedYaw = null;
+      s.suggestedPitch = null;
+    }
 
     if (s.mode === 'third_person') {
       s.tpYaw -= snap.orbitDeltaX * 0.006 * sens;
@@ -430,6 +509,21 @@ export function CameraRig({
         CAMERA_CONSTANTS.TP_MIN_DIST,
         Math.min(CAMERA_CONSTANTS.TP_MAX_DIST, s.tpDistance + snap.zoomDelta * 0.6),
       );
+
+      // Smoothly blend suggested perspective if present and no active player drag
+      if (s.suggestedYaw !== null) {
+        s.tpYaw = lerpAngle(s.tpYaw, s.suggestedYaw, Math.min(1, dt * 3.0));
+        if (Math.abs(((s.suggestedYaw - s.tpYaw + Math.PI) % (Math.PI * 2)) - Math.PI) < 0.01) {
+          s.suggestedYaw = null;
+        }
+      }
+      if (s.suggestedPitch !== null) {
+        s.tpPitch += (s.suggestedPitch - s.tpPitch) * Math.min(1, dt * 3.0);
+        if (Math.abs(s.suggestedPitch - s.tpPitch) < 0.01) {
+          s.suggestedPitch = null;
+        }
+      }
+
       onCameraYawChange?.(s.tpYaw);
     } else {
       s.isoZoom = Math.max(
@@ -449,25 +543,61 @@ export function CameraRig({
     }
 
     // 4. Determine camera focus target (BIT during playback, NPC during dialogue, or Player)
-    let targetPos: [number, number, number] = [
+    let rawTarget: [number, number, number] = [
       playerPosRef.current[0],
       playerPosRef.current[1] + 1.25,
       playerPosRef.current[2],
     ];
     if (game.isObservingPlayback) {
-      targetPos = [
+      rawTarget = [
         bitPosRef.current[0],
         bitPosRef.current[1] + 0.6,
         bitPosRef.current[2],
       ];
+    } else if (ui.inGameOverlay === 'editor') {
+      const dist = Math.hypot(
+        playerPosRef.current[0] - bitPosRef.current[0],
+        playerPosRef.current[2] - bitPosRef.current[2],
+      );
+      if (dist < 14) {
+        rawTarget = [
+          (playerPosRef.current[0] + bitPosRef.current[0]) * 0.5,
+          Math.max(playerPosRef.current[1], bitPosRef.current[1]) + 0.8,
+          (playerPosRef.current[2] + bitPosRef.current[2]) * 0.5,
+        ];
+      }
     } else if (s.dialogueShot && npcPositionsRef?.current[s.dialogueShot.targetId]) {
       const npcPos = npcPositionsRef.current[s.dialogueShot.targetId]!;
       if (s.dialogueShot.preset === 'overview') {
-        targetPos = [npcPos[0], npcPos[1] + 2.5, npcPos[2]];
+        rawTarget = [npcPos[0], npcPos[1] + 2.5, npcPos[2]];
       } else {
-        targetPos = [npcPos[0], npcPos[1] + 1.15, npcPos[2]];
+        rawTarget = [npcPos[0], npcPos[1] + 1.15, npcPos[2]];
       }
     }
+
+    // Smooth target follow & vertical stair dampening
+    if (!s.targetPosSmoothed) {
+      s.targetPosSmoothed = [...rawTarget];
+    } else {
+      const dx = rawTarget[0] - s.targetPosSmoothed[0];
+      const dy = rawTarget[1] - s.targetPosSmoothed[1];
+      const dz = rawTarget[2] - s.targetPosSmoothed[2];
+      const distSq = dx * dx + dy * dy + dz * dz;
+      if (distSq > 144) {
+        // Fast snap on teleports or respawns
+        s.targetPosSmoothed = [...rawTarget];
+      } else {
+        // Horizontal follow: responsive rate 16
+        const rateH = Math.min(1, dt * 16);
+        // Vertical follow: slightly dampened (rate 10) to absorb block-stair steps smoothly
+        const rateV = Math.min(1, dt * 10);
+        s.targetPosSmoothed[0] += dx * rateH;
+        s.targetPosSmoothed[1] += dy * rateV;
+        s.targetPosSmoothed[2] += dz * rateH;
+      }
+    }
+
+    const targetPos = s.targetPosSmoothed;
 
     const desiredPose = computeCameraPose({
       mode: s.mode,
@@ -479,7 +609,7 @@ export function CameraRig({
       isoZoom: s.isoZoom,
     });
 
-    // 5. Third-person terrain collision clamping via DDA voxel raycast
+    // 5. Third-person terrain collision clamping with smooth distance damping
     if (s.mode === 'third_person' && storageRef.current) {
       const dirX = desiredPose.position[0] - targetPos[0];
       const dirY = desiredPose.position[1] - targetPos[1];
@@ -492,19 +622,30 @@ export function CameraRig({
           [dirX, dirY, dirZ],
           maxLen,
         );
-        if (hit && hit.distance < maxLen) {
-          const safeDist = Math.max(1.1, hit.distance - 0.35);
-          const scale = safeDist / maxLen;
-          desiredPose.position = [
-            targetPos[0] + dirX * scale,
-            targetPos[1] + dirY * scale,
-            targetPos[2] + dirZ * scale,
-          ];
+
+        const targetDist = hit && hit.distance < maxLen
+          ? Math.max(1.15, hit.distance - 0.35)
+          : maxLen;
+
+        if (targetDist < s.collisionDist) {
+          // Obstacle encroaching: rapid retraction to prevent clipping into terrain
+          s.collisionDist += (targetDist - s.collisionDist) * Math.min(1, dt * 25);
+        } else {
+          // Obstacle cleared: smooth easing back out to avoid popping/jerking
+          s.collisionDist += (targetDist - s.collisionDist) * Math.min(1, dt * 6);
         }
+
+        s.collisionDist = Math.max(1.1, Math.min(maxLen, s.collisionDist));
+        const scale = s.collisionDist / maxLen;
+        desiredPose.position = [
+          targetPos[0] + dirX * scale,
+          targetPos[1] + dirY * scale,
+          targetPos[2] + dirZ * scale,
+        ];
       }
     }
 
-    // 6. Smooth 600 ms cubic ease-out mode transition
+    // 6. Smooth 600 ms cubic ease-out mode transition with dynamic anchor tracking
     let finalPose = desiredPose;
     if (s.transitionActive) {
       const transitionSec = settings.accessibility.reducedMotion
@@ -512,7 +653,19 @@ export function CameraRig({
         : CAMERA_CONSTANTS.TRANSITION_MS / 1000;
       s.transitionElapsed += dt;
       const t = Math.min(1, s.transitionElapsed / transitionSec);
-      finalPose = lerpCameraPose(s.fromPose, desiredPose, t);
+
+      // Dynamically track target so player movement during transition doesn't lag or snap
+      const fromPoseDynamic: CameraPoseOutput = {
+        position: [
+          desiredPose.lookAt[0] + (s.fromPose.position[0] - s.fromPose.lookAt[0]),
+          desiredPose.lookAt[1] + (s.fromPose.position[1] - s.fromPose.lookAt[1]),
+          desiredPose.lookAt[2] + (s.fromPose.position[2] - s.fromPose.lookAt[2]),
+        ],
+        lookAt: desiredPose.lookAt,
+        fov: s.fromPose.fov,
+      };
+
+      finalPose = lerpCameraPose(fromPoseDynamic, desiredPose, t);
       if (t >= 1) {
         s.transitionActive = false;
       }

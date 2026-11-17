@@ -257,7 +257,7 @@ export function createDefaultGlobalSettings(
       cameraSensitivity: 1.0,
       invertY: false,
       leftHandedTouch: false,
-      autoIsoInPuzzle: true,
+      autoIsoInPuzzle: false,
       pointerLock: false,
     },
     accessibility: {

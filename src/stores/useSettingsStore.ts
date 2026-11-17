@@ -62,7 +62,7 @@ export const DEFAULT_SETTINGS: SettingsDTO = {
   controls: {
     cameraSensitivity: 1.0,
     invertY: false,
-    autoIsoInPuzzle: true,
+    autoIsoInPuzzle: false,
     leftHandedTouch: false,
     pointerLock: false,
   },

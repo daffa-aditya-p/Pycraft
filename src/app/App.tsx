@@ -345,8 +345,7 @@ export function App(): React.JSX.Element {
       if (ui.screen !== 'in_game') return;
       switch (action) {
         case 'camera_toggle': {
-          const cur = useGameStore.getState().world.cameraMode;
-          useGameStore.getState().setCameraMode(cur === 'third_person' ? 'isometric' : 'third_person');
+          // Handled directly inside CameraRig to prevent duplicate toggles
           break;
         }
         case 'open_editor': {
@@ -359,7 +358,12 @@ export function App(): React.JSX.Element {
           break;
         }
         case 'open_journal': {
-          ui.setInGameOverlay(ui.inGameOverlay === 'journal' ? 'explore' : 'journal');
+          if (ui.inGameOverlay === 'journal') {
+            ui.setInGameOverlay('explore');
+          } else {
+            ui.setJournalTab('quests');
+            ui.setInGameOverlay('journal');
+          }
           break;
         }
         case 'open_map': {

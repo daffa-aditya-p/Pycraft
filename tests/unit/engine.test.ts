@@ -10,6 +10,7 @@ import {
   computeTargetViewOffset,
   easeOutCubic,
   generateAwakeningWorld,
+  lerpAngle,
   lerpCameraPose,
   meshPaddedChunk,
   raycastStorage,
@@ -285,6 +286,27 @@ describe('CameraRig Math & 7 Awakening Islands Generator', () => {
     expect(computeTargetViewOffset('D', true, 'peek', 1440, 900)).toEqual([288, 0]);
     expect(computeTargetViewOffset('P', true, 'half', 390, 844)).toEqual([0, 844 * 0.22]);
     expect(computeTargetViewOffset('D', false, 'peek', 1440, 900)).toEqual([0, 0]);
+  });
+
+  it('preserves camera orientation smoothly across mode switches and handles lerpAngle wrapping', () => {
+    const angleA = Math.PI - 0.1;
+    const angleB = -Math.PI + 0.1;
+    const blended = lerpAngle(angleA, angleB, 0.5);
+    expect(Math.abs(Math.abs(blended) - Math.PI)).toBeLessThan(0.15);
+
+    // For an angle aligned with an isometric diagonal (e.g. 135 deg = 3 * PI / 4)
+    const tpYawDiag = Math.PI * 0.75;
+    const isoStepDiag = Math.round((tpYawDiag - Math.PI * 0.25) / (Math.PI * 0.5));
+    const backToTpYaw = Math.PI * 0.25 + isoStepDiag * (Math.PI * 0.5);
+    const diffDiag = Math.abs(((backToTpYaw - tpYawDiag + Math.PI) % (Math.PI * 2)) - Math.PI);
+    expect(diffDiag).toBeLessThan(0.01);
+
+    // For any arbitrary angle, nearest isometric quadrant is at most 45 deg (PI / 4) away
+    const tpYawArbitrary = -Math.PI * 0.5;
+    const isoStepArb = Math.round((tpYawArbitrary - Math.PI * 0.25) / (Math.PI * 0.5));
+    const backFromArb = Math.PI * 0.25 + isoStepArb * (Math.PI * 0.5);
+    const diffArb = Math.abs(((backFromArb - tpYawArbitrary + Math.PI) % (Math.PI * 2)) - Math.PI);
+    expect(diffArb).toBeLessThanOrEqual(Math.PI * 0.25 + 0.001);
   });
 
   it('generates all 7 Awakening Islands and enforces 0.125 u detail-voxel snapping & emissive clamp', () => {

@@ -181,7 +181,7 @@ export class InputManager {
       } else if (code === 'Tab') {
         e.preventDefault();
         this.emitAction('open_editor');
-      } else if (code === 'KeyJ' || code === 'KeyI' || code === 'KeyK') {
+      } else if (code === 'KeyJ' || code === 'KeyI' || code === 'KeyK' || code === 'KeyO') {
         this.emitAction('open_journal');
       } else if (code === 'KeyM') {
         this.emitAction('open_map');
