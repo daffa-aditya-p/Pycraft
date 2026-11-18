@@ -67,7 +67,7 @@ export const CINEMATIC_ACTS: CinematicAct[] = [
       id: 'Jauh di atas samudra awan, kepulauan Aetheria melayang dalam keheningan abadi...',
       en: 'Far above the ocean of clouds, the floating archipelago of Aetheria drifts in eternal silence...',
     },
-    durationSec: 5.5,
+    durationSec: 7.5,
     cameraStart: {
       position: [-10, 48, 54],
       lookAt: [-42, 18, -8],
@@ -90,7 +90,7 @@ export const CINEMATIC_ACTS: CinematicAct[] = [
       id: 'Dahulu kala, Menara Inti memancarkan energi magis yang menggerakkan air terjun, jembatan energi, dan ekosistem Aetheria.',
       en: 'In ancient times, the Core Spire radiated magical energy that powered the waterfalls, energy bridges, and ecosystems of Aetheria.',
     },
-    durationSec: 7.0,
+    durationSec: 9.0,
     cameraStart: {
       position: [-28, 34, 18],
       lookAt: [-48, 24, -16],
@@ -113,7 +113,7 @@ export const CINEMATIC_ACTS: CinematicAct[] = [
       id: 'Ketika Menara Inti teredam, Zaman Kesunyian tiba. Jembatan runtuh, gerbang terkunci, dan mesin-mesin kuno tertidur lelap.',
       en: 'When the Core Spire dimmed, the Great Silence fell. Bridges crumbled, gates sealed shut, and ancient machines fell into deep slumber.',
     },
-    durationSec: 7.2,
+    durationSec: 9.0,
     cameraStart: {
       position: [14, 16, 24],
       lookAt: [-16, 5, 32],
@@ -136,7 +136,7 @@ export const CINEMATIC_ACTS: CinematicAct[] = [
       id: 'Kini, ramalan kuno telah terwujud. Seorang Arsitek telah tiba di Kuil Stasis—membawa kembali kekuatan bahasa logika Python!',
       en: 'Now, ancient prophecy is fulfilled. An Architect has arrived at the Stasis Shrine—bringing back the power of Python logic!',
     },
-    durationSec: 7.5,
+    durationSec: 9.0,
     cameraStart: {
       position: [-53, 7.5, 60],
       lookAt: [-48, 4.3, 52],
@@ -159,7 +159,7 @@ export const CINEMATIC_ACTS: CinematicAct[] = [
       id: 'Tuliskan baris kodemu. Bangunkan rekan automasimu BIT, dan pulihkan kejayaan Aetheria!',
       en: 'Write your lines of code. Awaken your automaton companion BIT, and restore the glory of Aetheria!',
     },
-    durationSec: 8.0,
+    durationSec: 8.5,
     cameraStart: {
       position: [-45.0, 4.8, 54.5],
       lookAt: [-47.0, 3.8, 50.8],
@@ -192,6 +192,51 @@ export const CinematicIntroOverlay: React.FC<CinematicIntroOverlayProps> = ({ on
   const actTimerRef = useRef<number | null>(null);
   const typewriterTimerRef = useRef<number | null>(null);
   const completedRef = useRef(false);
+  const audioCacheRef = useRef<Map<string, HTMLAudioElement>>(new Map());
+  const activeAudioRef = useRef<HTMLAudioElement | null>(null);
+  const speechTimeoutRef = useRef<number | null>(null);
+  const isSpeakingRef = useRef(false);
+
+  const updateSpeaking = useCallback((speaking: boolean) => {
+    isSpeakingRef.current = speaking;
+    setIsSpeaking(speaking);
+  }, []);
+
+  const stopNarration = useCallback(() => {
+    if (speechTimeoutRef.current !== null) {
+      window.clearTimeout(speechTimeoutRef.current);
+      speechTimeoutRef.current = null;
+    }
+    if (activeAudioRef.current) {
+      activeAudioRef.current.pause();
+      activeAudioRef.current.currentTime = 0;
+      activeAudioRef.current = null;
+    }
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+    updateSpeaking(false);
+  }, [updateSpeaking]);
+
+  // Preload pre-generated VO <audio> elements for all 5 acts on mount / locale change
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof Audio === 'undefined') return;
+    const cache = audioCacheRef.current;
+    for (const act of CINEMATIC_ACTS) {
+      const key = `${act.id}_${locale}`;
+      if (!cache.has(key)) {
+        const audio = new Audio(`/audio/vo/${act.id}_${locale}.mp3`);
+        audio.preload = 'auto';
+        audio.addEventListener('error', () => {
+          if (!audio.dataset.wavFallback) {
+            audio.dataset.wavFallback = '1';
+            audio.src = `/audio/vo/${act.id}_${locale}.wav`;
+          }
+        });
+        cache.set(key, audio);
+      }
+    }
+  }, [locale]);
 
   const currentAct = CINEMATIC_ACTS[actIndex] ?? CINEMATIC_ACTS[0]!;
 
@@ -208,46 +253,95 @@ export const CinematicIntroOverlay: React.FC<CinematicIntroOverlayProps> = ({ on
   const handleComplete = useCallback(() => {
     if (completedRef.current) return;
     completedRef.current = true;
-    if (typeof window !== 'undefined' && window.speechSynthesis) {
-      window.speechSynthesis.cancel();
-    }
+    stopNarration();
     EventBus.emit('cinematic.shot', null);
     onComplete();
-  }, [onComplete]);
+  }, [onComplete, stopNarration]);
 
-  // Speech synthesis narrator
-  const speakNarrator = useCallback(
-    (textToSpeak: string) => {
-      if (typeof window === 'undefined' || !window.speechSynthesis) return;
-      if (voiceMuted || audioSettings.muted) {
-        setIsSpeaking(false);
+  // Web Speech API fallback (80ms delay after cancel prevents Chrome synchronous drop)
+  const speakWithSpeechSynthesis = useCallback(
+    (textToSpeak: string, volume: number) => {
+      if (typeof window === 'undefined' || !window.speechSynthesis) {
+        updateSpeaking(false);
         return;
       }
       try {
         window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(textToSpeak);
-        utterance.lang = locale === 'id' ? 'id-ID' : 'en-US';
-        utterance.rate = 0.92;
-        utterance.pitch = 0.94;
-        utterance.volume = Math.min(1, Math.max(0, audioSettings.master * audioSettings.sfx * 1.2));
-
-        const voices = window.speechSynthesis.getVoices();
-        if (voices.length > 0) {
-          const prefix = locale === 'id' ? 'id' : 'en';
-          const match = voices.find((v) => v.lang.toLowerCase().startsWith(prefix));
-          if (match) utterance.voice = match;
+        if (speechTimeoutRef.current !== null) {
+          window.clearTimeout(speechTimeoutRef.current);
         }
+        speechTimeoutRef.current = window.setTimeout(() => {
+          speechTimeoutRef.current = null;
+          const utterance = new SpeechSynthesisUtterance(textToSpeak);
+          utterance.lang = locale === 'id' ? 'id-ID' : 'en-US';
+          utterance.rate = 0.92;
+          utterance.pitch = 0.94;
+          utterance.volume = volume;
 
-        utterance.onstart = () => setIsSpeaking(true);
-        utterance.onend = () => setIsSpeaking(false);
-        utterance.onerror = () => setIsSpeaking(false);
+          const voices = window.speechSynthesis.getVoices();
+          if (voices.length > 0) {
+            const prefix = locale === 'id' ? 'id' : 'en';
+            const match = voices.find((v) => v.lang.toLowerCase().startsWith(prefix));
+            if (match) utterance.voice = match;
+          }
 
-        window.speechSynthesis.speak(utterance);
+          utterance.onstart = () => updateSpeaking(true);
+          utterance.onend = () => updateSpeaking(false);
+          utterance.onerror = () => updateSpeaking(false);
+
+          window.speechSynthesis.speak(utterance);
+        }, 80);
       } catch {
-        setIsSpeaking(false);
+        updateSpeaking(false);
       }
     },
-    [audioSettings, locale, voiceMuted]
+    [locale, updateSpeaking]
+  );
+
+  // Zero-delay pre-generated VO narrator with SpeechSynthesis fallback
+  const speakNarrator = useCallback(
+    (textToSpeak: string, actId: string) => {
+      stopNarration();
+      if (voiceMuted || audioSettings.muted) {
+        return;
+      }
+      const volume = Math.min(1, Math.max(0, audioSettings.master * audioSettings.sfx * 1.2));
+      const key = `${actId}_${locale}`;
+      const audio = audioCacheRef.current.get(key);
+
+      if (audio) {
+        activeAudioRef.current = audio;
+        audio.currentTime = 0;
+        audio.volume = volume;
+        audio.onplay = () => updateSpeaking(true);
+        audio.onended = () => {
+          if (activeAudioRef.current === audio) {
+            activeAudioRef.current = null;
+          }
+          updateSpeaking(false);
+        };
+        audio.onerror = () => {
+          if (activeAudioRef.current === audio) {
+            activeAudioRef.current = null;
+            speakWithSpeechSynthesis(textToSpeak, volume);
+          }
+        };
+
+        const playPromise = audio.play();
+        if (playPromise && typeof playPromise.catch === 'function') {
+          playPromise.catch(() => {
+            if (activeAudioRef.current === audio) {
+              activeAudioRef.current = null;
+            }
+            speakWithSpeechSynthesis(textToSpeak, volume);
+          });
+        }
+        return;
+      }
+
+      speakWithSpeechSynthesis(textToSpeak, volume);
+    },
+    [audioSettings, locale, speakWithSpeechSynthesis, stopNarration, updateSpeaking, voiceMuted]
   );
 
   // Transition to a specific act
@@ -287,8 +381,8 @@ export const CinematicIntroOverlay: React.FC<CinematicIntroOverlayProps> = ({ on
       window.clearInterval(typewriterTimerRef.current);
     }
 
-    // Start speech synthesis with personalized text
-    speakNarrator(personalizedText);
+    // Start VO narration with personalized text
+    speakNarrator(personalizedText, currentAct.id);
 
     typewriterTimerRef.current = window.setInterval(() => {
       charIdx += 2;
@@ -306,7 +400,27 @@ export const CinematicIntroOverlay: React.FC<CinematicIntroOverlayProps> = ({ on
         window.clearInterval(typewriterTimerRef.current);
       }
     };
-  }, [actIndex, personalizedText, speakNarrator]);
+  }, [actIndex, currentAct.id, personalizedText, speakNarrator]);
+
+  // Pause/resume active narration when isPaused toggles
+  useEffect(() => {
+    const activeAudio = activeAudioRef.current;
+    if (isPaused) {
+      if (activeAudio && !activeAudio.paused) {
+        activeAudio.pause();
+      }
+      if (typeof window !== 'undefined' && window.speechSynthesis?.speaking) {
+        window.speechSynthesis.pause();
+      }
+    } else if (!voiceMuted && !audioSettings.muted) {
+      if (activeAudio && activeAudio.paused && activeAudio.currentTime > 0 && !activeAudio.ended) {
+        void activeAudio.play().catch(() => {});
+      }
+      if (typeof window !== 'undefined' && window.speechSynthesis?.paused) {
+        window.speechSynthesis.resume();
+      }
+    }
+  }, [audioSettings.muted, isPaused, voiceMuted]);
 
   // Act progress timer & continuous camera interpolation
   useEffect(() => {
@@ -328,7 +442,8 @@ export const CinematicIntroOverlay: React.FC<CinematicIntroOverlayProps> = ({ on
       );
       EventBus.emit('cinematic.shot', interpolatedShot);
 
-      if (elapsed >= durationMs) {
+      // Delay auto-advance up to +2500ms if voice-over is still speaking
+      if (elapsed >= durationMs && (!isSpeakingRef.current || elapsed >= durationMs + 2500)) {
         if (actTimerRef.current !== null) {
           window.clearInterval(actTimerRef.current);
           actTimerRef.current = null;
@@ -351,12 +466,10 @@ export const CinematicIntroOverlay: React.FC<CinematicIntroOverlayProps> = ({ on
     AudioManager.playCinematicDrone(0);
 
     return () => {
-      if (typeof window !== 'undefined' && window.speechSynthesis) {
-        window.speechSynthesis.cancel();
-      }
+      stopNarration();
       EventBus.emit('cinematic.shot', null);
     };
-  }, []);
+  }, [stopNarration]);
 
   // Keyboard controls: Space/Esc to skip, Arrows to navigate
   useEffect(() => {
@@ -506,11 +619,10 @@ export const CinematicIntroOverlay: React.FC<CinematicIntroOverlayProps> = ({ on
             onClick={() => {
               const nextMute = !voiceMuted;
               setVoiceMuted(nextMute);
-              if (nextMute && typeof window !== 'undefined' && window.speechSynthesis) {
-                window.speechSynthesis.cancel();
-                setIsSpeaking(false);
-              } else if (!nextMute) {
-                speakNarrator(personalizedText);
+              if (nextMute) {
+                stopNarration();
+              } else if (!isPaused) {
+                speakNarrator(personalizedText, currentAct.id);
               }
             }}
             title={voiceMuted ? 'Nyalakan Suara Narator' : 'Matikan Suara Narator'}
