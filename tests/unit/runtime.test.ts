@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   PROTOCOL_VERSION,
   RuntimeClient,
+  adaptVisiblePredicatesForInput,
   isMainToWorkerMessage,
   isRunEvent,
   isRunEventBatch,
@@ -12,7 +13,8 @@ import {
   type WorkerToMainMessage,
 } from '@/runtime/index';
 import { ActionPlayer, TimelineIndex } from '@/playback/index';
-import { WorldSim } from '@/sim/index';
+import { WorldSim, evaluateScenarioPredicates } from '@/sim/index';
+import { getStepById } from '@/content';
 import type { WorldSimInit } from '@/sim/types';
 
 function makeBasicInit(overrides: Partial<WorldSimInit> = {}): WorldSimInit {
@@ -388,5 +390,38 @@ describe('RuntimeClient lifecycle, input fallback, stop & heap recycle', () => {
     expect(recycleReasons).toContain('stopped');
 
     client.dispose();
+  });
+
+  it('adapts m1_s5 visible scenario predicates to accept custom player input() names while hidden scenario stays strict', () => {
+    const m1s5 = getStepById('m1_s5')!;
+    const visibleScenario = m1s5.scenarios[0]!; // Arsitek Rara
+    const hiddenScenario = m1s5.scenarios[1]!; // Arsitek Budi
+    const sim = new WorldSim(visibleScenario.initialState);
+
+    const adaptedPreds = adaptVisiblePredicatesForInput(
+      visibleScenario.predicates,
+      visibleScenario.scriptedInputs,
+      ['Heri']
+    );
+    const visiblePass = evaluateScenarioPredicates(sim, ['Selamat datang, Heri'], adaptedPreds, []);
+    expect(visiblePass.passed).toBe(true);
+
+    // If a hardcoded print('Selamat datang, Heri') ignores input(), hidden scenario fails expecting Budi Santoso
+    const hiddenHardcodedFail = evaluateScenarioPredicates(
+      sim,
+      ['Selamat datang, Heri'],
+      hiddenScenario.predicates,
+      []
+    );
+    expect(hiddenHardcodedFail.passed).toBe(false);
+
+    // Valid input() code echoes the hidden scenario input and passes
+    const hiddenDynamicPass = evaluateScenarioPredicates(
+      sim,
+      ['Selamat datang, Budi Santoso'],
+      hiddenScenario.predicates,
+      []
+    );
+    expect(hiddenDynamicPass.passed).toBe(true);
   });
 });

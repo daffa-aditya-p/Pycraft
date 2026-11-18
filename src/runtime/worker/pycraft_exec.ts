@@ -5,9 +5,58 @@ import {
 } from '../../sim/index.js';
 import type {
   CommandResult,
+  ScenarioPredicate,
   SimCommandKind,
   WorldSimInit,
 } from '../../sim/types.js';
+
+/**
+ * Adapts visible scenario predicates so user-entered `input()` answers (e.g. "Heri")
+ * replace placeholder `scriptedInputs` strings ("Rara") while hidden scenarios keep strict checks.
+ */
+export function adaptVisiblePredicatesForInput(
+  predicates: ScenarioPredicate[],
+  scriptedInputs?: string[],
+  inputAnswers?: string[],
+): ScenarioPredicate[] {
+  if (!scriptedInputs || scriptedInputs.length === 0 || !inputAnswers || inputAnswers.length === 0) {
+    return predicates;
+  }
+  const replacements: Array<[string, string]> = [];
+  for (let i = 0; i < scriptedInputs.length; i++) {
+    const scriptedVal = scriptedInputs[i];
+    const userVal = inputAnswers[i];
+    if (
+      scriptedVal &&
+      typeof userVal === 'string' &&
+      userVal.length > 0 &&
+      userVal !== scriptedVal
+    ) {
+      replacements.push([scriptedVal, userVal]);
+    }
+  }
+  if (replacements.length === 0) return predicates;
+
+  const replaceAllPairs = (str: string): string => {
+    let out = str;
+    for (const [from, to] of replacements) {
+      out = out.split(from).join(to);
+    }
+    return out;
+  };
+  return predicates.map((pred) => {
+    if (pred.type === 'stdout_contains') {
+      return { ...pred, text: replaceAllPairs(pred.text) };
+    }
+    if (pred.type === 'stdout_equals_lines') {
+      return { ...pred, lines: pred.lines.map(replaceAllPairs) };
+    }
+    if (pred.type === 'stdout_tokens_in_order') {
+      return { ...pred, tokens: pred.tokens.map(replaceAllPairs) };
+    }
+    return pred;
+  });
+}
 import {
   DEFAULT_RUNTIME_LIMITS,
   type ASTValidationReport,
@@ -1713,48 +1762,13 @@ export class PycraftExecutor {
       stdoutLines.pop();
     }
 
-    let predicatesToEvaluate = opts.scenario.predicates;
-    if (
-      opts.visible &&
-      opts.scenario.scriptedInputs &&
-      opts.scenario.scriptedInputs.length > 0 &&
-      opts.inputAnswers.length > 0
-    ) {
-      const replacements: Array<[string, string]> = [];
-      for (let i = 0; i < opts.scenario.scriptedInputs.length; i++) {
-        const scriptedVal = opts.scenario.scriptedInputs[i];
-        const userVal = opts.inputAnswers[i];
-        if (
-          scriptedVal &&
-          typeof userVal === 'string' &&
-          userVal.length > 0 &&
-          userVal !== scriptedVal
-        ) {
-          replacements.push([scriptedVal, userVal]);
-        }
-      }
-      if (replacements.length > 0) {
-        const replaceAllPairs = (str: string): string => {
-          let out = str;
-          for (const [from, to] of replacements) {
-            out = out.split(from).join(to);
-          }
-          return out;
-        };
-        predicatesToEvaluate = opts.scenario.predicates.map((pred) => {
-          if (pred.type === 'stdout_contains') {
-            return { ...pred, text: replaceAllPairs(pred.text) };
-          }
-          if (pred.type === 'stdout_equals_lines') {
-            return { ...pred, lines: pred.lines.map(replaceAllPairs) };
-          }
-          if (pred.type === 'stdout_tokens_in_order') {
-            return { ...pred, tokens: pred.tokens.map(replaceAllPairs) };
-          }
-          return pred;
-        });
-      }
-    }
+    const predicatesToEvaluate = opts.visible
+      ? adaptVisiblePredicatesForInput(
+          opts.scenario.predicates,
+          opts.scenario.scriptedInputs,
+          opts.inputAnswers,
+        )
+      : opts.scenario.predicates;
 
     const evalRes = evaluateScenarioPredicates(
       sim,

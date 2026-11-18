@@ -366,4 +366,47 @@ describe('Cinematic Intro Camera Math & Choreography', () => {
       expect(act.text.en.length).toBeGreaterThan(15);
     }
   });
+
+  it('keeps all 7 Awakening island spawn anchors, interactables, and bridge landings unobstructed with headroom', () => {
+    const world = generateAwakeningWorld();
+    const isSolid = (v: number): boolean => v !== VoxelId.AIR && v !== VoxelId.CLOUD_WHITE;
+
+    for (const anchor of world.anchors) {
+      const x = Math.round(anchor.position[0]);
+      const y = Math.floor(anchor.position[1]);
+      const z = Math.round(anchor.position[2]);
+      const groundBelow =
+        isSolid(world.storage.getVoxel(x, y - 1, z)) || isSolid(world.storage.getVoxel(x, y - 2, z));
+      expect(groundBelow).toBe(true);
+      expect(world.storage.getVoxel(x, y, z)).toBe(VoxelId.AIR);
+      expect(world.storage.getVoxel(x, y + 1, z)).toBe(VoxelId.AIR);
+    }
+
+    for (const item of world.interactables) {
+      const x = Math.round(item.position[0]);
+      const y = Math.floor(item.position[1]);
+      const z = Math.round(item.position[2]);
+      // Ensure ground exists below (at y-1 or y-2) and overhead headroom is clear (y+1, y+2)
+      const groundBelow =
+        isSolid(world.storage.getVoxel(x, y - 1, z)) || isSolid(world.storage.getVoxel(x, y - 2, z));
+      expect(groundBelow).toBe(true);
+      expect(world.storage.getVoxel(x, y + 1, z)).toBe(VoxelId.AIR);
+      expect(world.storage.getVoxel(x, y + 2, z)).toBe(VoxelId.AIR);
+    }
+
+    // Verify bridge landing pads between E->F [-6, 17, -44] and F->G [-36, 23, -25] have clear headroom (no overhang walls)
+    for (const [bx, by, bz] of [
+      [-6, 17, -44],
+      [-36, 23, -25],
+      [-27, 4, 37],
+      [5, 4, 21],
+      [37, 7, 4],
+      [26, 11, -22],
+    ] as const) {
+      expect(isSolid(world.storage.getVoxel(bx, by, bz))).toBe(true);
+      expect(world.storage.getVoxel(bx, by + 1, bz)).toBe(VoxelId.AIR);
+      expect(world.storage.getVoxel(bx, by + 2, bz)).toBe(VoxelId.AIR);
+      expect(world.storage.getVoxel(bx, by + 3, bz)).toBe(VoxelId.AIR);
+    }
+  });
 });

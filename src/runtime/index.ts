@@ -2,6 +2,7 @@ export * from './protocol.js';
 export * from './client/RuntimeClient.js';
 export {
   PycraftExecutor,
+  adaptVisiblePredicatesForInput,
   loadPyodideInstance,
   isKnownCapability,
   type PycraftExecutorHost,

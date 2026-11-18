@@ -31,6 +31,7 @@ import {
 } from '@/editor/autocomplete';
 import { EventBus, useEditorStore, useGameStore, useSettingsStore, useUIStore } from '@/stores';
 import { AWAKENING_QUESTS } from '@/content/awakening/quests';
+import { getStepById } from '@/content';
 
 // Ensure React 19 act() works cleanly in jsdom
 (globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -159,6 +160,13 @@ describe('CodeMirror Guided Blank Widgets & Autocomplete', () => {
     const spans = pastedState.field(guidedBlanksField).spans;
     expect(spans[0]!.from).toBe(blank.from);
     expect(spans[0]!.to).toBe(blank.from + 'Halo Aetheria'.length);
+
+    // Selecting all text (Ctrl+A) and deleting everything (Backspace) never throws RangeError
+    const clearedState = state.update({
+      changes: { from: 0, to: state.doc.length, insert: '' },
+    }).state;
+    expect(clearedState.doc.toString()).toBe('');
+    expect(clearedState.field(guidedBlanksField).spans[0]!.to).toBe(0);
   });
 
   it('scopes autocomplete and mobile snippet chips to active step capabilities', () => {
@@ -633,5 +641,85 @@ describe('JournalModal & Quest Objectives System (Acts 1-4)', () => {
     expect(el.textContent).toContain('Membaca Masukan dengan input()');
     expect(el.textContent).toContain('Menampilkan Output dengan print()');
     expect(el.textContent).not.toContain('F6 — F6');
+  });
+
+  it('syncs crystal counter (0/3 -> 2/3) live in GameplayHud & avoids (0/3)(1/3) duplication in JournalModal', () => {
+    useSettingsStore.setState({ locale: 'id' });
+    useUIStore.setState({ screen: 'in_game', inGameOverlay: 'explore' });
+    useGameStore.setState((s) => ({
+      ...s,
+      quests: {
+        ...s.quests,
+        activeMissionId: 'interlude_find_bit',
+        states: { prologue: 'completed', m1_hello_architect: 'completed', interlude_find_bit: 'active' },
+        completedStepIds: ['int_1_go'],
+      },
+      world: {
+        ...s.world,
+        collectedWorldItemIds: ['awakening_crystal_1', 'awakening_crystal_2'],
+      },
+      inventory: { items: { blue_crystal: 2 } },
+      objectiveLabel: 'Kumpulkan 3 Kristal Biru (0/3)',
+      objectiveHint: 'Dekati kristal dan tekan [E].',
+    }));
+
+    const hudEl = mount(React.createElement(GameplayHud, {}));
+    const badge = hudEl.querySelector('[data-testid="hud-objective-badge"]');
+    expect(badge?.textContent).toContain('Selingan: Mencari BIT');
+    expect(badge?.textContent).toContain('Kumpulkan 3 Kristal Biru (2/3)');
+    expect(badge?.textContent).not.toContain('(0/3)');
+
+    // Also inspect JournalModal without (0/3) (2/3) double counter
+    act(() => {
+      useUIStore.setState({ inGameOverlay: 'journal', journalTab: 'quests' });
+    });
+    const journalEl = mount(React.createElement(JournalModal, {}));
+    expect(journalEl.textContent).toContain('Kumpulkan 3 Kristal Biru (2/3)');
+    expect(journalEl.textContent).not.toContain('(0/3) (2/3)');
+    expect(journalEl.textContent).not.toContain('(0/3)(2/3)');
+  });
+
+  it('shows post-game completion card in JournalModal when all Awakening quests are done & renders in-editor lesson guide', () => {
+    useSettingsStore.setState({ locale: 'id' });
+    const allCompleted = Object.fromEntries(AWAKENING_QUESTS.map((q) => [q.id, 'completed' as const]));
+    useUIStore.setState({ screen: 'in_game', inGameOverlay: 'journal', journalTab: 'quests' });
+    useGameStore.setState((s) => ({
+      ...s,
+      quests: { ...s.quests, states: allCompleted, activeMissionId: null, activeStepId: null },
+    }));
+
+    const journalEl = mount(React.createElement(JournalModal, {}));
+    expect(journalEl.textContent).toContain('Semua Misi Kebangkitan Selesai!');
+
+    // EditorWorkspace lessonSlides toggle explains logical operators (and, or, not) for m3_s5
+    const m3s5 = getStepById('m3_s5')!;
+    useUIStore.setState({
+      screen: 'in_game',
+      inGameOverlay: 'editor',
+      editorDockOpen: true,
+      editorAutoCollapsedForRestoration: false,
+    });
+    useEditorStore.getState().loadStepEditor(m3s5.stepId, m3s5.starters.guided, 'guided');
+    const editorEl = mount(
+      React.createElement(EditorWorkspace, {
+        stepTitle: m3s5.title.id,
+        stepGoal: m3s5.goal.id,
+        lessonSlides: m3s5.lessonSlides,
+        onRun: () => undefined,
+        onStop: () => undefined,
+        onResetCode: () => undefined,
+        onRequestHint: () => undefined,
+        onChangeTier: () => undefined,
+      })
+    );
+    const guideBtn = Array.from(editorEl.querySelectorAll('button')).find((b) =>
+      b.textContent?.includes('Materi')
+    );
+    expect(guideBtn).toBeDefined();
+    act(() => {
+      guideBtn!.click();
+    });
+    expect(editorEl.textContent).toContain('and');
+    expect(editorEl.textContent).toContain('or');
   });
 });
