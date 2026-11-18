@@ -114,17 +114,19 @@ export class CuratedMentorProvider implements MentorProvider {
       };
 
       const resolvedBody = isId
-        ? !isMessageSlug
-          ? failure.message
-          : idSlugMap[msgKey] ??
-            idSlugMap[failure.message] ??
-            'Periksa kembali struktur kodemu agar sesuai aturan tantangan.'
+        ? isSlugKey
+          ? !isMessageSlug && failure.message.trim().length > 0
+            ? failure.message
+            : idSlugMap[msgKey] ??
+              idSlugMap[failure.message] ??
+              'Periksa kembali struktur kodemu agar sesuai aturan tantangan.'
+          : msgKey
         : isSlugKey || isMessageSlug
           ? enSlugMap[msgKey] ??
             enSlugMap[failure.message] ??
-            (isMessageSlug
-              ? 'Check your code structure to match the challenge rules.'
-              : failure.message)
+            (!isMessageSlug && failure.message.trim().length > 0
+              ? failure.message
+              : 'Check your code structure to match the challenge rules.')
           : failure.message;
 
       return {

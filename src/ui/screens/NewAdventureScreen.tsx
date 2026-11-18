@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   RANK_THRESHOLDS,
   useGameStore,
@@ -59,10 +59,17 @@ export const NewAdventureScreen: React.FC<NewAdventureScreenProps> = ({
     (s) => s.slotId === selectedSlot && s.occupied
   );
 
+  const didMountPreviewRef = useRef(false);
+  useEffect(() => {
+    if (!didMountPreviewRef.current) {
+      didMountPreviewRef.current = true;
+      return;
+    }
+    onPreviewAppearance?.(appearance);
+  }, [appearance, onPreviewAppearance]);
+
   const updateAppearance = (patch: Partial<ArchitectAppearance>) => {
-    const next = { ...appearance, ...patch };
-    setAppearance(next);
-    onPreviewAppearance?.(next);
+    setAppearance((prev) => ({ ...prev, ...patch }));
   };
 
   const commitStart = async () => {

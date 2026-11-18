@@ -957,6 +957,38 @@ describe('CuratedMentorProvider', () => {
       simSummary: { robotPos: [0, 0], actionsExecuted: 0, warningCodes: [] },
     });
     expect(enResp.body).toContain('too many print() calls');
+
+    const slugFallbackId = await provider.explainError({
+      missionId: 'm1_hello_architect',
+      stepId: 'm1_bonus',
+      locale: 'id',
+      assistanceTier: 'mastery',
+      attemptNumber: 1,
+      playerCode: 'print("a")\nprint("b")',
+      targetKCs: ['F5'],
+      astReport: {
+        ok: false,
+        comments: [],
+        mixedTabsSpaces: false,
+        constructCounts: {},
+        statementLines: 2,
+        printCalls: 2,
+        inputCalls: 0,
+        hasInputInLoop: false,
+        definedFunctions: [],
+        traps: [],
+        ruleFailures: [
+          {
+            rule: 'maxPrintCalls',
+            messageId: 'too_many_prints',
+            message: 'too_many_prints',
+          },
+        ],
+      },
+      simSummary: { robotPos: [0, 0], actionsExecuted: 0, warningCodes: [] },
+    });
+    expect(slugFallbackId.body).not.toBe('too_many_prints');
+    expect(slugFallbackId.body).toContain('print()');
   });
 });
 

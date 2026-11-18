@@ -15,6 +15,8 @@ import { GameplayHud } from '@/ui/hud/GameplayHud';
 import { JournalModal } from '@/ui/panels/JournalModal';
 import { TouchControls } from '@/ui/hud/TouchControls';
 import { EditorWorkspace } from '@/ui/panels/EditorWorkspace';
+import { NewAdventureScreen } from '@/ui/screens/NewAdventureScreen';
+import { MissionCompleteModal } from '@/ui/screens/MissionCompleteModal';
 import { PortraitOrientationGuard } from '@/ui/components/PortraitOrientationGuard';
 import { InputManager } from '@/engine/input/InputManager';
 import {
@@ -122,7 +124,7 @@ describe('CodeMirror Guided Blank Widgets & Autocomplete', () => {
     expect(parsed.blanks[2]).toMatchObject({ index: 2, line: 3, placeholder: '___' });
   });
 
-  it('protects boilerplate while allowing typing and OS paste inside Guided blanks', () => {
+  it('tracks Guided blanks while allowing free editing on Line 1 and outside blanks without lockout', () => {
     const template = 'print("___")';
     const parsed = parseBlankTemplate(template);
 
@@ -137,11 +139,14 @@ describe('CodeMirror Guided Blank Widgets & Autocomplete', () => {
       }),
     }).state;
 
-    // Attempt to delete boilerplate character 'p' at index 0..1 -> blocked
-    const blockedState = state.update({
-      changes: { from: 0, to: 1, insert: '' },
+    // Editing on Line 1 outside blanks (e.g. prepending a comment) is allowed and shifts blank spans cleanly
+    const editedOutside = state.update({
+      changes: { from: 0, to: 0, insert: '# header\n' },
     }).state;
-    expect(blockedState.doc.toString()).toBe('print("___")');
+    expect(editedOutside.doc.toString()).toBe('# header\nprint("___")');
+    const shiftedSpans = editedOutside.field(guidedBlanksField).spans;
+    expect(shiftedSpans[0]!.from).toBe(parsed.blanks[0]!.from + '# header\n'.length);
+    expect(shiftedSpans[0]!.to).toBe(parsed.blanks[0]!.to + '# header\n'.length);
 
     // Paste/replace inside blank span 7..10 -> allowed
     const blank = parsed.blanks[0]!;
@@ -576,5 +581,57 @@ describe('JournalModal & Quest Objectives System (Acts 1-4)', () => {
     expect(badge).not.toBeNull();
     expect(badge?.textContent).toContain('Hidupkan NEO di alas batu');
     expect(badge?.textContent).toContain('Dekati alas batu silinder tempat kapsul stasis NEO berada');
+  });
+
+  it('renders live ArchitectAvatarPreview in NewAdventureScreen with 10 hair and 10 scarf colors', () => {
+    useSettingsStore.setState({ locale: 'id' });
+    useUIStore.setState({ screen: 'new_adventure', slotSummaries: [] });
+
+    const el = mount(React.createElement(NewAdventureScreen, {}));
+    const preview = el.querySelector('[data-testid="architect-avatar-preview"]');
+    expect(preview).not.toBeNull();
+
+    // Expanded palette options exist and update preview dynamically when clicked
+    const crimsonHairBtn = el.querySelector('button[aria-label="Merah Crimson"]') as HTMLButtonElement | null;
+    const purpleScarfBtn = el.querySelector('button[aria-label="Ungu Royal"]') as HTMLButtonElement | null;
+    const snowScarfBtn = el.querySelector('button[aria-label="Putih Salju"]') as HTMLButtonElement | null;
+    const emeraldHairBtn = el.querySelector('button[aria-label="Hijau Zamrud"]') as HTMLButtonElement | null;
+    expect(crimsonHairBtn).not.toBeNull();
+    expect(purpleScarfBtn).not.toBeNull();
+    expect(snowScarfBtn).not.toBeNull();
+    expect(emeraldHairBtn).not.toBeNull();
+
+    act(() => {
+      crimsonHairBtn!.click();
+      purpleScarfBtn!.click();
+    });
+
+    expect(preview?.textContent).toContain('Merah Crimson');
+    expect(preview?.textContent).toContain('Ungu Royal');
+  });
+
+  it('resolves human-readable KC titles via getKC inside MissionCompleteModal instead of F6 — F6', () => {
+    useSettingsStore.setState({ locale: 'id' });
+
+    const el = mount(
+      React.createElement(MissionCompleteModal, {
+        open: true,
+        missionTitle: 'Misi 1: Halo Arsitek',
+        xpGained: 35,
+        conceptsPracticed: [
+          { kcId: 'F6', title: 'F6', previousScore: 0, newScore: 10 },
+          { kcId: 'V1', title: 'V1', previousScore: 0, newScore: 10 },
+          { kcId: 'F2', title: 'F2', previousScore: 20, newScore: 30 },
+        ],
+        rewardsUnlocked: [],
+        playerCodeSnippet: 'nama = input("siapa namamu?")\nprint("Selamat datang,", nama)',
+        neoLine: 'Kerja bagus, Arsitek!',
+        onContinue: () => undefined,
+      })
+    );
+
+    expect(el.textContent).toContain('Membaca Masukan dengan input()');
+    expect(el.textContent).toContain('Menampilkan Output dengan print()');
+    expect(el.textContent).not.toContain('F6 — F6');
   });
 });
