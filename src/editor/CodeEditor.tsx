@@ -386,9 +386,14 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     const current = view.state.doc.toString();
     if (current !== value) {
       const isGuided = tier === 'guided';
-      const parsed = isGuided ? parseBlankTemplate(guidedTemplate ?? value) : null;
+      const targetText = value.length > 0 ? value : (guidedTemplate ?? '');
+      const parsed = isGuided ? parseBlankTemplate(targetText) : null;
+      const firstBlank = parsed?.blanks[0];
       view.dispatch({
         changes: { from: 0, to: current.length, insert: value },
+        ...(isGuided && firstBlank && firstBlank.to <= value.length
+          ? { selection: { anchor: firstBlank.from, head: firstBlank.to } }
+          : {}),
         effects: setGuidedBlanksEffect.of({
           enabled: Boolean(isGuided && parsed && parsed.blanks.length > 0),
           spans:
@@ -408,8 +413,13 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     if (!view) return;
     const isGuided = tier === 'guided';
     const docText = view.state.doc.toString();
-    const parsed = isGuided ? parseBlankTemplate(guidedTemplate ?? docText) : null;
+    const targetText = docText.length > 0 ? docText : (guidedTemplate ?? '');
+    const parsed = isGuided ? parseBlankTemplate(targetText) : null;
+    const firstBlank = parsed?.blanks[0];
     view.dispatch({
+      ...(isGuided && firstBlank && firstBlank.to <= docText.length
+        ? { selection: { anchor: firstBlank.from, head: firstBlank.to } }
+        : {}),
       effects: setGuidedBlanksEffect.of({
         enabled: Boolean(isGuided && parsed && parsed.blanks.length > 0),
         spans:
@@ -559,6 +569,11 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       <div
         ref={hostRef}
         data-testid="codemirror-host"
+        onClick={() => {
+          if (viewRef.current && !viewRef.current.hasFocus) {
+            viewRef.current.focus();
+          }
+        }}
         style={{
           flex: 1,
           minHeight: 0,

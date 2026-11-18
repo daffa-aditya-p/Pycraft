@@ -77,11 +77,31 @@ export class CuratedMentorProvider implements MentorProvider {
       const failure = ctx.astReport.ruleFailures[0]!;
       const msgKey = failure.messageId;
       const isSlugKey = /^[a-z0-9_]+$/i.test(msgKey);
+      const isMessageSlug = /^[a-z0-9_]+$/i.test(failure.message);
+
+      const idSlugMap: Record<string, string> = {
+        too_many_prints:
+          'Kamu menggunakan print() lebih dari 1 kali. Gabungkan baris ke dalam satu print() menggunakan \\n.',
+        missing_comment: 'Tambahkan minimal satu komentar Python yang diawali tanda #.',
+        too_many_statements:
+          'Kodemu melebihi batas maksimum jumlah baris perintah untuk tantangan ini.',
+        forbidden_print: 'Jangan gunakan print() pada langkah ini.',
+        missing_function_name: 'Definisikan nama fungsi yang diminta dengan def ...():.',
+        missing_for: 'Tantangan ini membutuhkan perulangan for.',
+        missing_while: 'Tantangan ini membutuhkan perulangan while.',
+        missing_if: 'Tantangan ini membutuhkan percabangan if.',
+        missing_functiondef: 'Tantangan ini membutuhkan pembuatan fungsi dengan def.',
+        missing_return: 'Fungsimu harus mengembalikan nilai menggunakan return.',
+        exact_print_calls:
+          'Jumlah pemanggilan print() belum sesuai dengan yang diminta tantangan ini.',
+      };
 
       const enSlugMap: Record<string, string> = {
-        too_many_prints: 'You used too many print() calls on this step. Combine lines into one print() using \\n.',
+        too_many_prints:
+          'You used too many print() calls on this step. Combine lines into one print() using \\n.',
         missing_comment: 'Add at least one Python comment starting with #.',
-        too_many_statements: 'Your code exceeds the maximum statement line limit for this challenge.',
+        too_many_statements:
+          'Your code exceeds the maximum statement line limit for this challenge.',
         forbidden_print: 'Do not use print() on this step.',
         missing_function_name: 'Define the required function name with def ...():.',
         missing_for: 'This challenge requires a for loop.',
@@ -89,14 +109,22 @@ export class CuratedMentorProvider implements MentorProvider {
         missing_if: 'This challenge requires an if branch.',
         missing_functiondef: 'This challenge requires defining a function with def.',
         missing_return: 'Your function must return a value using return.',
+        exact_print_calls:
+          'The number of print() calls does not match what this challenge requires.',
       };
 
       const resolvedBody = isId
-        ? isSlugKey
+        ? !isMessageSlug
           ? failure.message
-          : msgKey
-        : isSlugKey
-          ? enSlugMap[msgKey] ?? failure.message
+          : idSlugMap[msgKey] ??
+            idSlugMap[failure.message] ??
+            'Periksa kembali struktur kodemu agar sesuai aturan tantangan.'
+        : isSlugKey || isMessageSlug
+          ? enSlugMap[msgKey] ??
+            enSlugMap[failure.message] ??
+            (isMessageSlug
+              ? 'Check your code structure to match the challenge rules.'
+              : failure.message)
           : failure.message;
 
       return {

@@ -61,6 +61,25 @@ const TIERS: Array<{ id: AssistanceTier; idLabel: string; enLabel: string }> = [
   { id: 'mastery', idLabel: 'Mahir', enLabel: 'Mastery' },
 ];
 
+const TIER_HINTS: Record<AssistanceTier, { id: string; en: string }> = {
+  guided: {
+    id: '💡 Terpandu: Klik kotak kuning ___ atau ketik bebas di baris mana saja',
+    en: '💡 Guided: Click yellow ___ blanks or type freely on any line',
+  },
+  assisted: {
+    id: '💡 Dibantu: Kerangka awal dengan petunjuk komentar',
+    en: '💡 Assisted: Starter skeleton with comment hints',
+  },
+  independent: {
+    id: '💡 Mandiri: Tulis solusi lengkap dari instruksi',
+    en: '💡 Independent: Write full solution from instructions',
+  },
+  mastery: {
+    id: '💡 Mahir: Kanvas kosong tanpa bantuan (+XP Maksimal)',
+    en: '💡 Mastery: Blank canvas with no scaffolding (+Max XP)',
+  },
+};
+
 const SPEEDS: Array<{ value: PlaybackSpeed; label: string }> = [
   { value: 0.5, label: '0.5×' },
   { value: 1, label: '1×' },
@@ -644,42 +663,58 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
               ))}
             </div>
 
-            <div
-              role="group"
-              aria-label={locale === 'id' ? 'Tingkat Bantuan' : 'Assistance Tier'}
-              style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}
-            >
-              {TIERS.map((tItem) => {
-                const active = tier === tItem.id;
-                return (
-                  <button
-                    key={tItem.id}
-                    type="button"
-                    data-testid={`tier-btn-${tItem.id}`}
-                    aria-pressed={active}
-                    onClick={() => {
-                      if (onChangeTier) {
-                        onChangeTier(tItem.id);
-                      } else {
-                        setTier(tItem.id);
-                      }
-                    }}
-                    style={{
-                      minHeight: '30px',
-                      padding: '2px 10px',
-                      backgroundColor: active ? '#FBBF24' : 'rgba(255, 255, 255, 0.16)',
-                      color: active ? '#422006' : '#FFFFFF',
-                      border: active ? '1.5px solid #FEF3C7' : '1px solid rgba(255, 255, 255, 0.35)',
-                      borderRadius: '999px',
-                      fontSize: '0.75rem',
-                      fontWeight: 800,
-                      cursor: 'pointer',
-                    }}
-                  >
-                    {locale === 'id' ? tItem.idLabel : tItem.enLabel}
-                  </button>
-                );
-              })}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+              <div
+                role="group"
+                aria-label={locale === 'id' ? 'Tingkat Bantuan' : 'Assistance Tier'}
+                style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}
+              >
+                {TIERS.map((tItem) => {
+                  const active = tier === tItem.id;
+                  return (
+                    <button
+                      key={tItem.id}
+                      type="button"
+                      data-testid={`tier-btn-${tItem.id}`}
+                      aria-pressed={active}
+                      onClick={() => {
+                        if (onChangeTier) {
+                          onChangeTier(tItem.id);
+                        } else {
+                          setTier(tItem.id);
+                        }
+                      }}
+                      style={{
+                        minHeight: '30px',
+                        padding: '2px 10px',
+                        backgroundColor: active ? '#FBBF24' : 'rgba(255, 255, 255, 0.16)',
+                        color: active ? '#422006' : '#FFFFFF',
+                        border: active ? '1.5px solid #FEF3C7' : '1px solid rgba(255, 255, 255, 0.35)',
+                        borderRadius: '999px',
+                        fontSize: '0.75rem',
+                        fontWeight: 800,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {locale === 'id' ? tItem.idLabel : tItem.enLabel}
+                    </button>
+                  );
+                })}
+              </div>
+              <div
+                data-testid="tier-explanation-badge"
+                style={{
+                  fontSize: '0.72rem',
+                  fontWeight: 600,
+                  color: '#E0F2FE',
+                  backgroundColor: 'rgba(15, 23, 42, 0.22)',
+                  padding: '2px 8px',
+                  borderRadius: '6px',
+                  lineHeight: 1.3,
+                }}
+              >
+                {TIER_HINTS[tier][locale === 'id' ? 'id' : 'en']}
+              </div>
             </div>
           </div>
         )}

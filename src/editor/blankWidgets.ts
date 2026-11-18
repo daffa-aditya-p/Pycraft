@@ -99,32 +99,15 @@ class EmptyBlankPlaceholderWidget extends WidgetType {
 function applyChangesToSpans(spans: BlankSpan[], tr: Transaction): BlankSpan[] {
   if (!tr.docChanged || spans.length === 0) return spans;
 
-  const updated = spans.map((s) => ({ ...s }));
-  tr.changes.iterChanges((fromA, toA, _fromB, _toB, inserted) => {
-    const delta = inserted.length - (toA - fromA);
-    let matchedIdx = -1;
-    for (let i = 0; i < updated.length; i++) {
-      const span = updated[i];
-      if (span && fromA >= span.from && toA <= span.to) {
-        matchedIdx = i;
-        break;
-      }
-    }
-    if (matchedIdx !== -1) {
-      const matched = updated[matchedIdx];
-      if (matched) {
-        matched.to += delta;
-      }
-      for (let j = matchedIdx + 1; j < updated.length; j++) {
-        const nextSpan = updated[j];
-        if (nextSpan) {
-          nextSpan.from += delta;
-          nextSpan.to += delta;
-        }
-      }
-    }
+  return spans.map((span) => {
+    const mappedFrom = tr.changes.mapPos(span.from, -1);
+    const mappedTo = tr.changes.mapPos(span.to, 1);
+    return {
+      index: span.index,
+      from: Math.min(mappedFrom, mappedTo),
+      to: Math.max(mappedFrom, mappedTo),
+    };
   });
-  return updated;
 }
 
 export const guidedBlanksField = StateField.define<GuidedBlanksState>({
@@ -153,34 +136,76 @@ export const guidedBlanksField = StateField.define<GuidedBlanksState>({
 
 function buildBlankDecorations(state: EditorState): DecorationSet {
   const { enabled, spans } = state.field(guidedBlanksField);
-  if (!enabled || spans.length === 0) return Decoration.none;
+  if (!enabled) return Decoration.none;
 
-  const builder = new RangeSetBuilder<Decoration>();
   const docLen = state.doc.length;
+  const items: Array<{ from: number; to: number; deco: Decoration }> = [];
+  const trackedRanges: Array<{ from: number; to: number }> = [];
 
   for (const span of spans) {
     const from = Math.max(0, Math.min(span.from, docLen));
     const to = Math.max(from, Math.min(span.to, docLen));
+    trackedRanges.push({ from, to });
     if (from === to) {
-      builder.add(
-        from,
-        from,
-        Decoration.widget({
-          widget: new EmptyBlankPlaceholderWidget(span.index),
-          side: 1,
-        })
-      );
-    } else {
-      builder.add(
+      items.push({
         from,
         to,
-        Decoration.mark({
+        deco: Decoration.widget({
+          widget: new EmptyBlankPlaceholderWidget(span.index),
+          side: 1,
+        }),
+      });
+    } else {
+      items.push({
+        from,
+        to,
+        deco: Decoration.mark({
           class: 'cm-guided-blank',
           attributes: {
             'data-blank-index': String(span.index),
           },
-        })
-      );
+        }),
+      });
+    }
+  }
+
+  // Also highlight any remaining unfilled `___` tokens in the document
+  const docText = state.doc.toString();
+  const tokenRegex = /_{3,}/g;
+  let match: RegExpExecArray | null;
+  while ((match = tokenRegex.exec(docText)) !== null) {
+    const tokenFrom = match.index;
+    const tokenTo = tokenFrom + match[0].length;
+    const overlapsTracked = trackedRanges.some(
+      (r) =>
+        (r.from === r.to && r.from >= tokenFrom && r.from <= tokenTo) ||
+        (r.from < tokenTo && r.to > tokenFrom)
+    );
+    if (!overlapsTracked) {
+      items.push({
+        from: tokenFrom,
+        to: tokenTo,
+        deco: Decoration.mark({
+          class: 'cm-guided-blank',
+        }),
+      });
+    }
+  }
+
+  if (items.length === 0) return Decoration.none;
+
+  items.sort((a, b) => a.from - b.from || a.to - b.to);
+
+  const builder = new RangeSetBuilder<Decoration>();
+  let lastTo = -1;
+  for (const item of items) {
+    if (item.from < lastTo) continue;
+    if (item.from === item.to) {
+      builder.add(item.from, item.to, item.deco);
+      lastTo = item.from;
+    } else {
+      builder.add(item.from, item.to, item.deco);
+      lastTo = item.to;
     }
   }
   return builder.finish();
@@ -192,55 +217,47 @@ export const guidedBlanksDecorations = EditorView.decorations.compute(
 );
 
 /**
- * Transaction filter that keeps boilerplate read-only in Guided tier while allowing
- * full typing, selection replacement, and OS copy/paste inside blank spans.
+ * Transaction filter for Guided tier. Always allows user edits so typing on any line
+ * (including Line 1 or outside blanks) is never locked out.
  */
 export const guidedBlanksFilter = EditorState.transactionFilter.of((tr) => {
-  if (!tr.docChanged) return tr;
-  // Bypass when replacing the entire template programmatically
-  if (tr.effects.some((e) => e.is(setGuidedBlanksEffect))) {
-    return tr;
-  }
-
-  const { enabled, spans } = tr.startState.field(guidedBlanksField);
-  if (!enabled) return tr;
-
-  // Validate against evolving spans across multi-part changes
-  const simSpans = spans.map((s) => ({ ...s }));
-  let allInsideBlanks = true;
-
-  tr.changes.iterChanges((fromA, toA, _fromB, _toB, inserted) => {
-    if (!allInsideBlanks) return;
-    let matchedIdx = -1;
-    for (let i = 0; i < simSpans.length; i++) {
-      const span = simSpans[i];
-      if (span && fromA >= span.from && toA <= span.to) {
-        matchedIdx = i;
-        break;
-      }
-    }
-    if (matchedIdx === -1) {
-      allInsideBlanks = false;
-      return;
-    }
-    const delta = inserted.length - (toA - fromA);
-    const matched = simSpans[matchedIdx];
-    if (matched) {
-      matched.to += delta;
-    }
-    for (let j = matchedIdx + 1; j < simSpans.length; j++) {
-      const nextSpan = simSpans[j];
-      if (nextSpan) {
-        nextSpan.from += delta;
-        nextSpan.to += delta;
-      }
-    }
-  });
-
-  if (!allInsideBlanks) {
-    return [];
-  }
   return tr;
+});
+
+/**
+ * Selects the full `___` token when the user clicks inside or on an unfilled blank
+ * so typing immediately replaces it.
+ */
+export const guidedBlanksDomHandlers = EditorView.domEventHandlers({
+  mouseup(event, view) {
+    const { enabled } = view.state.field(guidedBlanksField);
+    if (!enabled) return false;
+
+    const sel = view.state.selection.main;
+    if (!sel.empty) return false;
+
+    const pos = view.posAtCoords({ x: event.clientX, y: event.clientY });
+    if (pos === null) return false;
+
+    const line = view.state.doc.lineAt(pos);
+    const localPos = pos - line.from;
+    const regex = /_{3,}/g;
+    let match: RegExpExecArray | null;
+    while ((match = regex.exec(line.text)) !== null) {
+      const matchStart = match.index;
+      const matchEnd = matchStart + match[0].length;
+      if (localPos >= matchStart && localPos <= matchEnd) {
+        view.dispatch({
+          selection: {
+            anchor: line.from + matchStart,
+            head: line.from + matchEnd,
+          },
+        });
+        return true;
+      }
+    }
+    return false;
+  },
 });
 
 /**
@@ -267,5 +284,10 @@ export function focusNextGuidedBlank(view: EditorView): boolean {
 }
 
 export function guidedBlanksExtension(): Extension {
-  return [guidedBlanksField, guidedBlanksDecorations, guidedBlanksFilter];
+  return [
+    guidedBlanksField,
+    guidedBlanksDecorations,
+    guidedBlanksFilter,
+    guidedBlanksDomHandlers,
+  ];
 }
