@@ -92,6 +92,19 @@ const NEO_VISORS = [
   { id: 'amber', label: 'Amber Suar', unlockId: 'neo_visor_amber', hex: '#F59E0B' },
 ];
 
+const COSMETIC_LABELS: Record<string, { id: string; en: string }> = {
+  bit_paint_moss: { id: 'Cat BIT: Lumut', en: 'BIT Paint: Moss' },
+  bit_paint_clay: { id: 'Cat BIT: Terakota', en: 'BIT Paint: Clay' },
+  bit_paint_slate: { id: 'Cat BIT: Batu Sabak', en: 'BIT Paint: Slate' },
+  bit_paint_sky: { id: 'Cat BIT: Langit', en: 'BIT Paint: Sky' },
+  bit_acc_lantern: { id: 'Aksesori BIT: Lentera', en: 'BIT Accessory: Lantern' },
+  bit_acc_flag: { id: 'Aksesori BIT: Bendera Antena', en: 'BIT Accessory: Antenna Flag' },
+  bit_acc_antenna_flag: { id: 'Aksesori BIT: Bendera Antena', en: 'BIT Accessory: Antenna Flag' },
+  neo_visor_turquoise: { id: 'Visor NEO: Turquoise Inti', en: 'NEO Visor: Core Turquoise' },
+  neo_visor_amber: { id: 'Visor NEO: Amber Suar', en: 'NEO Visor: Beacon Amber' },
+  scarf_amber: { id: 'Syal Arsitek: Amber', en: 'Architect Scarf: Amber' },
+};
+
 export const JournalModal: React.FC<JournalModalProps> = ({ onPracticeKC }) => {
   const locale = useSettingsStore((s) => s.locale);
   const inGameOverlay = useUIStore((s) => s.inGameOverlay);
@@ -238,12 +251,32 @@ export const JournalModal: React.FC<JournalModalProps> = ({ onPracticeKC }) => {
   };
 
   // Derive active focus card data
-  const activeQuest =
-    AWAKENING_QUESTS.find(
-      (q) =>
-        (quests.states[q.id] ?? (q.prerequisites.length === 0 ? 'active' : 'locked')) ===
-        'active'
-    ) ?? AWAKENING_QUESTS[0];
+  const allQuestsCompleted = AWAKENING_QUESTS.every(
+    (q) =>
+      (quests.states[q.id] ?? (q.prerequisites.length === 0 ? 'active' : 'locked')) ===
+      'completed'
+  );
+
+  const activeQuest = allQuestsCompleted
+    ? null
+    : AWAKENING_QUESTS.find(
+        (q) =>
+          (quests.states[q.id] ?? (q.prerequisites.length === 0 ? 'active' : 'locked')) ===
+          'active'
+      ) ?? AWAKENING_QUESTS[0];
+
+  const getCollectProgress = (targetId: string, requiredCount = 1) =>
+    Math.min(
+      requiredCount,
+      Math.max(
+        inventory.items[targetId] ?? 0,
+        targetId === 'blue_crystal'
+          ? world.collectedWorldItemIds.filter((id) =>
+              id.startsWith('awakening_crystal_')
+            ).length
+          : 0
+      )
+    );
 
   const activeFocus = activeQuest
     ? (() => {
@@ -257,9 +290,13 @@ export const JournalModal: React.FC<JournalModalProps> = ({ onPracticeKC }) => {
           activeItem.objective.hint?.[locale] ?? activeQuest.hint?.[locale] ?? '';
         const conciseHint =
           rawHint.length > 110 ? `${rawHint.slice(0, 107).trimEnd()}…` : rawHint;
+        const objLabel =
+          activeItem.objective.type === 'collect'
+            ? `${activeItem.objective.label[locale].replace(/\s*\(\d+\/\d+\)/g, '')} (${getCollectProgress(activeItem.objective.targetId, activeItem.objective.requiredCount ?? 1)}/${activeItem.objective.requiredCount ?? 1})`
+            : activeItem.objective.label[locale];
         return {
           questTitle: activeQuest.title[locale],
-          objectiveLabel: activeItem.objective.label[locale],
+          objectiveLabel: objLabel,
           location: loc,
           hint: conciseHint,
         };
@@ -436,8 +473,41 @@ export const JournalModal: React.FC<JournalModalProps> = ({ onPracticeKC }) => {
         >
           {journalTab === 'quests' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {/* Prominent Current Mission Focus Card */}
-              {activeFocus && (
+              {/* Prominent Current Mission Focus Card or Completion Celebration */}
+              {allQuestsCompleted ? (
+                <section
+                  aria-label={locale === 'id' ? 'Semua Misi Kebangkitan Selesai' : 'All Awakening Missions Complete'}
+                  style={{
+                    background: 'linear-gradient(135deg, #DCFCE7 0%, #ECFEFF 100%)',
+                    border: '1.5px solid #4ADE80',
+                    borderRadius: '14px',
+                    padding: '16px 18px',
+                    boxShadow: '0 6px 18px rgba(22, 163, 74, 0.12)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '6px',
+                  }}
+                >
+                  <div
+                    style={{
+                      fontFamily: 'var(--font-display)',
+                      fontSize: '1.125rem',
+                      fontWeight: 800,
+                      color: '#166534',
+                    }}
+                  >
+                    {locale === 'id'
+                      ? '🎉 Semua Misi Kebangkitan Selesai!'
+                      : '🎉 All Awakening Missions Complete!'}
+                  </div>
+                  <div style={{ fontSize: '0.875rem', color: '#15803D', fontWeight: 600 }}>
+                    {locale === 'id'
+                      ? 'Serpihan Inti Aetheria telah menyala kembali. Kamu dapat mengulang latihan keahlian di tab Pohon Keahlian atau menjelajahi pulau dengan bebas.'
+                      : 'The Core Shard of Aetheria is reawakened. You can practice any skill in the Skill Tree tab or explore the islands freely.'}
+                  </div>
+                </section>
+              ) : (
+                activeFocus && (
                 <section
                   aria-label={locale === 'id' ? 'Fokus Misi Saat Ini' : 'Current Mission Focus'}
                   style={{
@@ -504,7 +574,7 @@ export const JournalModal: React.FC<JournalModalProps> = ({ onPracticeKC }) => {
                     </div>
                   )}
                 </section>
-              )}
+              ))}
 
               {/* Act Filter Navigation Pills */}
               <div
@@ -1033,7 +1103,11 @@ export const JournalModal: React.FC<JournalModalProps> = ({ onPracticeKC }) => {
                                 {quest.unlocksCosmetics && (
                                   <span>
                                     🎨 {locale === 'id' ? 'Membuka Kosmetik' : 'Unlocks Cosmetic'}:{' '}
-                                    <strong>{quest.unlocksCosmetics.join(', ')}</strong>
+                                    <strong>
+                                      {quest.unlocksCosmetics
+                                        .map((id) => COSMETIC_LABELS[id]?.[locale] ?? id)
+                                        .join(', ')}
+                                    </strong>
                                   </span>
                                 )}
                               </div>
@@ -1087,9 +1161,10 @@ export const JournalModal: React.FC<JournalModalProps> = ({ onPracticeKC }) => {
                                     icon: '•',
                                   };
 
+                                  const requiredCount = objective.requiredCount ?? 1;
                                   const collectCount =
                                     objective.type === 'collect'
-                                      ? inventory.items[objective.targetId] ?? 0
+                                      ? getCollectProgress(objective.targetId, requiredCount)
                                       : 0;
 
                                   const objTipKey = `obj:${quest.id}:${objective.id || objIdx}`;
@@ -1180,7 +1255,9 @@ export const JournalModal: React.FC<JournalModalProps> = ({ onPracticeKC }) => {
                                                   : '#475569',
                                             }}
                                           >
-                                            {objective.label[locale]}
+                                            {objective.type === 'collect'
+                                              ? objective.label[locale].replace(/\s*\(\d+\/\d+\)/g, '')
+                                              : objective.label[locale]}
                                           </span>
 
                                           {objective.type === 'collect' && (
@@ -1192,8 +1269,7 @@ export const JournalModal: React.FC<JournalModalProps> = ({ onPracticeKC }) => {
                                                 color: isCompleted ? '#16A34A' : '#D97706',
                                               }}
                                             >
-                                              ({Math.min(objective.requiredCount ?? 1, collectCount)}/
-                                              {objective.requiredCount ?? 1})
+                                              ({collectCount}/{requiredCount})
                                             </span>
                                           )}
 

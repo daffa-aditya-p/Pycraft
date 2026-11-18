@@ -573,8 +573,8 @@ export const AWAKENING_MISSIONS: readonly MissionManifest[] = [
         order: 5,
         title: { id: '1.5 Siapa Namamu?', en: '1.5 What Is Your Name?' },
         goal: {
-          id: 'Minta nama Arsitek dengan input(), simpan ke variabel, lalu cetak salam yang menyebut nama itu.',
-          en: 'Ask the Architect’s name with input(), store it, and print a greeting using that name.',
+          id: 'Minta nama Arsitek dengan input(), simpan ke variabel, lalu cetak salam yang menyebut nama itu (Suar menguji beberapa nama secara dinamis).',
+          en: 'Ask the Architect’s name with input(), store it in a variable, and print a greeting using that variable (tested dynamically with multiple names).',
         },
         targetKCs: ['F6', 'V1', 'F2'],
         capabilities: ['print', 'input', 'beacon.print'],
@@ -584,10 +584,10 @@ export const AWAKENING_MISSIONS: readonly MissionManifest[] = [
           {
             title: { id: 'Membaca Masukan dengan input()', en: 'Reading User Input' },
             body: {
-              id: 'input("...") menunggu jawaban dan menyimpannya ke variabel agar bisa dicetak ulang.',
-              en: 'input("...") waits for an answer and stores it in a variable.',
+              id: 'input("...") menunggu jawaban dan menyimpannya ke variabel agar bisa dicetak ulang secara dinamis untuk nama apa pun (misal "Rara" maupun "Budi Santoso"). Jangan menulis nama secara statis di dalam print()!',
+              en: 'input("...") waits for an answer and stores it in a variable so print() greets any name dynamically (e.g. "Rara" or "Budi Santoso") instead of hardcoding.',
             },
-            exampleCode: 'nama = input("Siapa namamu? ")\nprint("Halo,", nama)',
+            exampleCode: 'nama = input("Siapa namamu? ")\nprint("Selamat datang,", nama)',
           },
         ],
         starters: {
@@ -675,9 +675,10 @@ export const AWAKENING_MISSIONS: readonly MissionManifest[] = [
           {
             title: { id: 'Merapikan Kolom dengan \\t', en: 'Aligning with \\t' },
             body: {
-              id: '\\t menyisipkan jarak tab horizontal di dalam satu print().',
-              en: '\\t inserts a horizontal tab stop inside a single print().',
+              id: '`\\t` menyisipkan jarak tab horizontal, sedangkan `\\n` memutus baris di dalam satu perintah `print()`.',
+              en: '`\\t` inserts a horizontal tab stop while `\\n` breaks lines inside a single `print()` call.',
             },
+            exampleCode: 'print("===\\tSUAR\\t===\\n\\tAKTIF\\n===")',
           },
         ],
         starters: {
@@ -1216,7 +1217,11 @@ export const AWAKENING_MISSIONS: readonly MissionManifest[] = [
         lessonSlides: [
           {
             title: { id: 'Jalur Alternatif else', en: 'The else Branch' },
-            body: { id: 'else menangani semua keadaan saat kondisi if bernilai False.', en: 'else executes whenever the if condition is False.' },
+            body: {
+              id: '`else:` tidak butuh syarat sendiri dan menangani semua keadaan saat kondisi `if` bernilai `False`. Gunakan `gate.light("red")` untuk sinyal penolakan.',
+              en: '`else:` takes no condition and runs whenever the `if` condition is `False`. Call `gate.light("red")` to signal denial.',
+            },
+            exampleCode: 'if warna == "blue":\n    gate.open()\nelse:\n    gate.light("red")',
           },
         ],
         starters: {
@@ -1257,7 +1262,11 @@ export const AWAKENING_MISSIONS: readonly MissionManifest[] = [
         lessonSlides: [
           {
             title: { id: 'Banyak Pilihan dengan elif', en: 'Multiple Choices with elif' },
-            body: { id: 'elif memeriksa kondisi berikutnya jika kondisi sebelumnya bernilai False.', en: 'elif checks another condition when earlier ones are False.' },
+            body: {
+              id: '`elif` (singkatan dari else-if) memeriksa kondisi berikutnya hanya jika kondisi `if` di atasnya bernilai `False`. Gunakan `gate.light("yellow")` untuk kristal `"green"`.',
+              en: '`elif` (else-if) checks another condition only when earlier branches are `False`. Call `gate.light("yellow")` for `"green"`.',
+            },
+            exampleCode: 'if warna == "blue":\n    gate.open()\nelif warna == "green":\n    gate.light("yellow")\nelse:\n    gate.light("red")',
           },
         ],
         starters: {
@@ -1299,9 +1308,20 @@ export const AWAKENING_MISSIONS: readonly MissionManifest[] = [
         xp: 50,
         lessonSlides: [
           {
-            title: { id: 'Menggabungkan Syarat dengan and', en: 'Combining Conditions with and' },
-            body: { id: 'Operator `and` hanya bernilai True jika kedua sisi sama-sama True.', en: '`and` is True only when both conditions hold.' },
+            title: { id: 'Operator Logika: and (Kedua Syarat Wajib Benar)', en: 'Logical and (Both Conditions Required)' },
+            body: {
+              id: 'Operator `and` hanya bernilai `True` jika KEDUA syarat di kiri dan kanannya bernilai `True`. Jika salah satu saja `False`, seluruh ekspresi menjadi `False`.',
+              en: 'The `and` operator evaluates to `True` ONLY when BOTH left and right conditions are `True`. If either is `False`, the result is `False`.',
+            },
             exampleCode: 'if warna == "blue" and beban >= 2:\n    gate.open()',
+          },
+          {
+            title: { id: 'Bandingkan dengan or & not', en: 'Compare with or & not' },
+            body: {
+              id: '• `and`: kedua syarat WAJIB `True` (`warna == "blue" and beban >= 2`).\n• `or`: cukup SALAH SATU syarat `True` (`if warna == "blue" or warna == "green":`).\n• `not`: membalik hasil logika `True` ↔ `False` (`if not (warna == "red"):`).',
+              en: '• `and`: BOTH conditions must be `True`.\n• `or`: AT LEAST ONE condition is `True` (`if warna == "blue" or warna == "green":`).\n• `not`: flips `True` ↔ `False` (`if not (warna == "red"):`).',
+            },
+            exampleCode: '# and -> keduanya True\n# or  -> minimal satu True\nif warna == "blue" or warna == "green":\n    gate.light("yellow")\n# not -> membalik True/False\nif not (warna == "red"):\n    gate.open()',
           },
         ],
         starters: {
@@ -1344,7 +1364,22 @@ export const AWAKENING_MISSIONS: readonly MissionManifest[] = [
         xp: 50,
         unlocksCosmeticId: 'scarf_amber',
         lessonSlides: [
-          { title: { id: 'Membalik Kondisi dengan not', en: 'Inverting with not' }, body: { id: 'Jika syarat tidak terpenuhi (`if not (...):`), nyalakan lampu merah dulu!', en: '`if not (warna == "blue" and beban >= 2):` triggers red first!' } },
+          {
+            title: { id: 'Operator Logika: not (Pembalik Nilai)', en: 'Logical not (Boolean Inverter)' },
+            body: {
+              id: 'Operator `not` membalik hasil logika: `not True` menjadi `False`, dan `not False` menjadi `True`. Cocok untuk menuliskan syarat penolakan lebih dulu: `if not (warna == "blue" and beban >= 2):`.',
+              en: 'The `not` operator flips a boolean: `not True` becomes `False`, and `not False` becomes `True`. Ideal for checking denial first: `if not (warna == "blue" and beban >= 2):`.',
+            },
+            exampleCode: 'if not (warna == "red"):\n    gate.open()\n\n# Kunci ganda dengan not:\nif not (warna == "blue" and beban >= 2):\n    gate.light("red")\nelse:\n    gate.open()',
+          },
+          {
+            title: { id: 'Ringkasan 3 Operator Logika (and / or / not)', en: '3 Logical Operators Summary (and / or / not)' },
+            body: {
+              id: '• `and`: kedua syarat harus `True` (`if warna == "blue" and beban >= 2:`).\n• `or`: cukup satu syarat `True` (`if warna == "blue" or warna == "green":`).\n• `not`: membalik `True` ↔ `False` (`if not (warna == "red"):`).',
+              en: '• `and`: both conditions must be `True`.\n• `or`: either condition can be `True` (`if warna == "blue" or warna == "green":`).\n• `not`: inverts `True` ↔ `False` (`if not (warna == "red"):`).',
+            },
+            exampleCode: 'if warna == "blue" and beban >= 2:\n    gate.open()\nelif warna == "blue" or warna == "green":\n    gate.light("yellow")\nelif not (warna == "red"):\n    gate.light("red")',
+          },
         ],
         starters: {
           guided: 'warna = sensor.read()\nbeban = scale.read()\nif ___(warna == "blue" and beban >= 2):\n    gate.light("red")\nelse:\n    gate.open()',
@@ -1404,7 +1439,11 @@ export const AWAKENING_MISSIONS: readonly MissionManifest[] = [
         lessonSlides: [
           {
             title: { id: 'Pengulangan Manual Itu Melelahkan', en: 'Manual Repetition' },
-            body: { id: 'Coba tanam 3 petak berurutan secara manual dulu sebelum memakai loop.', en: 'Plant 3 tiles sequentially first to feel why loops exist.' },
+            body: {
+              id: 'Gunakan `robot.plant("wheat")` untuk menanam gandum di petak saat ini, lalu `robot.move(1)` untuk maju 1 petak. Ulangi 3 kali untuk merasakan mengapa loop dibutuhkan.',
+              en: 'Call `robot.plant("wheat")` to sow wheat on the current tile and `robot.move(1)` to step forward. Repeat 3 times to see why loops exist.',
+            },
+            exampleCode: 'robot.plant("wheat")\nrobot.move(1)',
           },
         ],
         starters: {
@@ -1477,7 +1516,11 @@ export const AWAKENING_MISSIONS: readonly MissionManifest[] = [
         lessonSlides: [
           {
             title: { id: 'Variabel Loop i & range(1, 6)', en: 'Loop Variable i & range(1, 6)' },
-            body: { id: 'range(1, 6) mulai dari 1 dan berhenti sebelum 6 (yaitu 1, 2, 3, 4, 5).', en: 'range(1, 6) starts at 1 and stops before 6: 1, 2, 3, 4, 5.' },
+            body: {
+              id: '`range(1, 6)` mulai dari `1` dan berhenti tepat sebelum `6` (menghasilkan 1, 2, 3, 4, 5). Kirim variabel `i` ke `robot.say(i)` di setiap iterasi.',
+              en: '`range(1, 6)` starts at `1` and stops before `6` (yielding 1, 2, 3, 4, 5). Pass `i` into `robot.say(i)` on each iteration.',
+            },
+            exampleCode: 'for i in range(1, 6):\n    robot.say(i)\n    robot.plant("wheat")\n    robot.move(1)',
           },
         ],
         starters: {
@@ -1621,7 +1664,14 @@ export const AWAKENING_MISSIONS: readonly MissionManifest[] = [
         xp: 50,
         unlocksCosmeticId: 'bit_acc_lantern',
         lessonSlides: [
-          { title: { id: 'Melompati Iterasi dengan continue', en: 'Skipping with continue' }, body: { id: 'Gunakan `continue` agar BIT langsung melompati sisa langkah pada sel berbatu.', en: '`continue` skips the rest of the loop body on rock obstacles.' } },
+          {
+            title: { id: 'Melompati Iterasi dengan continue', en: 'Skipping with continue' },
+            body: {
+              id: 'Periksa petak di depan dengan `robot.front()`. Jika bernilai `"rock"`, jalankan `continue` agar BIT langsung melompati `robot.plant()` dan `robot.move(1)` pada iterasi tersebut.',
+              en: 'Check the tile ahead with `robot.front()`. If it is `"rock"`, run `continue` to skip `robot.plant()` and `robot.move(1)` for that iteration.',
+            },
+            exampleCode: 'if robot.front() == "rock":\n    continue',
+          },
         ],
         starters: {
           guided: 'for r in range(farm.rows):\n    for c in range(farm.cols):\n        if robot.front() == "rock":\n            ___\n        robot.plant("wheat")\n        robot.move(1)\n    robot.next_row()',
@@ -1763,7 +1813,14 @@ export const AWAKENING_MISSIONS: readonly MissionManifest[] = [
         requirementChips: { id: ['Parameter: tinggi', 'Tinggi: 2, 4, 3'], en: ['Parameter: tinggi', 'Heights: 2, 4, 3'] },
         xp: 55,
         lessonSlides: [
-          { title: { id: 'Parameter Membuat Fungsi Fleksibel', en: 'Parameters Make Recipes Flexible' }, body: { id: 'Dengan `def pasang_tiang(tinggi):`, satu fungsi bisa membangun tiang setinggi berapa pun.', en: '`def pasang_tiang(tinggi):` builds any requested height.' } },
+          {
+            title: { id: 'Parameter Membuat Fungsi Fleksibel', en: 'Parameters Make Recipes Flexible' },
+            body: {
+              id: 'Parameter adalah nilai masukan di dalam tanda kurung `def`. Dengan `def pasang_tiang(tinggi):`, satu fungsi dapat menumpuk balok batu setinggi angka apa pun yang dikirim saat dipanggil.',
+              en: 'A parameter is an input inside `def` parentheses. With `def pasang_tiang(tinggi):`, one function stacks stone blocks to any requested height.',
+            },
+            exampleCode: 'def pasang_tiang(tinggi):\n    for i in range(tinggi):\n        robot.place_block("stone")',
+          },
         ],
         starters: {
           guided: 'def pasang_tiang(___):\n    for i in range(tinggi):\n        robot.place_block("stone")\n\npasang_tiang(2)\nrobot.turn("right")\nrobot.move(2)\nrobot.turn("left")\npasang_tiang(4)\nrobot.turn("right")\nrobot.move(2)\nrobot.turn("left")\npasang_tiang(___)',
@@ -1876,7 +1933,14 @@ export const AWAKENING_MISSIONS: readonly MissionManifest[] = [
         requirementChips: { id: ['Wajib: def', '4 tiang sudut menara'], en: ['Require: def', '4 watchtower corner pillars'] },
         xp: 80,
         lessonSlides: [
-          { title: { id: 'Menyusun Menara dengan Fungsi', en: 'Composing Watchtower Pillars' }, body: { id: 'Kelilingi tepi pelataran 5x5 dan belok ke dalam untuk memanggil pasang_tiang(3) di keempat sudut.', en: 'Walk around the perimeter, turn inward to call pasang_tiang(3) at each corner.' } },
+          {
+            title: { id: 'Menyusun Menara dengan Fungsi', en: 'Composing Watchtower Pillars' },
+            body: {
+              id: 'Gabungkan `def pasang_tiang(tinggi):` dengan loop `for sisi in range(4):`. Kelilingi tepi pelataran 5×5, belok ke dalam (`robot.turn("right")`) untuk memanggil `pasang_tiang(3)`, lalu belok keluar dan lanjutkan ke sudut berikutnya.',
+              en: 'Combine `def pasang_tiang(tinggi):` with `for sisi in range(4):`. Walk the 5×5 perimeter, turn inward (`robot.turn("right")`) to call `pasang_tiang(3)`, then turn back and continue.',
+            },
+            exampleCode: 'for sisi in range(4):\n    robot.move(1)\n    robot.turn("right")\n    pasang_tiang(3)\n    robot.turn("left")\n    robot.move(3)\n    robot.turn("right")',
+          },
         ],
         starters: {
           guided: 'def pasang_tiang(tinggi):\n    for i in range(tinggi):\n        robot.place_block("stone")\n\nfor sisi in range(4):\n    robot.move(1)\n    robot.turn("right")\n    pasang_tiang(3)\n    robot.turn("left")\n    robot.move(___)\n    robot.turn("___")',
@@ -1929,7 +1993,14 @@ export const AWAKENING_MISSIONS: readonly MissionManifest[] = [
         xp: 50,
         unlocksCosmeticId: 'bit_acc_antenna_flag',
         lessonSlides: [
-          { title: { id: 'Nilai Default', en: 'Default Values' }, body: { id: 'Parameter default otomatis dipakai jika pemanggil tidak mengirim nilai.', en: 'Default parameter values apply when omitted.' } },
+          {
+            title: { id: 'Nilai Default pada Parameter', en: 'Default Parameter Values' },
+            body: {
+              id: 'Dengan `def pasang_tiang(tinggi=3, blok="stone"):`, parameter memakai nilai bawaan saat fungsi dipanggil tanpa argumen (`pasang_tiang()`), tetapi tetap bisa ditimpa (`pasang_tiang(2, "wood")`).',
+              en: 'With `def pasang_tiang(tinggi=3, blok="stone"):`, calling `pasang_tiang()` uses the defaults, while `pasang_tiang(2, "wood")` overrides them.',
+            },
+            exampleCode: 'def pasang_tiang(tinggi=3, blok="stone"):\n    for i in range(tinggi):\n        robot.place_block(blok)',
+          },
         ],
         starters: {
           guided: 'def pasang_tiang(tinggi=___, blok="___"):\n    for i in range(tinggi):\n        robot.place_block(blok)\n\npasang_tiang()\nrobot.turn("right")\nrobot.move(2)\nrobot.turn("left")\npasang_tiang(2, "wood")',
@@ -2036,7 +2107,14 @@ export const AWAKENING_MISSIONS: readonly MissionManifest[] = [
         requirementChips: { id: ['Wajib: def buat_tangga(n) & for', 'Celah 3, 4, 5'], en: ['Require: def buat_tangga(n) & for', 'Gaps 3, 4, 5'] },
         xp: 100,
         lessonSlides: [
-          { title: { id: 'Tangga Menaik dengan Nested Loop', en: 'Ascending Stairs' }, body: { id: 'Pada setiap langkah ke-i (1..n), maju di jalur dasar lalu menoleh ke utara untuk menumpuk i balok batu.', en: 'At step i (1..n), step along the base lane and turn north to stack i stone blocks.' } },
+          {
+            title: { id: 'Tangga Menaik dengan Nested Loop', en: 'Ascending Stairs' },
+            body: {
+              id: 'Di dalam `def buat_tangga(n):`, gunakan `for tingkat in range(1, n + 1):`. Pada setiap tingkat, panggil `robot.move(1)`, belok kiri (`robot.turn("left")`), tumpuk `tingkat` balok dengan `robot.place_block("stone")`, lalu belok kanan lagi.',
+              en: 'Inside `def buat_tangga(n):`, loop `for tingkat in range(1, n + 1):`. On each step, call `robot.move(1)`, `robot.turn("left")`, stack `tingkat` blocks with `robot.place_block("stone")`, and `robot.turn("right")`.',
+            },
+            exampleCode: 'def buat_tangga(n):\n    for tingkat in range(1, n + 1):\n        robot.move(1)\n        robot.turn("left")\n        for b in range(tingkat):\n            robot.place_block("stone")\n        robot.turn("right")',
+          },
         ],
         starters: {
           guided: 'def buat_tangga(n):\n    for tingkat in range(1, n + 1):\n        robot.move(1)\n        robot.turn("left")\n        for b in range(___):\n            robot.place_block("stone")\n        robot.turn("right")\n\nbuat_tangga(farm.cols)',
@@ -2076,7 +2154,14 @@ export const AWAKENING_MISSIONS: readonly MissionManifest[] = [
         xp: 100,
         unlocksCosmeticId: 'bit_paint_sky',
         lessonSlides: [
-          { title: { id: 'Menyatukan Serpihan Inti', en: 'Awakening the Core Shard' }, body: { id: 'Kirim 3 sel energi ke altar untuk menyalakan kembali Jembatan Langit pertama Aetheria.', en: 'Feed 3 energy cells into the altar to relight Aetheria’s first Skybridge.' } },
+          {
+            title: { id: 'Menyatukan Serpihan Inti', en: 'Awakening the Core Shard' },
+            body: {
+              id: 'Simpan `jumlah_sel = 3`, kirim ke altar menggunakan `altar.activate(jumlah_sel)`, lalu cetak konfirmasi dengan f-string `print(f"INTI AKTIF: {jumlah_sel} sel")` untuk menyalakan Jembatan Langit pertama Aetheria.',
+              en: 'Store `jumlah_sel = 3`, feed the altar with `altar.activate(jumlah_sel)`, and print `print(f"INTI AKTIF: {jumlah_sel} sel")` to relight Aetheria’s first Skybridge.',
+            },
+            exampleCode: 'jumlah_sel = 3\naltar.activate(jumlah_sel)\nprint(f"INTI AKTIF: {jumlah_sel} sel")',
+          },
         ],
         starters: {
           guided: 'jumlah_sel = ___\naltar.activate(jumlah_sel)\nprint(f"INTI AKTIF: {jumlah_sel} sel")',

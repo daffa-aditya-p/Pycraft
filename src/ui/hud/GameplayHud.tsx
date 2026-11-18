@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { AWAKENING_QUESTS } from '@/content/awakening/quests';
 import {
   EventBus,
   useEditorStore,
@@ -39,6 +40,8 @@ export const GameplayHud: React.FC<GameplayHudProps> = ({
   const activeMissionId = useGameStore((s) => s.quests.activeMissionId);
   const xp = useGameStore((s) => s.learning.xp);
   const cameraMode = useGameStore((s) => s.world.cameraMode);
+  const inventoryItems = useGameStore((s) => s.inventory.items);
+  const collectedWorldItemIds = useGameStore((s) => s.world.collectedWorldItemIds);
 
   const saveStatus = useUIStore((s) => s.saveStatus);
   const announcements = useUIStore((s) => s.announcements);
@@ -128,6 +131,25 @@ export const GameplayHud: React.FC<GameplayHudProps> = ({
         : saveStatus === 'saved'
           ? '#15803D'
           : '#0E7490';
+
+  const crystalCount = Math.min(
+    3,
+    Math.max(
+      inventoryItems.blue_crystal ?? 0,
+      collectedWorldItemIds.filter((id) => id.startsWith('awakening_crystal_')).length
+    )
+  );
+  const rawObjectiveLabel =
+    objectiveLabel ??
+    (locale === 'id'
+      ? 'Jelajahi pulau dan temui NEO.'
+      : 'Explore the island and meet NEO.');
+  const displayObjectiveLabel = /\(\d+\/3\)/.test(rawObjectiveLabel)
+    ? rawObjectiveLabel.replace(/\(\d+\/3\)/g, `(${crystalCount}/3)`)
+    : rawObjectiveLabel;
+  const activeMissionTitle = activeMissionId
+    ? (AWAKENING_QUESTS.find((q) => q.id === activeMissionId)?.title[locale] ?? activeMissionId)
+    : (locale === 'id' ? 'Eksplorasi' : 'Exploration');
 
   const isCompact = layoutClass === 'P' || layoutClass === 'L';
   const isLandscapePhone = layoutClass === 'L';
@@ -229,7 +251,7 @@ export const GameplayHud: React.FC<GameplayHudProps> = ({
                     color: '#0E7490',
                   }}
                 >
-                  {activeMissionId ?? (locale === 'id' ? 'Eksplorasi' : 'Exploration')} · {xp} XP
+                  {activeMissionTitle} · {xp} XP
                 </div>
                 {!isCompact && (
                   <span
@@ -261,10 +283,7 @@ export const GameplayHud: React.FC<GameplayHudProps> = ({
                   WebkitBoxOrient: isCompact ? 'vertical' : undefined,
                 }}
               >
-                {objectiveLabel ??
-                  (locale === 'id'
-                    ? 'Jelajahi pulau dan temui NEO.'
-                    : 'Explore the island and meet NEO.')}
+                {displayObjectiveLabel}
               </div>
               {objectiveHint && (
                 <div
@@ -322,7 +341,8 @@ export const GameplayHud: React.FC<GameplayHudProps> = ({
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
-                flexWrap: 'wrap',
+                flexWrap: 'nowrap',
+                flexShrink: 0,
                 justifyContent: 'flex-end',
               }}
             >
