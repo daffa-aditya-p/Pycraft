@@ -122,6 +122,8 @@ function AwakeningScene({
 
   const appearance = useGameStore((s) => s.profile.appearance);
   const cosmetics = useGameStore((s) => s.profile.cosmetics);
+  const activeSlotId = useGameStore((s) => s.activeSlotId);
+  const profileCreatedAt = useGameStore((s) => s.profile.createdAt);
   const restoredZoneIds = useGameStore((s) => s.world.restoredZoneIds);
   const collectedWorldItemIds = useGameStore((s) => s.world.collectedWorldItemIds);
   const discoveredLoreNoteIds = useGameStore((s) => s.world.discoveredLoreNoteIds);
@@ -193,6 +195,27 @@ function AwakeningScene({
   const focusPosRef = useRef<[number, number, number]>([...playerPosRef.current]);
   const lastStoreSyncRef = useRef(0);
   const lastFadeRef = useRef(0);
+
+  // Reset 3D controller & entity positions cleanly on save-slot switch or New Adventure
+  useEffect(() => {
+    const savedPos = useGameStore.getState().world.playerPosition;
+    const savedYaw = useGameStore.getState().world.playerYaw;
+    const startPos: [number, number, number] =
+      savedPos[0] === 0 && savedPos[1] === 2 && savedPos[2] === 0
+        ? world.playerSpawnPos
+        : savedPos;
+    controllerRef.current = new CharacterController(
+      startPos,
+      savedYaw,
+      world.anchors,
+    );
+    playerPosRef.current = [...startPos];
+    playerYawRef.current = savedYaw;
+    focusPosRef.current = [...startPos];
+    bitPosRef.current = [...world.bitInitialPos];
+    bitYawRef.current = 0;
+    clearBitVisualOverride();
+  }, [activeSlotId, profileCreatedAt, world]);
 
   // Mesh all chunks asynchronously via MesherClient worker
   useEffect(() => {

@@ -153,6 +153,7 @@ export function App(): React.JSX.Element {
   const locale = useSettingsStore((s) => s.locale);
   const activeMissionId = useGameStore((s) => s.quests.activeMissionId);
   const activeStepId = useGameStore((s) => s.quests.activeStepId);
+  const editorStepId = useEditorStore((s) => s.stepId);
   const code = useEditorStore((s) => s.code);
   const inputModalOpen = useEditorStore((s) => s.inputModal.open);
 
@@ -187,6 +188,15 @@ export function App(): React.JSX.Element {
   });
 
   const activeStep: MissionStepManifest = useMemo(() => {
+    if (
+      editorStepId &&
+      (editorDockOpen ||
+        inGameOverlay === 'editor' ||
+        inGameOverlay === 'learning_intro')
+    ) {
+      const editorStep = getStepById(editorStepId);
+      if (editorStep) return editorStep;
+    }
     if (activeStepId) {
       const found = getStepById(activeStepId);
       if (found) return found;
@@ -196,7 +206,7 @@ export function App(): React.JSX.Element {
       if (mission && mission.steps[0]) return mission.steps[0];
     }
     return ALL_AWAKENING_STEPS[0]!;
-  }, [activeMissionId, activeStepId]);
+  }, [editorStepId, activeMissionId, activeStepId, editorDockOpen, inGameOverlay]);
 
   const activeStepRef = useRef<MissionStepManifest>(activeStep);
   activeStepRef.current = activeStep;
@@ -1645,6 +1655,7 @@ export function App(): React.JSX.Element {
                     capabilities={activeStep.capabilities}
                     targetKCs={activeStep.targetKCs}
                     guidedTemplate={activeStep.starters.guided}
+                    lessonSlides={activeStep.lessonSlides}
                     hasNextStep={nextStepInMission !== null}
                     nextStepTitle={nextStepInMission?.title[locale]}
                     onNextStep={() => {

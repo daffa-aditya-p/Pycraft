@@ -1713,10 +1713,53 @@ export class PycraftExecutor {
       stdoutLines.pop();
     }
 
+    let predicatesToEvaluate = opts.scenario.predicates;
+    if (
+      opts.visible &&
+      opts.scenario.scriptedInputs &&
+      opts.scenario.scriptedInputs.length > 0 &&
+      opts.inputAnswers.length > 0
+    ) {
+      const replacements: Array<[string, string]> = [];
+      for (let i = 0; i < opts.scenario.scriptedInputs.length; i++) {
+        const scriptedVal = opts.scenario.scriptedInputs[i];
+        const userVal = opts.inputAnswers[i];
+        if (
+          scriptedVal &&
+          typeof userVal === 'string' &&
+          userVal.length > 0 &&
+          userVal !== scriptedVal
+        ) {
+          replacements.push([scriptedVal, userVal]);
+        }
+      }
+      if (replacements.length > 0) {
+        const replaceAllPairs = (str: string): string => {
+          let out = str;
+          for (const [from, to] of replacements) {
+            out = out.split(from).join(to);
+          }
+          return out;
+        };
+        predicatesToEvaluate = opts.scenario.predicates.map((pred) => {
+          if (pred.type === 'stdout_contains') {
+            return { ...pred, text: replaceAllPairs(pred.text) };
+          }
+          if (pred.type === 'stdout_equals_lines') {
+            return { ...pred, lines: pred.lines.map(replaceAllPairs) };
+          }
+          if (pred.type === 'stdout_tokens_in_order') {
+            return { ...pred, tokens: pred.tokens.map(replaceAllPairs) };
+          }
+          return pred;
+        });
+      }
+    }
+
     const evalRes = evaluateScenarioPredicates(
       sim,
       stdoutLines,
-      opts.scenario.predicates,
+      predicatesToEvaluate,
       warningCodes,
     );
 

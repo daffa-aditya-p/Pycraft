@@ -99,13 +99,30 @@ class EmptyBlankPlaceholderWidget extends WidgetType {
 function applyChangesToSpans(spans: BlankSpan[], tr: Transaction): BlankSpan[] {
   if (!tr.docChanged || spans.length === 0) return spans;
 
+  const oldLen = tr.startState.doc.length;
+  const newLen = tr.newDoc.length;
+
   return spans.map((span) => {
-    const mappedFrom = tr.changes.mapPos(span.from, -1);
-    const mappedTo = tr.changes.mapPos(span.to, 1);
+    const clampedFrom = Math.max(0, Math.min(span.from, oldLen));
+    const clampedTo = Math.max(clampedFrom, Math.min(span.to, oldLen));
+
+    let mappedFrom = 0;
+    let mappedTo = 0;
+    try {
+      mappedFrom = tr.changes.mapPos(clampedFrom, -1);
+      mappedTo = tr.changes.mapPos(clampedTo, 1);
+    } catch {
+      mappedFrom = Math.min(clampedFrom, newLen);
+      mappedTo = Math.min(clampedTo, newLen);
+    }
+
+    const safeFrom = Math.max(0, Math.min(mappedFrom, newLen));
+    const safeTo = Math.max(safeFrom, Math.min(mappedTo, newLen));
+
     return {
       index: span.index,
-      from: Math.min(mappedFrom, mappedTo),
-      to: Math.max(mappedFrom, mappedTo),
+      from: safeFrom,
+      to: safeTo,
     };
   });
 }

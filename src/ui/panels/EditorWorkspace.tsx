@@ -38,6 +38,11 @@ export interface EditorWorkspaceProps {
   capabilities?: string[];
   targetKCs?: string[];
   guidedTemplate?: string;
+  lessonSlides?: Array<{
+    title: { id: string; en: string };
+    body: { id: string; en: string };
+    exampleCode?: string;
+  }>;
   hasNextStep?: boolean;
   nextStepTitle?: string;
   onNextStep?: () => void;
@@ -95,6 +100,7 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
   capabilities = [],
   targetKCs = [],
   guidedTemplate,
+  lessonSlides,
   hasNextStep = false,
   nextStepTitle,
   onNextStep,
@@ -155,6 +161,7 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
   const [rung4ConfirmOpen, setRung4ConfirmOpen] = useState(false);
   const [rawTracebackOpen, setRawTracebackOpen] = useState(false);
   const [landscapeRailCollapsed, setLandscapeRailCollapsed] = useState(false);
+  const [lessonGuideOpen, setLessonGuideOpen] = useState(false);
   const [inputDrafts, setInputDrafts] = useState<string[]>(['']);
 
   const [viewportSize, setViewportSize] = useState<{ w: number; h: number }>(() =>
@@ -749,6 +756,107 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
               {locale === 'id' ? 'Tugas' : 'Task'}
             </strong>
             <span style={{ fontWeight: 600 }}>{stepGoal}</span>
+          </div>
+        )}
+
+        {lessonSlides && lessonSlides.length > 0 && (
+          <div style={{ marginTop: '6px' }}>
+            <button
+              type="button"
+              data-testid="btn-toggle-lesson-guide"
+              onClick={() => setLessonGuideOpen((prev) => !prev)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '4px 10px',
+                borderRadius: '8px',
+                border: lessonGuideOpen
+                  ? '1px solid #0284C7'
+                  : '1px solid #CBD5E1',
+                backgroundColor: lessonGuideOpen ? '#E0F2FE' : '#F8FAFC',
+                color: lessonGuideOpen ? '#0369A1' : '#334155',
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+              }}
+            >
+              <span>
+                {locale === 'id' ? '📖 Materi & Contoh' : '📖 Lesson & Examples'}
+              </span>
+              <span style={{ fontSize: '0.7rem', opacity: 0.8 }}>
+                {lessonGuideOpen ? '▲' : '▼'}
+              </span>
+            </button>
+
+            {lessonGuideOpen && (
+              <div
+                style={{
+                  marginTop: '6px',
+                  padding: '10px 12px',
+                  backgroundColor: '#F0F9FF',
+                  border: '1px solid #BAE6FD',
+                  borderRadius: '10px',
+                  maxHeight: isLandscapePhone ? '130px' : '210px',
+                  overflowY: 'auto',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '10px',
+                }}
+              >
+                {lessonSlides.map((slide, idx) => (
+                  <div
+                    key={idx}
+                    style={{
+                      paddingBottom:
+                        idx < lessonSlides.length - 1 ? '8px' : undefined,
+                      borderBottom:
+                        idx < lessonSlides.length - 1
+                          ? '1px solid #BAE6FD'
+                          : undefined,
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontWeight: 700,
+                        fontSize: '0.82rem',
+                        color: '#0C4A6E',
+                        marginBottom: '3px',
+                      }}
+                    >
+                      {slide.title[locale]}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: '0.79rem',
+                        lineHeight: 1.45,
+                        color: '#1E293B',
+                        whiteSpace: 'pre-line',
+                      }}
+                    >
+                      {slide.body[locale]}
+                    </div>
+                    {slide.exampleCode && (
+                      <pre
+                        style={{
+                          margin: '6px 0 0',
+                          padding: '7px 10px',
+                          backgroundColor: '#0F172A',
+                          color: '#E2E8F0',
+                          borderRadius: '6px',
+                          fontSize: '0.76rem',
+                          fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+                          overflowX: 'auto',
+                          lineHeight: 1.4,
+                        }}
+                      >
+                        <code>{slide.exampleCode}</code>
+                      </pre>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </header>
