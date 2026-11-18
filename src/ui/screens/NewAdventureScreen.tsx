@@ -10,6 +10,13 @@ import {
 import { IconBack, IconCheck, IconPlay, IconWarning } from '../icons';
 import { formatRelativeTime } from '../layout';
 import { HoldConfirmModal } from '../components/HoldConfirmModal';
+import {
+  ArchitectAvatarPreview,
+  HAIR_COLORS,
+  HAIR_STYLES,
+  SCARF_COLORS,
+  SKIN_TONES,
+} from '../components/ArchitectAvatarPreview';
 
 export interface NewAdventureScreenProps {
   onStartNewAdventure?: (
@@ -20,35 +27,6 @@ export interface NewAdventureScreenProps {
   onExportSlot?: (slotId: SlotId) => void | Promise<void>;
   onPreviewAppearance?: (appearance: ArchitectAppearance) => void;
 }
-
-const SKIN_TONES = [
-  { id: 0, label: 'Pucat', hex: '#F3D2B8' },
-  { id: 1, label: 'Cerah', hex: '#E6B894' },
-  { id: 2, label: 'Sawo Terang', hex: '#CF9A6E' },
-  { id: 3, label: 'Sawo Matang', hex: '#B57B4F' },
-  { id: 4, label: 'Cokelat Hangat', hex: '#8C5835' },
-  { id: 5, label: 'Gelap', hex: '#5D3822' },
-];
-
-const HAIR_STYLES = ['Pendek Rapi', 'Belah Tengah', 'Kuncir Belakang', 'Ikal Berombak'];
-
-const HAIR_COLORS = [
-  { id: 0, label: 'Hitam Arang', hex: '#26292B' },
-  { id: 1, label: 'Cokelat Tua', hex: '#543A28' },
-  { id: 2, label: 'Kastanye', hex: '#8A4F30' },
-  { id: 3, label: 'Pirang Pasir', hex: '#D4B06A' },
-  { id: 4, label: 'Perak Abu', hex: '#A9B8BD' },
-  { id: 5, label: 'Teal Arsitek', hex: '#2F7F86' },
-];
-
-const SCARF_COLORS = [
-  { id: 0, label: 'Teal Aetheria', hex: '#2F7F86' },
-  { id: 1, label: 'Amber Suar', hex: '#F2B544' },
-  { id: 2, label: 'Terakota', hex: '#B4533C' },
-  { id: 3, label: 'Lumut', hex: '#64923C' },
-  { id: 4, label: 'Batu Sabak', hex: '#55595D' },
-  { id: 5, label: 'Turquoise Inti', hex: '#3CC4C0' },
-];
 
 export const NewAdventureScreen: React.FC<NewAdventureScreenProps> = ({
   onStartNewAdventure,
@@ -299,7 +277,7 @@ export const NewAdventureScreen: React.FC<NewAdventureScreenProps> = ({
           />
         </section>
 
-        {/* Step 3: Live 3D Architect Appearance Customizer */}
+        {/* Step 3: Live Architect Appearance Customizer */}
         <section style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           <h2
             style={{
@@ -311,7 +289,22 @@ export const NewAdventureScreen: React.FC<NewAdventureScreenProps> = ({
             {locale === 'id' ? '3. Penampilan Arsitek' : '3. Architect Appearance'}
           </h2>
 
-          {/* Skin Tones */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+              gap: '18px',
+              alignItems: 'start',
+            }}
+          >
+            <ArchitectAvatarPreview
+              appearance={appearance}
+              playerName={playerName.trim() || 'Arsitek'}
+              locale={locale}
+            />
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              {/* Skin Tones */}
           <div>
             <div style={{ fontSize: '0.875rem', color: '#335267', fontWeight: 600, marginBottom: '6px' }}>
               {locale === 'id' ? 'Warna Kulit' : 'Skin Tone'}
@@ -421,6 +414,8 @@ export const NewAdventureScreen: React.FC<NewAdventureScreenProps> = ({
                 />
               ))}
             </div>
+          </div>
+          </div>
           </div>
         </section>
 

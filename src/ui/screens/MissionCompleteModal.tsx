@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { getKC } from '@/learning';
 import { useSettingsStore, useUIStore } from '@/stores';
 import { IconCheck } from '../icons';
 
@@ -154,6 +155,10 @@ export const MissionCompleteModal: React.FC<MissionCompleteModalProps> = ({
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               {conceptsPracticed.map((kc) => {
                 const delta = kc.newScore - kc.previousScore;
+                const resolvedTitle =
+                  kc.title && kc.title !== kc.kcId
+                    ? kc.title
+                    : (getKC(kc.kcId)?.title[locale] ?? kc.title);
                 return (
                   <div
                     key={kc.kcId}
@@ -161,17 +166,33 @@ export const MissionCompleteModal: React.FC<MissionCompleteModalProps> = ({
                       display: 'flex',
                       justifyContent: 'space-between',
                       alignItems: 'center',
-                      padding: '8px 10px',
-                      backgroundColor: '#EFE2CA',
-                      border: '1px solid #D9C9A8',
-                      borderRadius: '2px',
+                      gap: '10px',
+                      padding: '8px 12px',
+                      backgroundColor: '#F0F9FF',
+                      border: '1px solid #BAE6FD',
+                      borderRadius: '10px',
                       fontSize: '0.875rem',
                     }}
                   >
-                    <span>
-                      <strong>{kc.kcId}</strong> — {kc.title}
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                      <span
+                        style={{
+                          padding: '2px 7px',
+                          borderRadius: '6px',
+                          backgroundColor: '#E0F2FE',
+                          border: '1px solid #7DD3FC',
+                          color: '#0369A1',
+                          fontWeight: 800,
+                          fontSize: '0.75rem',
+                        }}
+                      >
+                        {kc.kcId}
+                      </span>
+                      <span style={{ color: '#0F172A', fontWeight: 600 }}>
+                        {resolvedTitle && resolvedTitle !== kc.kcId ? resolvedTitle : kc.kcId}
+                      </span>
                     </span>
-                    <span style={{ fontWeight: 700, color: '#2A2420' }}>
+                    <span style={{ fontWeight: 700, color: '#0E7490', whiteSpace: 'nowrap' }}>
                       {kc.newScore}%{delta > 0 ? ` (+${delta})` : ''}
                     </span>
                   </div>

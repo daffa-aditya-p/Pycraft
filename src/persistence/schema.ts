@@ -34,10 +34,10 @@ export const StepCodeDraftSchema = z.object({
 export type StepCodeDraft = z.infer<typeof StepCodeDraftSchema>;
 
 export const AppearanceSchema = z.object({
-  skinTone: z.number().int().min(0).max(5),
-  hairStyle: z.number().int().min(0).max(3),
-  hairColor: z.number().int().min(0).max(5),
-  scarfColor: z.number().int().min(0).max(5),
+  skinTone: z.number().int().min(0).max(15),
+  hairStyle: z.number().int().min(0).max(15),
+  hairColor: z.number().int().min(0).max(15),
+  scarfColor: z.number().int().min(0).max(15),
 });
 export type ArchitectAppearance = z.infer<typeof AppearanceSchema>;
 
