@@ -131,6 +131,10 @@ function getZoneCenter(islandId: string): [number, number, number] {
   return zone.puzzleZoneCenter ?? zone.center;
 }
 
+function stepUsesRobot(step: MissionStepManifest | undefined): boolean {
+  return Boolean(step?.capabilities.some((c) => c.startsWith('robot.')));
+}
+
 export function App(): React.JSX.Element {
   const screen = useUIStore((s) => s.screen);
   const inGameOverlay = useUIStore((s) => s.inGameOverlay);
@@ -150,6 +154,7 @@ export function App(): React.JSX.Element {
   const activeMissionId = useGameStore((s) => s.quests.activeMissionId);
   const activeStepId = useGameStore((s) => s.quests.activeStepId);
   const code = useEditorStore((s) => s.code);
+  const inputModalOpen = useEditorStore((s) => s.inputModal.open);
 
   const saveManagerRef = useRef<SaveManager | null>(null);
   const runtimeRef = useRef<RuntimeClient | null>(null);
@@ -192,6 +197,9 @@ export function App(): React.JSX.Element {
     }
     return ALL_AWAKENING_STEPS[0]!;
   }, [activeMissionId, activeStepId]);
+
+  const activeStepRef = useRef<MissionStepManifest>(activeStep);
+  activeStepRef.current = activeStep;
 
   const completedStepIds = useGameStore((s) => s.quests.completedStepIds);
 
@@ -315,6 +323,7 @@ export function App(): React.JSX.Element {
       const initialCode = draft?.code ?? step.starters[tier] ?? step.starters.guided;
 
       visibleScenarioIndexRef.current = 0;
+      activeStepRef.current = step;
       const syncedLabel = step.isBonus
         ? `${loc === 'id' ? 'Bonus' : 'Bonus'}: ${step.title[loc]}`
         : step.title[loc];
@@ -352,15 +361,26 @@ export function App(): React.JSX.Element {
       syncEditorStore: true,
       callbacks: {
         onObservationModeChange: (observing) => {
+          if (!stepUsesRobot(activeStepRef.current)) {
+            useGameStore.getState().setObservingPlayback(false);
+            clearBitVisualOverride();
+            return;
+          }
           useGameStore.getState().setObservingPlayback(observing);
         },
         onWorldStateChange: (simState) => {
+          if (!stepUsesRobot(activeStepRef.current)) {
+            clearBitVisualOverride();
+            useGameStore.getState().setObservingPlayback(false);
+            return;
+          }
           const mission = getMissionById(useGameStore.getState().quests.activeMissionId ?? '');
           const origin = getZoneCenter(mission?.islandId ?? 'beacon_point');
           syncBitVisualFromSim(origin, simState);
         },
         onFault: (reason) => {
           clearBitVisualOverride();
+          useGameStore.getState().setObservingPlayback(false);
           useUIStore.getState().pushToast({ kind: 'error', message: reason });
         },
       },
@@ -1093,6 +1113,7 @@ export function App(): React.JSX.Element {
       if (!runtime || !player) return;
 
       const step = activeStep;
+      activeStepRef.current = step;
       const loc = useSettingsStore.getState().locale;
       const ed = useEditorStore.getState();
       const attempt = (attemptMapRef.current.get(step.stepId) ?? 0) + 1;
@@ -1109,7 +1130,7 @@ export function App(): React.JSX.Element {
         step.scenarios.length - 1
       );
       const visibleScenario = step.scenarios[visibleIdx]!;
-      player.beginRun(visibleScenario.initialState);
+      player.beginRun(visibleScenario.initialState, false);
       player.setSpeed(ed.playbackSpeed);
       player.setStepMode(ed.stepMode);
 
@@ -1129,14 +1150,21 @@ export function App(): React.JSX.Element {
 
       ed.setRuntimeStatus('running');
 
+      let inputCancelled = false;
       let runEnd: RunEndWorkerEvent;
       try {
         runEnd = await runtime.run({
           code: playerCode,
           visibleScenarioIndex: visibleIdx,
-          onNeedInputQueue: ({ count, unknownCount }) =>
-            new Promise<string[] | null>((resolve) => {
-              pendingInputQueueResolveRef.current = resolve;
+          onNeedInputQueue: ({ count, unknownCount }) => {
+            useGameStore.getState().setObservingPlayback(false);
+            return new Promise<string[] | null>((resolve) => {
+              pendingInputQueueResolveRef.current = (answers) => {
+                if (answers === null) {
+                  inputCancelled = true;
+                }
+                resolve(answers);
+              };
               useEditorStore.getState().setInputModal({
                 open: true,
                 mode: 'queue',
@@ -1144,16 +1172,30 @@ export function App(): React.JSX.Element {
                 expectedCount: count,
                 unknownCount,
               });
-            }),
+            });
+          },
         });
       } catch (err) {
+        actionPlayerRef.current?.stop();
+        clearBitVisualOverride();
+        useGameStore.getState().setObservingPlayback(false);
         ed.setRuntimeStatus('error');
         ed.appendConsole({ kind: 'error', text: (err as Error).message });
         return;
       }
 
+      if (inputCancelled) {
+        actionPlayerRef.current?.stop();
+        clearBitVisualOverride();
+        useGameStore.getState().setObservingPlayback(false);
+        useEditorStore.getState().setRuntimeStatus('idle');
+        return;
+      }
+
       player.finishStream(runEnd.finalStateHash);
-      player.play();
+      if (player.getState() !== 'finished' && player.getState() !== 'playing') {
+        player.play();
+      }
 
       const validation = evaluateValidationPipeline({
         stepId: step.stepId,
@@ -1198,9 +1240,10 @@ export function App(): React.JSX.Element {
           );
           game.updateKCMastery(kcId, nextRec);
           const kcDef = getKC(kcId);
+          const kcTitle = kcDef?.title?.[loc] || kcDef?.title?.id || kcDef?.title?.en || kcId;
           practicedSummaries.push({
             kcId,
-            title: kcDef?.title[loc] ?? kcId,
+            title: kcTitle,
             previousScore: prevScore,
             newScore: nextRec.score,
           });
@@ -1374,6 +1417,32 @@ export function App(): React.JSX.Element {
     }
     ed.setInputModal({ open: false });
   }, []);
+
+  const handleCancelInputModal = useCallback(() => {
+    if (pendingInputQueueResolveRef.current) {
+      const resolve = pendingInputQueueResolveRef.current;
+      pendingInputQueueResolveRef.current = null;
+      resolve(null);
+    }
+    actionPlayerRef.current?.stop();
+    clearBitVisualOverride();
+    useGameStore.getState().setObservingPlayback(false);
+    useEditorStore.getState().setRuntimeStatus('idle');
+  }, []);
+
+  useEffect(() => {
+    if (!inputModalOpen && pendingInputQueueResolveRef.current) {
+      handleCancelInputModal();
+    }
+  }, [inputModalOpen, handleCancelInputModal]);
+
+  useEffect(() => {
+    if (inGameOverlay === 'explore' && !editorDockOpen && !missionCompleteState.open) {
+      actionPlayerRef.current?.stop();
+      clearBitVisualOverride();
+      useGameStore.getState().setObservingPlayback(false);
+    }
+  }, [inGameOverlay, editorDockOpen, missionCompleteState.open]);
 
   const currentSlide = activeStep.lessonSlides[0];
 

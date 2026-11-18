@@ -35,9 +35,9 @@ export interface DetailBoxSpec {
   emissive?: number;
 }
 
-const SKIN_TONES = ['#F2C9A8', '#E0B088', '#C68B5E', '#A86D43', '#7D4E2D', '#54331C'] as const;
-const HAIR_COLORS = ['#2A2420', '#5B3A27', '#8F5D3C', '#CDB683', '#B4533C', '#8C9398'] as const;
-const SCARF_COLORS = ['#2F7F86', '#D9433B', '#F2B544', '#5FA32A', '#355C8C', '#B4533C'] as const;
+const SKIN_TONES = ['#F3D2B8', '#E6B894', '#CF9A6E', '#B57B4F', '#8C5835', '#5D3822'] as const;
+const HAIR_COLORS = ['#26292B', '#543A28', '#8A4F30', '#D4B06A', '#A9B8BD', '#2F7F86', '#C0392B', '#2563EB', '#7C3AED', '#059669'] as const;
+const SCARF_COLORS = ['#2F7F86', '#F2B544', '#B4533C', '#64923C', '#55595D', '#3CC4C0', '#E11D48', '#7E22CE', '#0284C7', '#F1F5F9'] as const;
 
 const BIT_PAINT_HEX: Record<string, string> = {
   moss: '#5F8E4E',
@@ -1254,7 +1254,8 @@ export function InteractablesHighlightLayer({
   const questsState = useGameStore((s) => s.quests);
   const screen = useUIStore((s) => s.screen);
   const inGameOverlay = useUIStore((s) => s.inGameOverlay);
-  const allowBadge = screen === 'in_game' && inGameOverlay === 'explore';
+  const editorDockOpen = useUIStore((s) => s.editorDockOpen);
+  const allowBadge = screen === 'in_game' && inGameOverlay === 'explore' && !editorDockOpen;
 
   const questInfo = useMemo(
     () => getActiveQuestTargetInfo(questsState, collectedWorldItemIds),

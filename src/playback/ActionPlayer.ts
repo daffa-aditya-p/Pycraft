@@ -166,7 +166,7 @@ export class ActionPlayer {
     }
   }
 
-  beginRun(initialState: WorldSimInit | WorldSimState): void {
+  beginRun(initialState: WorldSimInit | WorldSimState, observe = true): void {
     this.clearTimer();
     const sim = new WorldSim(initialState);
     this.initialStateSnapshot = sim.getState();
@@ -183,7 +183,7 @@ export class ActionPlayer {
     }
 
     this.callbacks.onWorldStateChange?.(this.mainSim.getState());
-    this.setObserving(true);
+    this.setObserving(observe);
     this.setPlaybackState('playing', 0, null);
   }
 
@@ -237,6 +237,10 @@ export class ActionPlayer {
 
   play(): void {
     if (this.playbackState === 'fault' || !this.mainSim) return;
+    if (this.streamClosed && this.timeline.getLength() === 0) {
+      this.finalizePlayback();
+      return;
+    }
     if (this.cursorIndex >= this.timeline.getLength() - 1 && this.streamClosed) {
       // Restart from beginning if already finished
       this.seekToIndex(-1);
@@ -513,6 +517,9 @@ export class ActionPlayer {
         break;
 
       case 'action': {
+        if (this.playbackState === 'playing' && !this.observing) {
+          this.setObserving(true);
+        }
         const stateSnapshot = this.mainSim!.getState();
         this.callbacks.onWorldStateChange?.(stateSnapshot);
         const mult = speedMultiplier(this.speed);
